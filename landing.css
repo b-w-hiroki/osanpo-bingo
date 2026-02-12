@@ -299,6 +299,70 @@ body {
   animation-delay: 0.5s;
 }
 
+/* ========== 広告枠 ========== */
+.ad-slot {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.ad-slot-infeed {
+  margin-bottom: 20px;
+}
+
+.ad-slot-footer {
+  padding: 12px 24px;
+  background: var(--bg);
+}
+
+.ad-slot-inner {
+  width: 100%;
+  max-width: 728px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ad-slot-label {
+  font-size: 0.65rem;
+  color: #bbb;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.ad-placeholder {
+  width: 100%;
+  max-width: 468px;
+  height: 100px;
+  background: #f0f2f1;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ad-placeholder-banner {
+  max-width: 728px;
+  height: 90px;
+}
+
+.ad-placeholder-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ccc;
+  letter-spacing: 0.1em;
+}
+
+.ad-placeholder-sub {
+  font-size: 0.65rem;
+  color: #ccc;
+}
+
 /* フッター */
 .footer {
   padding: 20px 24px;
@@ -369,6 +433,23 @@ body {
 
   .cta-bottom {
     padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  }
+
+  .ad-slot-infeed {
+    margin-bottom: 14px;
+  }
+
+  .ad-slot-footer {
+    padding: 10px 16px;
+  }
+
+  .ad-placeholder {
+    max-width: 100%;
+    height: 80px;
+  }
+
+  .ad-placeholder-banner {
+    height: 60px;
   }
 }
 
