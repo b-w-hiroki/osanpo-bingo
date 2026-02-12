@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="お散歩をもっと楽しく！友達と一緒に遊べるビンゴゲーム">
+  <meta name="theme-color" content="#7eb89a">
+  <title>お散歩ビンゴ - 散歩がもっと楽しくなる</title>
+  
+  <link rel="stylesheet" href="landing.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+  <div class="landing-container">
+    
+    <!-- ヒーロー + CTA -->
+    <section class="hero">
+      <div class="hero-image-wrap">
+        <img src="assets/hero-osanpo-combined-v4.png" alt="OSANPO BINGO - お散歩ビンゴ" class="hero-image">
+      </div>
+      <div class="hero-content">
+        <p class="hero-tagline">いつもの散歩が、ワクワクする冒険に</p>
+        <a href="game.html" class="btn-start">✨ 今すぐ始める</a>
+      </div>
+    </section>
+    
+    <!-- メインコンテンツ（1ブロックに集約） -->
+    <section class="main-content">
+      <div class="content-grid">
+        <!-- 特徴 -->
+        <div class="content-block">
+          <h2 class="block-title">3つの特徴</h2>
+          <div class="feature-list">
+            <div class="feature-item">
+              <strong>みんなで楽しめる</strong>
+              <span>合言葉で友達・家族と一緒に</span>
+            </div>
+            <div class="feature-item">
+              <strong>思い出を残せる</strong>
+              <span>写真で記録、後で見返せる</span>
+            </div>
+            <div class="feature-item">
+              <strong>簡単に遊べる</strong>
+              <span>アプリ不要、ブラウザだけで</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 遊び方 -->
+        <div class="content-block">
+          <h2 class="block-title">遊び方</h2>
+          <div class="howto-list">
+            <div class="howto-item">
+              <span class="step-num">1</span>
+              <span>合言葉を決めてスタート</span>
+            </div>
+            <div class="howto-item">
+              <span class="step-num">2</span>
+              <span>散歩してお題を探す</span>
+            </div>
+            <div class="howto-item">
+              <span class="step-num">3</span>
+              <span>写真を撮ってマーク、ビンゴ！</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- おすすめ -->
+      <div class="recommend-block">
+        <h2 class="block-title">こんな人におすすめ</h2>
+        <div class="recommend-grid">
+          <div class="recommend-item">家族で散歩</div>
+          <div class="recommend-item">犬の散歩</div>
+          <div class="recommend-item">運動不足解消</div>
+          <div class="recommend-item">写真好き</div>
+          <div class="recommend-item">自然を楽しむ</div>
+          <div class="recommend-item">友達と遊びたい</div>
+        </div>
+      </div>
+      
+      <!-- CTA -->
+      <div class="cta-bottom">
+        <a href="game.html" class="btn-start btn-large">✨ お散歩ビンゴを始める</a>
+      </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer class="footer">
+      <p>© 2026 お散歩ビンゴ　<span class="dot">・</span>　アプリ不要・無料</p>
+    </footer>
+  </div>
+  
+  <!-- Service Worker登録 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('✅ Service Worker登録成功:', reg.scope))
+          .catch(err => console.log('❌ Service Worker登録失敗:', err));
+      });
+    }
+  </script>
+</body>
+</html>

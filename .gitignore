@@ -1,0 +1,21 @@
+# エディタ
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ログ・一時ファイル
+*.log
+*.tmp
+.cache/
+
+# Node
+node_modules/
+
+# アイコンバックアップ（リサイズ時の元ファイル退避先）
+assets/icons/backup/

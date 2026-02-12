@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ヒーロー画像 案の比較</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, Meiryo, sans-serif;
+      padding: 24px;
+      background: #f8faf9;
+    }
+    h1 { font-size: 1.3rem; margin-bottom: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .option {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .option img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .option-label {
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #5a9b7d;
+    }
+    .option-desc {
+      padding: 0 12px 12px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>ヒーロー画像・素材一覧</h1>
+  <p style="margin-bottom: 20px; color: #666;">採用中ヒーロー画像とベース素材</p>
+  
+  <div class="grid">
+    <div class="option">
+      <img src="../assets/hero-osanpo-combined-v4.png" alt="採用中ヒーロー">
+      <div class="option-label">採用中: ヒーロー画像</div>
+      <div class="option-desc">男性＋マスコット2体が散歩、ロゴ入り</div>
+    </div>
+    <div class="option">
+      <img src="../assets/osanpo-hero.png" alt="ベース素材">
+      <div class="option-label">ベース素材: osanpo-hero</div>
+      <div class="option-desc">散歩する男性、公園の風景</div>
+    </div>
+  </div>
+</body>
+</html>

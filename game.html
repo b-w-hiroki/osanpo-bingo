@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="グループで楽しむお散歩ビンゴ">
+  <meta name="theme-color" content="#7eb89a">
+  <title>お散歩ビンゴ</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+  <div class="container">
+    <!-- ヘッダー -->
+    <header class="header">
+      <a href="index.html" class="header-back" id="headerBackToTop" data-href="index.html">← トップへ戻る</a>
+      <h1>🚶 お散歩ビンゴ</h1>
+      <p class="subtitle">グループで楽しむ散歩ゲーム</p>
+    </header>
+    
+    <!-- 合言葉モーダル -->
+    <div class="modal" id="roomCodeModal" style="display: none;">
+      <div class="modal-content">
+        <h2>🎮 ゲーム設定</h2>
+        
+        <p class="modal-description">
+          友達と一緒に遊ぶ場合は、同じ合言葉を使いましょう。<br>
+          似たお題が出るので、一緒に散歩が楽しめます！
+        </p>
+        
+        <div class="form-group">
+          <label for="roomCodeInput">🔑 合言葉（グループで共有）</label>
+          <div class="input-with-button">
+            <input 
+              type="text" 
+              id="roomCodeInput" 
+              class="input-text"
+              placeholder="例: さくら"
+              maxlength="5"
+            >
+            <button id="generateRoomCodeBtn" class="btn btn-secondary btn-icon" type="button">
+              🎲 自動
+            </button>
+          </div>
+          <p class="form-help">
+            友達から教えてもらった合言葉を入力するか、🎲で自動生成
+          </p>
+        </div>
+        
+        <div class="form-group">
+          <label for="playerCountInput">👥 参加人数（自分を含む）</label>
+          <input 
+            type="number" 
+            id="playerCountInput" 
+            class="input-text"
+            placeholder="例: 3"
+            min="1"
+            max="99"
+            value="1"
+          >
+          <p class="form-help">
+            一緒に遊ぶ人数を入力してください（後で変更可能）
+          </p>
+        </div>
+        
+        <div class="form-group">
+          <label for="difficultySelect">📊 難易度</label>
+          <select id="difficultySelect" class="select-box">
+            <option value="easy">かんたん（よく見るもの）</option>
+            <option value="medium" selected>ふつう（少し探す）</option>
+            <option value="hard">むずかしい（レアなもの）</option>
+          </select>
+          <p class="form-help">
+            難易度によってお題の種類が変わります
+          </p>
+        </div>
+        
+        <button id="startGameBtn" class="btn btn-primary btn-large">
+          ✨ ゲームを始める
+        </button>
+        <p class="modal-back-link">
+          <a href="index.html" class="link-back-top">← トップへ戻る</a>
+        </p>
+      </div>
+    </div>
+    
+    <!-- マス詳細モーダル -->
+    <div class="modal" id="cellModal" style="display: none;">
+      <div class="modal-content">
+        <button class="modal-close" id="closeCellModal">✕</button>
+        
+        <div class="cell-modal-header">
+          <div class="cell-modal-icon" id="cellModalIcon">🐱</div>
+          <h2 id="cellModalTitle">ネコ</h2>
+          <p class="cell-modal-description">
+            見つけたら写真を撮ってマークしましょう
+          </p>
+        </div>
+        
+        <!-- 既存の写真がある場合 -->
+        <div id="cellPhotoDisplay" class="cell-photo-display" style="display: none;">
+          <img id="cellPhotoImg" alt="写真">
+          <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">
+            🗑️ 写真を削除
+          </button>
+        </div>
+        
+        <!-- 写真プレビュー（新規アップロード時） -->
+        <div id="cellPhotoPreview" class="photo-preview" style="display: none;">
+          <img id="cellPhotoPreviewImg" alt="プレビュー">
+          <div class="photo-preview-actions">
+            <button id="saveCellPhotoBtn" class="btn btn-primary">
+              💾 保存してマーク
+            </button>
+            <button id="retakeCellPhotoBtn" class="btn btn-secondary">
+              🔄 撮り直し
+            </button>
+          </div>
+        </div>
+        
+        <!-- アクションボタン -->
+        <div class="cell-modal-actions">
+          <!-- 写真アップロードボタン -->
+          <label for="cellPhotoInput" class="btn btn-primary btn-large" id="uploadPhotoLabel">
+            📷 写真をアップロード
+          </label>
+          <input 
+            type="file" 
+            id="cellPhotoInput" 
+            accept="image/*" 
+            capture="environment"
+            style="display: none;"
+          >
+          
+          <!-- マーク切り替えボタン -->
+          <button type="button" id="toggleMarkBtn" class="btn btn-secondary btn-large">
+            ✓ マークする
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ビンゴボード -->
+    <main class="main">
+      <div id="bingoBoard" class="bingo-board">
+        <!-- JavaScriptで動的に生成 -->
+      </div>
+      
+      <!-- ビンゴメッセージ -->
+      <div id="bingoMessage" class="bingo-message" style="display: none;">
+        🎉 ビンゴ！
+      </div>
+    </main>
+    
+    <!-- 統計表示 -->
+    <section class="stats">
+      <div class="stat-item stat-item-clickable" id="roomCodeStat" title="タップでコピー">
+        <span class="stat-label">🔑 合言葉</span>
+        <span class="stat-value" id="roomCodeDisplay">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">👥 人数</span>
+        <span class="stat-value" id="playerCountDisplay">1</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">📊 難易度</span>
+        <span class="stat-value" id="difficultyDisplay">-</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">🎯 ビンゴ</span>
+        <span class="stat-value" id="bingoCount">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">✓ マーク</span>
+        <span class="stat-value" id="markedCount">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">📷 写真</span>
+        <span class="stat-value" id="photoCount">0</span>
+      </div>
+    </section>
+    
+    <!-- コントロール -->
+    <section class="controls">
+      <button id="newGameBtn" class="btn btn-primary">
+        ✨ 作り直す
+      </button>
+      <button id="endGameBtn" class="btn btn-secondary">
+        🏁 終わる
+      </button>
+    </section>
+    
+    <!-- 説明 -->
+    <section class="info">
+      <h2>遊び方</h2>
+      <ol>
+        <li>散歩しながらお題を探そう</li>
+        <li>見つけたらマスをタップしてマーク</li>
+        <li>縦・横・斜めで5つ揃ったらビンゴ！</li>
+      </ol>
+      
+      <details class="info-details">
+        <summary>詳しい説明</summary>
+        <ul>
+          <li><strong>終わる</strong>: ゲームを終了し、結果を記録・SNS共有できます</li>
+          <li><strong>作り直す</strong>: お題をシャッフルして新しいボードを作ります</li>
+          <li><strong>FREE</strong>: 中央のマスは最初からマーク済みです</li>
+        </ul>
+      </details>
+    </section>
+    
+    <!-- フッター -->
+    <footer class="footer">
+      <p><a href="index.html" id="footerBackToTop" class="link-back-top">← トップへ戻る</a>　<span class="dot">・</span>　© 2026 お散歩ビンゴ</p>
+    </footer>
+  </div>
+  
+  <!-- 終了・結果記録・共有画面（containerの外・body直下） -->
+  <div id="screenshotView" class="screenshot-view" style="display: none;">
+    <div class="screenshot-view-inner">
+      <!-- 編集モード：日付・グループ入力 -->
+      <div id="resultEditArea" class="result-edit-area">
+        <div class="result-card">
+          <h2 class="result-title">お散歩ビンゴ 結果</h2>
+          <div class="result-meta">
+            <span class="result-date" id="resultDate">-</span>
+          </div>
+          <div id="screenshotBoard" class="result-board-wrap">
+            <!-- ビンゴボードを複製表示 -->
+          </div>
+          <div class="result-stats-row">
+            <span class="result-stat">ビンゴ <strong id="screenshotBingoCount">0</strong> 本</span>
+            <span class="result-stat">マーク <strong id="screenshotMarkedCount">0</strong> マス</span>
+          </div>
+        </div>
+        <div class="result-group-form">
+          <label for="resultGroupInput">どんなグループで遊びましたか？</label>
+          <input type="text" id="resultGroupInput" class="input-text" placeholder="例: 家族で散歩、友達3人" maxlength="50">
+        </div>
+        <button id="resultConfirmBtn" class="btn btn-primary btn-large">決定</button>
+      </div>
+      <!-- 確定モード：スクショ・共有 -->
+      <div id="resultShareArea" class="result-share-area" style="display: none;">
+        <div id="resultCaptureArea" class="result-capture-area">
+          <div class="result-capture-header">
+            <h2 class="result-capture-title" id="resultCaptureTitle">お散歩ビンゴ</h2>
+            <p class="result-capture-meta">
+              <span id="resultCaptureDate">-</span>
+              <span class="result-meta-divider">／</span>
+              <span id="resultCaptureGroup">-</span>
+            </p>
+          </div>
+          <div id="resultCaptureBoard"></div>
+          <div class="result-capture-stats">
+            <span>ビンゴ <strong id="resultCaptureBingo">0</strong> 本</span>
+            <span>マーク <strong id="resultCaptureMarked">0</strong> マス</span>
+          </div>
+        </div>
+        <div class="result-share-buttons">
+          <button id="downloadImageBtn" class="btn btn-primary">📷 画像をダウンロード</button>
+          <button type="button" id="shareSnsBtn" class="btn btn-secondary">📤 SNSで共有</button>
+        </div>
+        <button id="exitScreenshotBtn" class="btn btn-secondary btn-large">← 戻る</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 確認・通知モーダル -->
+  <div id="dialogModal" class="dialog-modal" style="display: none;">
+    <div class="dialog-modal-backdrop"></div>
+    <div class="dialog-modal-content">
+      <p class="dialog-modal-message" id="dialogMessage"></p>
+      <div class="dialog-modal-actions" id="dialogActions">
+        <button type="button" id="dialogCancelBtn" class="btn btn-secondary dialog-btn dialog-cancel">キャンセル</button>
+        <button type="button" id="dialogOkBtn" class="btn btn-primary dialog-btn">OK</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- html2canvas（画像ダウンロード用） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- JavaScript -->
+  <script src="topics.js"></script>
+  <script src="app.js"></script>
+  
+  <!-- トップへ戻る（確実に遷移するためJSで補助） -->
+  <script>
+    (function() {
+      var indexUrl = 'index.html';
+      function goToTop(e) {
+        e.preventDefault();
+        window.location.href = indexUrl;
+      }
+      document.querySelectorAll('#headerBackToTop, #footerBackToTop, .link-back-top').forEach(function(el) {
+        if (el) el.addEventListener('click', goToTop);
+      });
+    })();
+  </script>
+  
+  <!-- Service Worker登録 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('✅ Service Worker登録成功:', reg.scope))
+          .catch(err => console.log('❌ Service Worker登録失敗:', err));
+      });
+    }
+  </script>
+</body>
+</html>

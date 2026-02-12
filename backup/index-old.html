@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="お散歩ビンゴ - 散歩中に見つけたものをマークしてビンゴを目指そう！">
+    <title>お散歩ビンゴ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7eb89a">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚶 お散歩ビンゴ</h1>
+            <p class="subtitle">散歩中に見つけたものをマークしてビンゴを目指そう！</p>
+        </header>
+
+        <div class="game-area">
+            <div class="bingo-board" id="bingoBoard">
+                <!-- ビンゴマスはJavaScriptで生成 -->
+            </div>
+
+            <div class="stats-display" id="statsDisplay"></div>
+
+            <div class="controls">
+                <button class="btn btn-reset" id="resetBtn">リセット</button>
+                <button class="btn btn-new" id="newGameBtn">新しいゲーム</button>
+            </div>
+
+            <div class="controls-secondary">
+                <button class="btn btn-action" id="customTopicBtn">📝 カスタムお題</button>
+                <button class="btn btn-action" id="shareBtn">📤 シェア</button>
+                <button class="btn btn-action" id="exportBtn">💾 エクスポート</button>
+                <button class="btn btn-action" id="importBtn">📥 インポート</button>
+                <input type="file" id="importFileInput" accept=".json" style="display: none;">
+            </div>
+
+            <div class="bingo-message" id="bingoMessage"></div>
+        </div>
+
+        <!-- 写真アップロード促進モーダル -->
+        <div class="modal" id="photoPromptModal">
+            <div class="modal-content modal-small">
+                <h2>📷 写真を撮影</h2>
+                <div class="modal-body">
+                    <p id="photoPromptMessage">お題を見つけましたか？</p>
+                    <div class="modal-buttons">
+                        <button class="btn btn-new" id="promptUploadBtn">写真を撮影</button>
+                        <button class="btn btn-secondary" id="promptSkipBtn">写真なしでマーク</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- カスタムお題管理モーダル -->
+        <div class="modal" id="customTopicModal">
+            <div class="modal-content">
+                <span class="modal-close" id="customTopicModalClose">&times;</span>
+                <h2>📝 カスタムお題の管理</h2>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="customTopicInput">新しいお題を追加</label>
+                        <div class="input-with-button">
+                            <input type="text" id="customTopicInput" placeholder="例: ユニークな看板">
+                            <button class="btn btn-new" id="addTopicBtn">追加</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>カスタムお題リスト</label>
+                        <div id="customTopicsList" class="custom-topics-list"></div>
+                    </div>
+                    <p class="help-text">※カスタムお題は次回の「新しいゲーム」から反映されます</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 合言葉入力モーダル -->
+        <div class="modal" id="roomCodeModal">
+            <div class="modal-content">
+                <h2>ゲーム設定</h2>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="roomCodeInput">合言葉（複数人で同じビンゴをする場合）</label>
+                        <input type="text" id="roomCodeInput" placeholder="例: さんぽ2026" autocomplete="off">
+                        <p class="help-text">※入力しない場合は一人用のランダムなビンゴになります</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficultySelect">難易度</label>
+                        <select id="difficultySelect">
+                            <option value="easy">かんたん（見つけやすいお題のみ）</option>
+                            <option value="normal" selected>ふつう（おすすめ）</option>
+                            <option value="hard">むずかしい（全種類）</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-new" id="startGameBtn">ゲームを開始</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 写真アップロードモーダル -->
+        <div class="modal" id="photoModal">
+            <div class="modal-content">
+                <span class="modal-close" id="modalClose">&times;</span>
+                <h2 id="modalTitle">写真をアップロード</h2>
+                <div class="modal-body">
+                    <div class="photo-preview-container" id="photoPreviewContainer">
+                        <img id="photoPreview" src="" alt="プレビュー" style="display: none;">
+                    </div>
+                    <div class="photo-actions">
+                        <label for="photoInput" class="btn btn-upload">
+                            📷 写真を選択
+                        </label>
+                        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none;">
+                        <button class="btn btn-delete" id="deletePhotoBtn" style="display: none;">削除</button>
+                    </div>
+                    <button class="btn btn-save" id="savePhotoBtn" style="display: none;">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>遊び方</h2>
+            <ol>
+                <li>散歩中にビンゴマスに書かれたお題を見つけましょう</li>
+                <li>見つけたらマスをタップ（またはEnterキー）してマークをつけます</li>
+                <li>マスを長押し（右クリック、またはPキー）すると写真をアップロードできます</li>
+                <li>写真を添付すると、マスに小さなサムネイルが表示されます</li>
+                <li>縦・横・斜めのいずれかが揃ったらビンゴです！</li>
+                <li>中央のマスは最初からマークされています（フリーマス）</li>
+            </ol>
+            <h3>複数人で遊ぶ場合</h3>
+            <p>「新しいゲーム」から同じ合言葉を入力すると、みんな異なるビンゴシートで遊べます。誰が先にビンゴできるか競争しましょう！</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Service Workerの登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch((error) => {
+                        console.log('ServiceWorker registration failed');
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

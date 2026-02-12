@@ -1,0 +1,321 @@
+/* お散歩ビンゴ - ランディングページ（コンパクト版） */
+
+:root {
+  --primary: #7eb89a;
+  --primary-light: #a8d5ba;
+  --primary-dark: #5a9b7d;
+  --bg: #f8faf9;
+  --card-bg: #ffffff;
+  --text: #2d3436;
+  --text-light: #636e72;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', Meiryo, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.landing-container {
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== ヒーロー（コンパクト） ========== */
+.hero {
+  flex-shrink: 0;
+  padding: 0 0 40px;
+  background: linear-gradient(180deg, #a8d5ba 0%, #7eb89a 100%);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-image-wrap {
+  width: 100%;
+  max-height: 320px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-content {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+}
+
+.hero-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.hero-tagline {
+  font-size: 1rem;
+  opacity: 0.95;
+  margin-top: 12px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* ========== CTAボタン（押しやすい・目立つ） ========== */
+.btn-start {
+  display: inline-block;
+  padding: 16px 32px;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f4f2 100%);
+  color: var(--primary-dark);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 14px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 4px 0 #c5d9cd,
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  animation: btn-float 2.5s ease-in-out infinite;
+}
+
+/* キラッと光る演出 */
+.btn-start::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: btn-shine 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.btn-start:hover {
+  animation: none;
+  transform: translateY(-4px);
+  box-shadow:
+    0 6px 0 #c5d9cd,
+    0 10px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.btn-start:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #c5d9cd,
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes btn-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes btn-shine {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  40% {
+    left: 150%;
+    opacity: 1;
+  }
+  41% {
+    opacity: 0;
+  }
+  100% {
+    left: -100%;
+    opacity: 0;
+  }
+}
+
+/* ========== メインコンテンツ（1ブロック） ========== */
+.main-content {
+  flex: 1;
+  padding: 32px 24px 40px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.content-block {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.block-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+/* 特徴リスト */
+.feature-list { display: flex; flex-direction: column; gap: 12px; }
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.feature-item strong {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.feature-item span {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+/* 遊び方 */
+.howto-list { display: flex; flex-direction: column; gap: 12px; }
+.howto-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.step-num {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.howto-item span:last-child {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+/* おすすめブロック */
+.recommend-block {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.recommend-block .block-title {
+  margin-bottom: 16px;
+}
+
+.recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.recommend-item {
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+}
+
+.recommend-item:hover {
+  background: rgba(168, 213, 186, 0.5);
+}
+
+/* CTA下 */
+.cta-bottom {
+  text-align: center;
+  position: relative;
+}
+
+.btn-large {
+  padding: 18px 40px;
+  font-size: 1.2rem;
+  animation-delay: 0.5s;
+}
+
+/* フッター */
+.footer {
+  padding: 20px 24px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  background: var(--card-bg);
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.footer .dot {
+  opacity: 0.5;
+}
+
+/* ========== レスポンシブ ========== */
+@media (max-width: 600px) {
+  .hero-image-wrap { max-height: 240px; }
+  .hero {
+    padding: 36px 20px 32px;
+  }
+  
+  .hero-icon { font-size: 3rem; }
+  .hero-title { font-size: 1.75rem; }
+  .hero-tagline { font-size: 0.95rem; margin-bottom: 20px; }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .content-block { padding: 16px; }
+  
+  .recommend-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .main-content { padding: 24px 20px 32px; }
+  
+}
