@@ -7,7 +7,10 @@ const urlsToCache = [
   'topics.js',
   'app.js',
   'manifest.json',
-  'lib/html2canvas.min.js'
+  'lib/html2canvas.min.js',
+  'icon-192.png',
+  'icon-512.png',
+  'assets/hero-osanpo-combined-v4.png'
 ];
 
 // インストール時にキャッシュを作成
