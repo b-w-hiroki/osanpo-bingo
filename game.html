@@ -100,7 +100,7 @@
           <div class="cell-modal-icon" id="cellModalIcon">🐱</div>
           <h2 id="cellModalTitle">ネコ</h2>
           <p class="cell-modal-description">
-            見つけたら写真を撮ってマークしましょう
+            見つけたら写真を撮ってマークしよう！
           </p>
         </div>
         
@@ -108,7 +108,7 @@
         <div id="cellPhotoDisplay" class="cell-photo-display" style="display: none;">
           <img id="cellPhotoImg" alt="写真">
           <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">
-            🗑️ 写真を削除
+            🗑️ この写真を削除
           </button>
         </div>
         
@@ -129,7 +129,7 @@
         <div class="cell-modal-actions">
           <!-- 写真アップロードボタン -->
           <label for="cellPhotoInput" class="btn btn-primary btn-large" id="uploadPhotoLabel">
-            📷 写真をアップロード
+            📷 写真を撮る・選ぶ
           </label>
           <input 
             type="file" 
@@ -241,12 +241,12 @@
           </div>
         </div>
         <div class="result-group-form">
-          <label for="resultGroupInput">どんなグループで遊びましたか？</label>
-          <input type="text" id="resultGroupInput" class="input-text" placeholder="例: 家族で散歩、友達3人" maxlength="50">
+          <label for="resultGroupInput">誰と遊びましたか？（任意）</label>
+          <input type="text" id="resultGroupInput" class="input-text" placeholder="例: 家族で散歩、友達3人で" maxlength="50">
         </div>
         <div class="result-edit-actions">
-          <button id="resultCancelBtn" class="btn btn-secondary">ゲームに戻る</button>
-          <button id="resultConfirmBtn" class="btn btn-primary btn-large">決定</button>
+          <button id="resultCancelBtn" class="btn btn-secondary">← ゲームに戻る</button>
+          <button id="resultConfirmBtn" class="btn btn-primary btn-large">結果を確定する</button>
         </div>
       </div>
       <!-- 確定モード：スクショ・共有 -->
@@ -267,10 +267,10 @@
           </div>
         </div>
         <div class="result-share-buttons">
-          <button id="downloadImageBtn" class="btn btn-primary">📷 画像をダウンロード</button>
-          <button type="button" id="shareSnsBtn" class="btn btn-secondary">📤 SNSで共有</button>
+          <button id="downloadImageBtn" class="btn btn-primary">📷 画像を保存</button>
+          <button type="button" id="shareSnsBtn" class="btn btn-secondary">📤 共有する</button>
         </div>
-        <button id="exitScreenshotBtn" class="btn btn-secondary btn-large">← トップへ戻る（新規開始）</button>
+        <button id="exitScreenshotBtn" class="btn btn-secondary btn-large">トップへ戻る</button>
       </div>
     </div>
   </div>
@@ -297,13 +297,26 @@
   <script>
     (function() {
       var indexUrl = 'index.html';
+      var navigating = false;
       function goToTop(e) {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        if (navigating) return;
+        navigating = true;
         window.location.href = indexUrl;
       }
-      document.querySelectorAll('#headerBackToTop, #footerBackToTop, .link-back-top').forEach(function(el) {
-        if (el) el.addEventListener('click', goToTop);
-      });
+      function setupLinks() {
+        document.querySelectorAll('#headerBackToTop, #footerBackToTop, .link-back-top').forEach(function(el) {
+          if (el && !el.dataset.goToTopBound) {
+            el.dataset.goToTopBound = '1';
+            el.addEventListener('click', goToTop);
+          }
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupLinks);
+      } else {
+        setupLinks();
+      }
     })();
   </script>
   

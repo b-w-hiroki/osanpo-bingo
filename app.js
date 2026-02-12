@@ -363,7 +363,11 @@ class OsanpoBingo {
   
   // 終了（結果記録・共有画面を表示）
   endGame() {
-    showConfirm('お散歩ビンゴを終了しても良いですか？').then((ok) => {
+    if (!this.board || this.board.length !== 25) {
+      showAlert('まずはゲームを始めてみましょう！');
+      return;
+    }
+    showConfirm('お散歩ビンゴを終了しますか？\n結果を記録・共有できます。').then((ok) => {
       if (ok) this.showResultView();
     });
   }
@@ -450,7 +454,7 @@ class OsanpoBingo {
     const shareArea = document.getElementById('resultShareArea');
     
     if (view) view.style.display = 'none';
-    if (container) container.style.display = '';
+    if (container) container.style.display = 'flex';
     if (editArea) editArea.style.display = 'flex';
     if (shareArea) shareArea.style.display = 'none';
   }
@@ -492,7 +496,7 @@ class OsanpoBingo {
   downloadResultImage() {
     const area = document.getElementById('resultCaptureArea');
     if (!area || typeof html2canvas === 'undefined') {
-      showAlert('画像生成に失敗しました。');
+      showAlert('画像の準備ができませんでした。\nもう一度お試しください。');
       return;
     }
     
@@ -507,7 +511,7 @@ class OsanpoBingo {
       link.href = canvas.toDataURL('image/png');
       link.click();
     }).catch(() => {
-      showAlert('画像の生成に失敗しました。');
+      showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
     });
   }
   
@@ -522,7 +526,7 @@ class OsanpoBingo {
         text: text,
         url: shareUrl
       }).then(() => {
-        showAlert('共有しました！');
+        showAlert('共有しました！\nお疲れさまでした。');
       }).catch((err) => {
         if (err.name === 'AbortError') return;
         this.copyShareText(text);
@@ -550,7 +554,7 @@ class OsanpoBingo {
   
   // 共有テキストをクリップボードにコピー
   copyShareText(text) {
-    const showSuccess = () => showAlert('コピーしました！\nSNSに貼り付けて投稿できます。');
+    const showSuccess = () => showAlert('テキストをコピーしました！\nSNSに貼り付けて共有できます。');
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(showSuccess).catch(() => {
         this.fallbackCopyText(text);
@@ -569,34 +573,53 @@ class OsanpoBingo {
     ta.select();
     try {
       document.execCommand('copy');
-      showAlert('コピーしました！\nSNSに貼り付けて投稿できます。');
+      showAlert('テキストをコピーしました！\nSNSに貼り付けて共有できます。');
     } catch (e) {
-      showAlert('コピーに失敗しました。以下のテキストを手動でコピーしてください：\n\n' + text);
+      showAlert('自動コピーできませんでした。\n以下を長押しでコピーしてください：\n\n' + text);
     }
     document.body.removeChild(ta);
   }
   
   // 結果画面からトップへ戻る（キャッシュリセットして新規開始可能に）
   exitResultView() {
-    this.resetAndGoToTop();
+    showConfirm('お疲れさまでした！\nトップページに戻りますか？').then((ok) => {
+      if (ok) this.resetAndGoToTop();
+    });
   }
 
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     try {
       localStorage.removeItem('osanpoBingo');
-      if ('caches' in window) {
-        caches.keys().then((names) => {
-          names.forEach((n) => caches.delete(n));
-        }).catch(() => {});
-      }
     } catch (e) {}
-    window.location.replace('index.html');
+
+    // キャッシュ削除を試みつつ、確実にナビゲーションする
+    const doNavigate = () => {
+      window.location.href = 'index.html';
+    };
+
+    // 万一キャッシュ処理が止まっても1秒後には必ず遷移
+    const timer = setTimeout(doNavigate, 1000);
+
+    try {
+      if ('caches' in window) {
+        caches.keys()
+          .then((names) => Promise.all(names.map((n) => caches.delete(n))))
+          .then(() => { clearTimeout(timer); doNavigate(); })
+          .catch(() => { clearTimeout(timer); doNavigate(); });
+      } else {
+        clearTimeout(timer);
+        doNavigate();
+      }
+    } catch (e) {
+      clearTimeout(timer);
+      doNavigate();
+    }
   }
   
   // 作り直す（お題をランダムシャッフル）
   newGame() {
-    showConfirm('ビンゴをお題シャッフルで作り直しますか？').then((ok) => {
+    showConfirm('お題をシャッフルして\n新しいビンゴを作りますか？').then((ok) => {
       if (!ok) return;
       console.log('🎮 ビンゴを作り直します');
       this.createBoard(this.roomCode, this.difficulty, Date.now().toString());
@@ -719,11 +742,11 @@ class OsanpoBingo {
         })
         .catch(err => {
           console.error('コピー失敗:', err);
-          showAlert(`合言葉: ${this.roomCode}\n\n手動でコピーしてください`);
+          showAlert(`合言葉は「${this.roomCode}」です\n\n長押しでコピーしてください`);
         });
     } else {
       // クリップボードAPIが使えない場合
-      showAlert(`合言葉: ${this.roomCode}\n\n手動でコピーしてください`);
+      showAlert(`合言葉は「${this.roomCode}」です\n\n長押しでコピーしてください`);
     }
   }
   
@@ -915,7 +938,7 @@ class OsanpoBingo {
     if (deleteCurrentPhotoBtn) {
       deleteCurrentPhotoBtn.addEventListener('click', () => {
         if (this.currentPhotoIndex !== null && this.photos[this.currentPhotoIndex]) {
-          showConfirm('写真を削除しますか？').then((ok) => {
+          showConfirm('この写真を削除しますか？').then((ok) => {
             if (!ok) return;
             delete this.photos[this.currentPhotoIndex];
             this.renderBoard();
@@ -1081,7 +1104,7 @@ class OsanpoBingo {
     } catch (error) {
       console.error('❌ 保存エラー:', error);
       if (error.name === 'QuotaExceededError') {
-        showAlert('保存容量が不足しています。写真を削除してください。');
+        showAlert('保存容量がいっぱいです。\n不要な写真を削除してから再度お試しください。');
       }
     }
   }

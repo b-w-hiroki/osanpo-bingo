@@ -89,7 +89,8 @@ body {
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
 .btn-start {
   display: inline-block;
-  padding: 16px 32px;
+  padding: 18px 36px;
+  min-height: 52px;
   background: linear-gradient(180deg, #ffffff 0%, #f0f4f2 100%);
   color: var(--primary-dark);
   font-size: 1.15rem;
@@ -105,6 +106,8 @@ body {
   position: relative;
   overflow: hidden;
   animation: btn-float 2.5s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* キラッと光る演出 */
@@ -139,6 +142,11 @@ body {
   box-shadow:
     0 2px 0 #c5d9cd,
     0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-start:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
 }
 
 @keyframes btn-float {
@@ -263,6 +271,7 @@ body {
 
 .recommend-item {
   padding: 10px 12px;
+  min-height: 40px;
   background: var(--bg);
   border-radius: 8px;
   transition: background 0.2s;
@@ -270,6 +279,9 @@ body {
   font-weight: 500;
   color: var(--text);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .recommend-item:hover {
