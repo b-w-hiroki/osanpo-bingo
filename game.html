@@ -28,66 +28,155 @@
     <!-- 合言葉モーダル -->
     <div class="modal" id="roomCodeModal" style="display: none;">
       <div class="modal-content">
-        <h2>🎮 ゲーム設定</h2>
         
-        <p class="modal-description">
-          友達と一緒に遊ぶ場合は、同じ合言葉を使いましょう。<br>
-          似たお題が出るので、一緒に散歩が楽しめます！
-        </p>
-        
-        <div class="form-group">
-          <label for="roomCodeInput">🔑 合言葉（グループで共有）</label>
-          <div class="input-with-button">
-            <input 
-              type="text" 
-              id="roomCodeInput" 
-              class="input-text"
-              placeholder="例: さくら"
-              maxlength="5"
-            >
-            <button id="generateRoomCodeBtn" class="btn btn-secondary btn-icon" type="button">
-              🎲 自動
+        <!-- ステップ1: モード選択 -->
+        <div id="modeSelectStep" class="modal-step">
+          <h2>🚶 お散歩ビンゴ</h2>
+          <p class="modal-description">
+            遊び方を選んでください
+          </p>
+          <div class="mode-select-buttons">
+            <button type="button" id="modeCreateBtn" class="mode-btn mode-btn-create">
+              <span class="mode-btn-icon">🎮</span>
+              <span class="mode-btn-label">ゲームを作る</span>
+              <span class="mode-btn-desc">お題・難易度を設定</span>
+            </button>
+            <button type="button" id="modeJoinBtn" class="mode-btn mode-btn-join">
+              <span class="mode-btn-icon">🤝</span>
+              <span class="mode-btn-label">ゲームに参加</span>
+              <span class="mode-btn-desc">合言葉を入力して参加</span>
             </button>
           </div>
-          <p class="form-help">
-            友達から教えてもらった合言葉を入力するか、🎲で自動生成
+          <p class="modal-back-link">
+            <a href="index.html" class="link-back-top">← トップへ戻る</a>
           </p>
         </div>
         
-        <div class="form-group">
-          <label for="playerCountInput">👥 参加人数（自分を含む）</label>
-          <input 
-            type="number" 
-            id="playerCountInput" 
-            class="input-text"
-            placeholder="例: 3"
-            min="1"
-            max="99"
-            value="1"
-          >
-          <p class="form-help">
-            一緒に遊ぶ人数を入力してください（後で変更可能）
+        <!-- ステップ2: ゲーム設定（作成モード） -->
+        <div id="createGameStep" class="modal-step" style="display: none;">
+          <h2>🎮 ゲームを作る</h2>
+          <p class="modal-description">
+            合言葉を友達にシェアして一緒に遊ぼう！
+          </p>
+          
+          <div class="form-group">
+            <label for="roomCodeInput">🔑 合言葉</label>
+            <div class="input-with-button">
+              <input 
+                type="text" 
+                id="roomCodeInput" 
+                class="input-text"
+                placeholder="例: さくら"
+                maxlength="5"
+              >
+              <button id="generateRoomCodeBtn" class="btn btn-secondary btn-icon" type="button">
+                🎲 自動
+              </button>
+            </div>
+            <p class="form-help">
+              友達に合言葉を教えてあげよう
+            </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="playerCountInput">👥 参加人数</label>
+            <input 
+              type="number" 
+              id="playerCountInput" 
+              class="input-text"
+              placeholder="例: 3"
+              min="1"
+              max="99"
+              value="1"
+            >
+            <p class="form-help">
+              自分を含む人数（後から変更可）
+            </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="difficultySelect">📊 難易度</label>
+            <select id="difficultySelect" class="select-box">
+              <option value="easy">かんたん（よく見るもの）</option>
+              <option value="medium" selected>ふつう（少し探す）</option>
+              <option value="hard">むずかしい（レアなもの）</option>
+            </select>
+            <p class="form-help">
+              お題の見つけやすさが変わります
+            </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="customTopicCount">✏️ フリー入力マス</label>
+            <select id="customTopicCount" class="select-box">
+              <option value="0" selected>なし</option>
+              <option value="1">1マス</option>
+              <option value="2">2マス</option>
+              <option value="3">3マス</option>
+              <option value="4">4マス</option>
+              <option value="5">5マス</option>
+              <option value="6">6マス</option>
+              <option value="8">8マス</option>
+              <option value="10">10マス</option>
+              <option value="12">12マス</option>
+            </select>
+            <p class="form-help">
+              自分だけのお題を設定できます
+            </p>
+            <div id="customTopicInputs" class="custom-topic-inputs" style="display: none;">
+              <!-- JSで動的に生成 -->
+            </div>
+          </div>
+          
+          <button id="startGameBtn" class="btn btn-primary btn-large">
+            ✨ ゲームを始める
+          </button>
+          <p class="modal-step-back">
+            <button type="button" id="backToModeSelect" class="link-btn">← 戻る</button>
           </p>
         </div>
         
-        <div class="form-group">
-          <label for="difficultySelect">📊 難易度</label>
-          <select id="difficultySelect" class="select-box">
-            <option value="easy">かんたん（よく見るもの）</option>
-            <option value="medium" selected>ふつう（少し探す）</option>
-            <option value="hard">むずかしい（レアなもの）</option>
-          </select>
-          <p class="form-help">
-            難易度によってお題の種類が変わります
+        <!-- ステップ2: ゲーム設定（参加モード） -->
+        <div id="joinGameStep" class="modal-step" style="display: none;">
+          <h2>🤝 ゲームに参加</h2>
+          <p class="modal-description">
+            作った人から合言葉と難易度を聞いてね
+          </p>
+          
+          <div class="form-group">
+            <label for="joinRoomCodeInput">🔑 合言葉</label>
+            <input 
+              type="text" 
+              id="joinRoomCodeInput" 
+              class="input-text"
+              placeholder="合言葉を入力"
+              maxlength="5"
+            >
+            <p class="form-help">
+              ゲームを作った人に教えてもらおう
+            </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="joinDifficultySelect">📊 難易度</label>
+            <select id="joinDifficultySelect" class="select-box">
+              <option value="easy">かんたん（よく見るもの）</option>
+              <option value="medium" selected>ふつう（少し探す）</option>
+              <option value="hard">むずかしい（レアなもの）</option>
+            </select>
+            <p class="form-help">
+              作った人と同じ難易度を選んでね
+            </p>
+          </div>
+          
+          <button id="joinGameBtn" class="btn btn-primary btn-large">
+            🤝 参加する
+          </button>
+          <p class="modal-step-back">
+            <button type="button" id="backToModeSelectFromJoin" class="link-btn">← 戻る</button>
           </p>
         </div>
         
-        <button id="startGameBtn" class="btn btn-primary btn-large">
-          ✨ ゲームを始める
-        </button>
-        <p class="modal-back-link">
-          <a href="index.html" class="link-back-top">← トップへ戻る</a>
-        </p>
       </div>
     </div>
     
@@ -212,6 +301,7 @@
           <li><strong>終わる</strong>: ゲームを終了し、結果を記録・SNS共有できます</li>
           <li><strong>作り直す</strong>: お題をシャッフルして新しいボードを作ります</li>
           <li><strong>FREE</strong>: 中央のマスは最初からマーク済みです</li>
+          <li><strong>✏️マス</strong>: 点線枠のマスは自分で設定したフリーお題です</li>
         </ul>
       </details>
     </section>

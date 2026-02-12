@@ -69,6 +69,9 @@ class OsanpoBingo {
     this.photos = {};             // {index: base64Data}
     this.currentPhotoIndex = null; // 現在写真を撮影中のインデックス
     
+    // フリー入力マス
+    this.customTopics = [];       // ユーザーが入力したカスタムお題 [{text, icon}]
+    
     // DOM要素（初期化時に取得）
     this.boardElement = null;
     this.messageElement = null;
@@ -169,7 +172,8 @@ class OsanpoBingo {
   
   // ボードを作成（お題を配置）
   // shuffleSalt: 指定すると毎回異なるシャッフル（作り直し用）
-  createBoard(roomCode = '', difficulty = 'medium', shuffleSalt = '') {
+  // customTopics: フリー入力マスのお題配列 [{text, icon}]
+  createBoard(roomCode = '', difficulty = 'medium', shuffleSalt = '', customTopics = null) {
     console.log('📋 新しいビンゴボードを作成します');
     console.log(`合言葉: ${roomCode}, 難易度: ${difficulty}`);
     
@@ -177,13 +181,28 @@ class OsanpoBingo {
     this.roomCode = roomCode || this.roomCode || '';
     this.difficulty = difficulty || this.difficulty || 'medium';
     
-    // 難易度に応じて24個のお題を取得
-    const topics = selectTopicsByDifficulty(
+    // カスタムトピックを保存（渡されなければ既存を維持）
+    if (customTopics !== null) {
+      this.customTopics = customTopics;
+    }
+    
+    // カスタムトピックの数だけランダムお題を減らす
+    const customCount = this.customTopics.length;
+    const randomCount = 24 - customCount;
+    
+    // 難易度に応じてランダムお題を取得
+    const randomTopics = selectTopicsByDifficulty(
       this.difficulty, 
       this.roomCode, 
       this.userId,
       shuffleSalt
-    );
+    ).slice(0, randomCount);
+    
+    // カスタムお題 + ランダムお題を合わせてシャッフル
+    const allTopics = [...this.customTopics, ...randomTopics];
+    const seedStr = [this.roomCode, this.userId, shuffleSalt, 'mix'].filter(Boolean).join('-');
+    const seed = stringToSeed(seedStr);
+    const shuffledTopics = shuffleWithSeed(allTopics, seed);
     
     // 25マスのボードを作成（中央はFREE）
     this.board = [];
@@ -193,7 +212,7 @@ class OsanpoBingo {
         this.board.push({text: 'FREE', icon: '⭐', isFree: true});
       } else {
         const topicIndex = i < 12 ? i : i - 1;
-        this.board.push(topics[topicIndex]);
+        this.board.push(shuffledTopics[topicIndex]);
       }
     }
     
@@ -233,16 +252,29 @@ class OsanpoBingo {
         cell.classList.add('free');
       }
       
+      // カスタムお題の場合
+      if (topic.isCustom) {
+        cell.classList.add('custom');
+      }
+      
       // ビンゴラインに含まれる場合
       const isInBingoLine = this.bingoLines.some(line => line.includes(index));
       if (isInBingoLine) {
         cell.classList.add('bingo');
       }
       
+      // テキストの文字数に応じたサイズクラスを付与
+      const textLen = topic.text.length;
+      let sizeClass = '';
+      if (textLen <= 2) sizeClass = 'cell-text-s';
+      else if (textLen <= 4) sizeClass = 'cell-text-m';
+      else if (textLen <= 6) sizeClass = 'cell-text-l';
+      else sizeClass = 'cell-text-xl';
+      
       // アイコンとテキストを表示（画像アイコン優先、なければ絵文字）
       cell.innerHTML = `
         ${getTopicIcon(topic)}
-        <div class="cell-text">${topic.text}</div>
+        <div class="cell-text ${sizeClass}">${topic.text}</div>
       `;
       
       // アクセシビリティ
@@ -622,7 +654,7 @@ class OsanpoBingo {
     showConfirm('お題をシャッフルして\n新しいビンゴを作りますか？').then((ok) => {
       if (!ok) return;
       console.log('🎮 ビンゴを作り直します');
-      this.createBoard(this.roomCode, this.difficulty, Date.now().toString());
+      this.createBoard(this.roomCode, this.difficulty, Date.now().toString(), null);
       this.markCell(12);
       this.renderBoard();
       this.checkBingo();
@@ -644,13 +676,18 @@ class OsanpoBingo {
     const modal = document.getElementById('roomCodeModal');
     if (!modal) return;
     
+    const modeSelectStep = document.getElementById('modeSelectStep');
+    const createGameStep = document.getElementById('createGameStep');
+    const joinGameStep = document.getElementById('joinGameStep');
+    
     // 既存の値を入力欄に設定
     const roomCodeInput = document.getElementById('roomCodeInput');
     const difficultySelect = document.getElementById('difficultySelect');
     const playerCountInput = document.getElementById('playerCountInput');
+    const customTopicCountSelect = document.getElementById('customTopicCount');
+    const customTopicInputsContainer = document.getElementById('customTopicInputs');
     
     if (roomCodeInput) {
-      // 既存の合言葉があればそれを使う、なければ新規生成
       roomCodeInput.value = this.roomCode || this.generateRoomCode();
     }
     
@@ -662,18 +699,82 @@ class OsanpoBingo {
       playerCountInput.value = this.playerCount || 1;
     }
     
+    // フリー入力マスの復元
+    if (customTopicCountSelect && customTopicInputsContainer) {
+      const customCount = this.customTopics.length;
+      customTopicCountSelect.value = customCount.toString();
+      this.renderCustomTopicInputs(customCount, customTopicInputsContainer);
+      if (customCount > 0) {
+        const inputs = customTopicInputsContainer.querySelectorAll('.custom-topic-input');
+        this.customTopics.forEach((topic, i) => {
+          if (inputs[i]) inputs[i].value = topic.text || '';
+        });
+      }
+    }
+    
+    // 初回はモード選択ステップを表示
+    if (modeSelectStep) modeSelectStep.style.display = 'block';
+    if (createGameStep) createGameStep.style.display = 'none';
+    if (joinGameStep) joinGameStep.style.display = 'none';
+    
     modal.style.display = 'flex';
   }
   
   // 合言葉モーダルを設定
   setupRoomCodeModal() {
     const startGameBtn = document.getElementById('startGameBtn');
+    const joinGameBtn = document.getElementById('joinGameBtn');
     const generateBtn = document.getElementById('generateRoomCodeBtn');
     const roomCodeInput = document.getElementById('roomCodeInput');
+    const customTopicCountSelect = document.getElementById('customTopicCount');
+    const customTopicInputsContainer = document.getElementById('customTopicInputs');
     
-    // 初回表示時に合言葉を自動生成
-    if (roomCodeInput && !roomCodeInput.value) {
-      roomCodeInput.value = this.generateRoomCode();
+    // モード選択ボタン
+    const modeCreateBtn = document.getElementById('modeCreateBtn');
+    const modeJoinBtn = document.getElementById('modeJoinBtn');
+    const backToModeSelect = document.getElementById('backToModeSelect');
+    const backToModeSelectFromJoin = document.getElementById('backToModeSelectFromJoin');
+    
+    const modeSelectStep = document.getElementById('modeSelectStep');
+    const createGameStep = document.getElementById('createGameStep');
+    const joinGameStep = document.getElementById('joinGameStep');
+    
+    // 「ゲームを作る」ボタン
+    if (modeCreateBtn) {
+      modeCreateBtn.addEventListener('click', () => {
+        if (modeSelectStep) modeSelectStep.style.display = 'none';
+        if (createGameStep) createGameStep.style.display = 'block';
+        if (joinGameStep) joinGameStep.style.display = 'none';
+        // 合言葉を自動生成
+        if (roomCodeInput && !roomCodeInput.value) {
+          roomCodeInput.value = this.generateRoomCode();
+        }
+      });
+    }
+    
+    // 「ゲームに参加」ボタン
+    if (modeJoinBtn) {
+      modeJoinBtn.addEventListener('click', () => {
+        if (modeSelectStep) modeSelectStep.style.display = 'none';
+        if (createGameStep) createGameStep.style.display = 'none';
+        if (joinGameStep) joinGameStep.style.display = 'block';
+      });
+    }
+    
+    // 「戻る」ボタン（作成モード）
+    if (backToModeSelect) {
+      backToModeSelect.addEventListener('click', () => {
+        if (modeSelectStep) modeSelectStep.style.display = 'block';
+        if (createGameStep) createGameStep.style.display = 'none';
+      });
+    }
+    
+    // 「戻る」ボタン（参加モード）
+    if (backToModeSelectFromJoin) {
+      backToModeSelectFromJoin.addEventListener('click', () => {
+        if (modeSelectStep) modeSelectStep.style.display = 'block';
+        if (joinGameStep) joinGameStep.style.display = 'none';
+      });
     }
     
     // 合言葉生成ボタン
@@ -683,7 +784,17 @@ class OsanpoBingo {
       });
     }
     
-    // ゲーム開始ボタン
+    // フリー入力マスの個数変更
+    if (customTopicCountSelect && customTopicInputsContainer) {
+      customTopicCountSelect.addEventListener('change', () => {
+        this.renderCustomTopicInputs(
+          parseInt(customTopicCountSelect.value) || 0,
+          customTopicInputsContainer
+        );
+      });
+    }
+    
+    // ゲーム開始ボタン（作成モード）
     if (startGameBtn) {
       startGameBtn.addEventListener('click', () => {
         const difficultySelect = document.getElementById('difficultySelect');
@@ -694,27 +805,121 @@ class OsanpoBingo {
         const difficulty = difficultySelect?.value || 'medium';
         const playerCount = parseInt(playerCountInput?.value) || 1;
         
+        // フリー入力マスのお題を収集
+        const customTopics = this.collectCustomTopics();
+        
         // 参加人数を保存
         this.playerCount = Math.max(1, Math.min(99, playerCount));
         
-        // ボードを作成
-        this.createBoard(roomCode, difficulty);
+        // ボードを作成（カスタムトピックを渡す）
+        this.createBoard(roomCode, difficulty, '', customTopics);
         this.markCell(12); // 中央をFREEに
         this.renderBoard();
         this.checkBingo();
         this.updateStats();
         
         // モーダルを閉じる
-        if (modal) {
-          modal.style.display = 'none';
-        }
-        
-        // メッセージを非表示
-        if (this.messageElement) {
-          this.messageElement.style.display = 'none';
-        }
+        if (modal) modal.style.display = 'none';
+        if (this.messageElement) this.messageElement.style.display = 'none';
       });
     }
+    
+    // 参加ボタン（参加モード）
+    if (joinGameBtn) {
+      joinGameBtn.addEventListener('click', () => {
+        const joinRoomCode = document.getElementById('joinRoomCodeInput');
+        const joinDifficulty = document.getElementById('joinDifficultySelect');
+        const modal = document.getElementById('roomCodeModal');
+        
+        const roomCode = joinRoomCode?.value.trim();
+        if (!roomCode) {
+          showAlert('合言葉を入力してください');
+          return;
+        }
+        
+        const difficulty = joinDifficulty?.value || 'medium';
+        
+        // 参加人数は1（自分だけ）
+        this.playerCount = 1;
+        
+        // ボードを作成（カスタムトピックなし）
+        this.createBoard(roomCode, difficulty, '', []);
+        this.markCell(12);
+        this.renderBoard();
+        this.checkBingo();
+        this.updateStats();
+        
+        // モーダルを閉じる
+        if (modal) modal.style.display = 'none';
+        if (this.messageElement) this.messageElement.style.display = 'none';
+      });
+    }
+  }
+  
+  // フリー入力マスの入力欄を動的に生成
+  renderCustomTopicInputs(count, container) {
+    if (!container) return;
+    
+    if (count <= 0) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+    
+    container.style.display = 'block';
+    
+    // 既存の値を保持
+    const existingValues = [];
+    container.querySelectorAll('.custom-topic-input').forEach(input => {
+      existingValues.push(input.value);
+    });
+    
+    container.innerHTML = '';
+    
+    for (let i = 0; i < count; i++) {
+      const row = document.createElement('div');
+      row.className = 'custom-topic-row';
+      
+      const num = document.createElement('span');
+      num.className = 'custom-topic-num';
+      num.textContent = (i + 1);
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'input-text custom-topic-input';
+      input.placeholder = '例: 赤いポスト';
+      input.maxLength = 20;
+      input.dataset.index = i;
+      
+      // 既存の値を復元
+      if (existingValues[i]) {
+        input.value = existingValues[i];
+      }
+      
+      row.appendChild(num);
+      row.appendChild(input);
+      container.appendChild(row);
+    }
+  }
+  
+  // フリー入力マスのお題を収集
+  collectCustomTopics() {
+    const inputs = document.querySelectorAll('.custom-topic-input');
+    const topics = [];
+    
+    inputs.forEach(input => {
+      const text = input.value.trim();
+      if (text) {
+        topics.push({
+          text: text,
+          icon: '✏️',
+          category: 'カスタム',
+          isCustom: true
+        });
+      }
+    });
+    
+    return topics;
   }
   
   // 合言葉をコピー
@@ -1097,7 +1302,8 @@ class OsanpoBingo {
         roomCode: this.roomCode,
         difficulty: this.difficulty,
         playerCount: this.playerCount,
-        photos: this.photos
+        photos: this.photos,
+        customTopics: this.customTopics
       };
       localStorage.setItem('osanpoBingo', JSON.stringify(data));
       console.log('💾 保存しました');
@@ -1143,6 +1349,10 @@ class OsanpoBingo {
       
       if (data.photos && typeof data.photos === 'object') {
         this.photos = data.photos;
+      }
+      
+      if (data.customTopics && Array.isArray(data.customTopics)) {
+        this.customTopics = data.customTopics;
       }
       
       console.log('💾 読み込みました');

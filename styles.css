@@ -184,6 +184,16 @@ h1 {
   font-weight: 600;
 }
 
+/* カスタムお題 */
+.bingo-cell.custom {
+  border-style: dashed;
+  border-color: var(--primary-light);
+}
+
+.bingo-cell.custom.marked {
+  border-style: solid;
+}
+
 /* ビンゴライン */
 .bingo-cell.bingo {
   background: var(--cell-bingo);
@@ -224,6 +234,17 @@ h1 {
   line-height: 1.2;
   word-break: keep-all;
   overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+/* 文字数に応じたサイズ調整 */
+.cell-text-s { font-size: 0.95rem; }  /* 1-2文字 */
+.cell-text-m { font-size: 0.88rem; }  /* 3-4文字 */
+.cell-text-l { font-size: 0.78rem; }  /* 5-6文字 */
+.cell-text-xl {                        /* 7文字以上 */
+  font-size: 0.68rem;
+  line-height: 1.15;
+  word-break: break-all;
 }
 
 /* マーク済みセルのテキスト */
@@ -504,10 +525,11 @@ h1 {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   
-  max-width: 500px;
+  max-width: 460px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   
   position: relative;
   animation: fadeInUp 0.3s ease;
@@ -560,10 +582,87 @@ h1 {
 .modal-description {
   text-align: center;
   color: var(--text-light);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.6;
   margin-bottom: var(--spacing-lg);
   padding: 0 var(--spacing-sm);
+}
+
+/* モード選択ボタン */
+.mode-select-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 2px solid var(--cell-border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.mode-btn:hover {
+  border-color: var(--primary);
+  background: #f0f8f4;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.mode-btn:active {
+  transform: translateY(0);
+}
+
+.mode-btn-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mode-btn-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+}
+
+.mode-btn-desc {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ステップ戻るリンク */
+.modal-step-back {
+  text-align: center;
+  margin-top: var(--spacing-md);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.link-btn:hover {
+  color: var(--primary-dark);
+  background: rgba(126, 184, 154, 0.1);
 }
 
 .modal-back-link {
@@ -601,6 +700,48 @@ h1 {
   font-size: 0.8rem;
   color: var(--text-light);
   margin-top: var(--spacing-xs);
+}
+
+/* フリー入力マス */
+.custom-topic-inputs {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--cell-border);
+}
+
+.custom-topic-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-topic-num {
+  width: 22px;
+  height: 22px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.custom-topic-input {
+  flex: 1;
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+  border-width: 1px !important;
 }
 
 .input-text {
@@ -1220,9 +1361,11 @@ h1 {
     height: 3.2rem;
   }
   
-  .cell-text {
-    font-size: 0.8rem;
-  }
+  .cell-text { font-size: 0.8rem; }
+  .cell-text-s { font-size: 0.82rem; }
+  .cell-text-m { font-size: 0.75rem; }
+  .cell-text-l { font-size: 0.65rem; }
+  .cell-text-xl { font-size: 0.58rem; }
   
   .stats {
     grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
@@ -1253,14 +1396,52 @@ h1 {
   }
   
   .modal {
-    padding: var(--spacing-md);
-    align-items: flex-start;
+    padding: var(--spacing-sm);
+    align-items: center;
   }
   
   .modal-content {
-    padding: var(--spacing-lg);
-    max-height: 85vh;
+    padding: 20px 16px;
+    max-height: 90vh;
     overflow-y: auto;
+    margin: auto 0;
+  }
+
+  .modal-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .modal-description {
+    font-size: 0.82rem;
+    padding: 0;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .form-group label {
+    font-size: 0.88rem;
+    margin-bottom: 6px;
+  }
+
+  .form-help {
+    font-size: 0.75rem;
+  }
+
+  .input-text {
+    padding: 12px;
+  }
+
+  .select-box {
+    padding: 12px;
+  }
+
+  .btn-icon {
+    padding: 12px 10px;
+    font-size: 0.85rem;
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-md);
   }
 
   .info-details summary {
@@ -1305,9 +1486,11 @@ h1 {
     height: 2.8rem;
   }
   
-  .cell-text {
-    font-size: 0.72rem;
-  }
+  .cell-text { font-size: 0.72rem; }
+  .cell-text-s { font-size: 0.74rem; }
+  .cell-text-m { font-size: 0.68rem; }
+  .cell-text-l { font-size: 0.58rem; }
+  .cell-text-xl { font-size: 0.52rem; }
   
   .bingo-board {
     gap: 6px;
@@ -1315,6 +1498,37 @@ h1 {
 
   .stat-item {
     min-height: 48px;
+  }
+
+  /* 極狭画面: モーダルの余白を最小化 */
+  .modal {
+    padding: 4px;
+  }
+
+  .modal-content {
+    padding: 16px 12px;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-content h2 {
+    font-size: 1.2rem;
+  }
+
+  .modal-description {
+    font-size: 0.78rem;
+  }
+
+  .form-group label {
+    font-size: 0.82rem;
+  }
+
+  .input-with-button {
+    gap: 4px;
+  }
+
+  .btn-icon {
+    padding: 10px 8px;
+    font-size: 0.8rem;
   }
 }
 
