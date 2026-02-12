@@ -1,4 +1,4 @@
-/* お散歩ビンゴ - ランディングページ（コンパクト版） */
+/* お散歩ビンゴ - ランディングページ（モバイルファースト・デザイナー調整版） */
 
 :root {
   --primary: #7eb89a;
@@ -15,12 +15,17 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', Meiryo, sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 .landing-container {
@@ -31,7 +36,7 @@ body {
   flex-direction: column;
 }
 
-/* ========== ヒーロー（コンパクト） ========== */
+/* ========== ヒーロー（フルブリード・ビューポート最適化） ========== */
 .hero {
   flex-shrink: 0;
   padding: 0 0 40px;
@@ -39,11 +44,14 @@ body {
   color: white;
   text-align: center;
   overflow: hidden;
+  position: relative;
 }
 
 .hero-image-wrap {
   width: 100%;
-  max-height: 320px;
+  height: 45vh;
+  min-height: 220px;
+  max-height: 420px;
   overflow: hidden;
   position: relative;
 }
@@ -52,13 +60,14 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 35%;
+  display: block;
 }
 
 .hero-content {
   max-width: 400px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 24px 24px 0;
   position: relative;
 }
 
@@ -293,29 +302,80 @@ body {
   opacity: 0.5;
 }
 
-/* ========== レスポンシブ ========== */
+/* ========== レスポンシブ（モバイルファースト・余白ゼロ設計） ========== */
 @media (max-width: 600px) {
-  .hero-image-wrap { max-height: 240px; }
+  /* ヒーロー: 横フルブリード・余白を詰める */
   .hero {
-    padding: 36px 20px 32px;
+    padding: 0 0 16px;
   }
-  
-  .hero-icon { font-size: 3rem; }
-  .hero-title { font-size: 1.75rem; }
-  .hero-tagline { font-size: 0.95rem; margin-bottom: 20px; }
-  
+
+  .hero-image-wrap {
+    height: 42vh;
+    min-height: 200px;
+    max-height: none;
+  }
+
+  .hero-image {
+    object-position: center 38%;
+  }
+
+  .hero-content {
+    padding: 12px 20px 0;
+  }
+
+  .hero-tagline {
+    font-size: 0.95rem;
+    margin-top: 4px;
+    margin-bottom: 14px;
+  }
+
+  /* メインコンテンツ: 詰めた余白 */
   .content-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 14px;
+    margin-bottom: 16px;
   }
-  
-  .content-block { padding: 16px; }
-  
+
+  .content-block {
+    padding: 16px;
+  }
+
+  .recommend-block {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
   .recommend-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
-  
-  .main-content { padding: 24px 20px 32px; }
-  
+
+  .main-content {
+    padding: 18px 16px 28px;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  }
+
+  .cta-bottom {
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  }
+}
+
+/* 超小型スマホ（ノッチ対策） */
+@media (max-width: 380px) {
+  .hero-image-wrap {
+    min-height: 38vh;
+  }
+
+  .hero-content {
+    padding: 10px 16px 0;
+  }
+
+  .hero-tagline {
+    margin-bottom: 12px;
+  }
+
+  .main-content {
+    padding: 16px 12px 24px;
+    padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+  }
 }
