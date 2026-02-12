@@ -1,13 +1,30 @@
 // お散歩ビンゴ - お題データベース
-// 120個のお題（かんたん40 + ふつう40 + むずかしい40）
+// このファイルは tools/csv-to-topics.js で自動生成されています
+// 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
+// 生成日時: 2026-02-12 14:47:26
 
 // お題ID → アイコン画像（画像ある場合のみ、なければ絵文字を使用）
 const topicIconMap = {
-  1: 'icon-neko.png', 2: 'icon-inu.png', 3: 'icon-hana.png', 4: 'icon-ki.png',
-  5: 'icon-tori.png', 6: 'icon-kuruma.png', 7: 'icon-jitensha.png', 8: 'icon-ie.png',
-  9: 'icon-kumo.png', 10: 'icon-kumo.png', 11: 'icon-taiyou.png', 12: 'icon-koen.png',
-  13: 'icon-bench.png', 14: 'icon-shingou.png', 15: 'icon-hashi.png', 16: 'icon-mizu.png',
-  17: 'icon-ishi.png', 18: 'icon-kusa.png', 19: 'icon-happa.png', 20: 'icon-kodomo.png',
+  1: 'icon-neko.png',
+  2: 'icon-inu.png',
+  3: 'icon-hana.png',
+  4: 'icon-ki.png',
+  5: 'icon-tori.png',
+  6: 'icon-kuruma.png',
+  7: 'icon-jitensha.png',
+  8: 'icon-ie.png',
+  9: 'icon-kumo.png',
+  10: 'icon-kumo.png',
+  11: 'icon-taiyou.png',
+  12: 'icon-koen.png',
+  13: 'icon-bench.png',
+  14: 'icon-shingou.png',
+  15: 'icon-hashi.png',
+  16: 'icon-mizu.png',
+  17: 'icon-ishi.png',
+  18: 'icon-kusa.png',
+  19: 'icon-happa.png',
+  20: 'icon-kodomo.png',
   40: 'icon-hito.png'
 };
 
@@ -61,7 +78,7 @@ const topicDatabase = {
     {id: 37, text: '道', icon: '🛣️', category: '場所'},
     {id: 38, text: '門', icon: '🚪', category: '物'},
     {id: 39, text: '窓', icon: '🪟', category: '物'},
-    {id: 40, text: '人', icon: '👤', category: '人'},
+    {id: 40, text: '人', icon: '👤', category: '人'}
   ],
   
   // ふつう（40個） - 少し探す必要があるもの
@@ -105,7 +122,7 @@ const topicDatabase = {
     {id: 77, text: '落ち葉', icon: '🍂', category: '物'},
     {id: 78, text: '水たまり', icon: '💧', category: '自然'},
     {id: 79, text: '霧', icon: '🌫️', category: '自然'},
-    {id: 80, text: '月', icon: '🌙', category: '自然'},
+    {id: 80, text: '月', icon: '🌙', category: '自然'}
   ],
   
   // むずかしい（40個） - レアなもの
@@ -149,7 +166,7 @@ const topicDatabase = {
     {id: 117, text: '向日葵', icon: '🌻', category: '植物'},
     {id: 118, text: 'コスモス', icon: '🌸', category: '植物'},
     {id: 119, text: '彼岸花', icon: '🌹', category: '植物'},
-    {id: 120, text: '四つ葉のクローバー', icon: '🍀', category: '植物'},
+    {id: 120, text: '四つ葉のクローバー', icon: '🍀', category: '植物'}
   ]
 };
 

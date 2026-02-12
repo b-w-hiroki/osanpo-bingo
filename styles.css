@@ -247,6 +247,33 @@ h1 {
   word-break: break-all;
 }
 
+/* 長テキストセルのアイコン適応縮小（A案） */
+.bingo-cell.cell-len-l {
+  gap: 3px;
+}
+
+.bingo-cell.cell-len-l .cell-icon {
+  font-size: 2.4rem;
+}
+
+.bingo-cell.cell-len-l .cell-icon-img {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.bingo-cell.cell-len-xl {
+  gap: 2px;
+}
+
+.bingo-cell.cell-len-xl .cell-icon {
+  font-size: 1.6rem;
+}
+
+.bingo-cell.cell-len-xl .cell-icon-img {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
 /* マーク済みセルのテキスト */
 .bingo-cell.marked .cell-text,
 .bingo-cell.free .cell-text {
@@ -261,6 +288,17 @@ h1 {
   50% {
     transform: scale(1.05);
   }
+}
+
+/* マーク時のポップアニメーション */
+@keyframes markPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.bingo-cell.just-marked {
+  animation: markPop 0.3s ease;
 }
 
 @keyframes fadeInUp {
@@ -1366,6 +1404,12 @@ h1 {
   .cell-text-m { font-size: 0.75rem; }
   .cell-text-l { font-size: 0.65rem; }
   .cell-text-xl { font-size: 0.58rem; }
+
+  /* A案: スマホ向けアイコン適応縮小 */
+  .bingo-cell.cell-len-l .cell-icon { font-size: 2rem; }
+  .bingo-cell.cell-len-l .cell-icon-img { width: 2rem; height: 2rem; }
+  .bingo-cell.cell-len-xl .cell-icon { font-size: 1.4rem; }
+  .bingo-cell.cell-len-xl .cell-icon-img { width: 1.4rem; height: 1.4rem; }
   
   .stats {
     grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
@@ -1491,6 +1535,12 @@ h1 {
   .cell-text-m { font-size: 0.68rem; }
   .cell-text-l { font-size: 0.58rem; }
   .cell-text-xl { font-size: 0.52rem; }
+
+  /* A案: 極小画面向けアイコン適応縮小 */
+  .bingo-cell.cell-len-l .cell-icon { font-size: 1.8rem; }
+  .bingo-cell.cell-len-l .cell-icon-img { width: 1.8rem; height: 1.8rem; }
+  .bingo-cell.cell-len-xl .cell-icon { font-size: 1.2rem; }
+  .bingo-cell.cell-len-xl .cell-icon-img { width: 1.2rem; height: 1.2rem; }
   
   .bingo-board {
     gap: 6px;

@@ -7,6 +7,7 @@
   },
   "scripts": {
     "resize-icons": "node tools/resize-icons.js",
-    "resize-icons:dry": "node tools/resize-icons.js --dry-run"
+    "resize-icons:dry": "node tools/resize-icons.js --dry-run",
+    "build-topics": "node tools/csv-to-topics.js"
   }
 }

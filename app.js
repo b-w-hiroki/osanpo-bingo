@@ -85,8 +85,6 @@ class OsanpoBingo {
   
   // 初期化
   init() {
-    console.log('🎮 お散歩ビンゴを初期化します...');
-    
     // ユーザーIDを取得・生成
     this.userId = getUserId();
     
@@ -113,7 +111,6 @@ class OsanpoBingo {
     
     if (!loaded || this.board.length !== 25 || !this.roomCode) {
       // 保存データがない、または合言葉がない場合はモーダル表示
-      console.log('💾 保存データがないため、ゲーム設定を表示します');
       this.showRoomCodeModal();
     } else {
       // 既存データを使用（モーダルを確実に非表示にしてボードを操作可能に）
@@ -124,7 +121,6 @@ class OsanpoBingo {
       this.updateStats();
     }
     
-    console.log('✅ 初期化完了！');
   }
   
   // イベントリスナーを設定
@@ -174,9 +170,6 @@ class OsanpoBingo {
   // shuffleSalt: 指定すると毎回異なるシャッフル（作り直し用）
   // customTopics: フリー入力マスのお題配列 [{text, icon}]
   createBoard(roomCode = '', difficulty = 'medium', shuffleSalt = '', customTopics = null) {
-    console.log('📋 新しいビンゴボードを作成します');
-    console.log(`合言葉: ${roomCode}, 難易度: ${difficulty}`);
-    
     // 合言葉と難易度を保存
     this.roomCode = roomCode || this.roomCode || '';
     this.difficulty = difficulty || this.difficulty || 'medium';
@@ -270,6 +263,10 @@ class OsanpoBingo {
       else if (textLen <= 4) sizeClass = 'cell-text-m';
       else if (textLen <= 6) sizeClass = 'cell-text-l';
       else sizeClass = 'cell-text-xl';
+      
+      // 長いテキストのセルにクラスを追加（アイコンサイズ調整用・A案）
+      if (textLen >= 7) cell.classList.add('cell-len-xl');
+      else if (textLen >= 5) cell.classList.add('cell-len-l');
       
       // アイコンとテキストを表示（画像アイコン優先、なければ絵文字）
       cell.innerHTML = `
@@ -653,7 +650,6 @@ class OsanpoBingo {
   newGame() {
     showConfirm('お題をシャッフルして\n新しいビンゴを作りますか？').then((ok) => {
       if (!ok) return;
-      console.log('🎮 ビンゴを作り直します');
       this.createBoard(this.roomCode, this.difficulty, Date.now().toString(), null);
       this.markCell(12);
       this.renderBoard();
@@ -1022,7 +1018,6 @@ class OsanpoBingo {
   
   // マス詳細モーダルを表示
   showCellModal(index) {
-    console.log('📱 showCellModal called, index:', index);
     this.currentPhotoIndex = index;
     const modal = document.getElementById('cellModal');
     const icon = document.getElementById('cellModalIcon');
@@ -1037,8 +1032,6 @@ class OsanpoBingo {
       console.error('❌ cellModal が見つかりません');
       return;
     }
-    
-    console.log('✅ modal found:', modal);
     
     const topic = this.board[index];
     
@@ -1190,6 +1183,7 @@ class OsanpoBingo {
     
     // マークした場合は即座にモーダルを閉じる（renderBoard より先に実行）
     if (!wasMarked && this.markedCells.has(index)) {
+      if (navigator.vibrate) navigator.vibrate(30);
       const modal = document.getElementById('cellModal');
       if (modal) modal.style.display = 'none';
       this.currentPhotoIndex = null;
@@ -1205,6 +1199,15 @@ class OsanpoBingo {
     this.checkBingo();
     this.updateStats();
     this.saveToStorage();
+    
+    // マークアニメーション
+    if (!wasMarked) {
+      const cell = this.boardElement?.querySelector(`[data-index="${index}"]`);
+      if (cell) {
+        cell.classList.add('just-marked');
+        cell.addEventListener('animationend', () => cell.classList.remove('just-marked'), { once: true });
+      }
+    }
     
     // ボタンのテキストを更新
     const toggleMarkBtn = document.getElementById('toggleMarkBtn');
@@ -1275,6 +1278,9 @@ class OsanpoBingo {
   saveCellPhoto() {
     if (this.currentPhotoIndex === null || !this.tempPhotoData) return;
     
+    // 振動フィードバック
+    if (navigator.vibrate) navigator.vibrate(30);
+    
     // 写真を保存
     this.photos[this.currentPhotoIndex] = this.tempPhotoData;
     
@@ -1306,7 +1312,6 @@ class OsanpoBingo {
         customTopics: this.customTopics
       };
       localStorage.setItem('osanpoBingo', JSON.stringify(data));
-      console.log('💾 保存しました');
     } catch (error) {
       console.error('❌ 保存エラー:', error);
       if (error.name === 'QuotaExceededError') {
@@ -1355,7 +1360,6 @@ class OsanpoBingo {
         this.customTopics = data.customTopics;
       }
       
-      console.log('💾 読み込みました');
       return true;
     } catch (error) {
       console.error('❌ 読み込みエラー:', error);
@@ -1366,7 +1370,6 @@ class OsanpoBingo {
 
 // ページ読み込み時に実行
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🚀 お散歩ビンゴを起動します');
   const game = new OsanpoBingo();
   game.init();
   

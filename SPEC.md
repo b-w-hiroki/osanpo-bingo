@@ -98,7 +98,7 @@
 
 | 項目 | 規格 |
 |------|------|
-| キャッシュ名 | osanpo-bingo-v3 |
+| キャッシュ名 | osanpo-bingo-v4 |
 | 対象 | index.html, game.html, CSS, JS, manifest |
 | ナビゲーション | SWをバイパス（直 fetch） |
 
