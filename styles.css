@@ -61,6 +61,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ==================== レイアウト ==================== */
@@ -144,6 +146,8 @@ h1 {
   
   cursor: pointer;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   
   transition: var(--transition);
   
@@ -360,9 +364,12 @@ h1 {
   cursor: pointer;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
 }
 
@@ -589,7 +596,7 @@ h1 {
   padding: var(--spacing-md);
   border: 2px solid var(--cell-border);
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: 16px; /* iOSでフォーカス時のズームを防ぐ */
   transition: var(--transition);
 }
 
@@ -620,7 +627,7 @@ h1 {
   padding: var(--spacing-md);
   border: 2px solid var(--cell-border);
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: 16px; /* iOSでフォーカス時のズームを防ぐ */
   background: white;
   cursor: pointer;
   transition: var(--transition);
@@ -892,8 +899,31 @@ h1 {
   font-size: 0.9rem;
 }
 
-.result-edit-area .btn-large {
-  width: 100%;
+.result-edit-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+}
+
+.result-edit-actions .btn-large {
+  flex: 1;
+  min-width: 140px;
+}
+
+.result-edit-actions .btn-secondary {
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .result-edit-actions {
+    flex-direction: column;
+  }
+
+  .result-edit-actions .btn {
+    width: 100%;
+    min-height: 48px;
+  }
 }
 
 /* キャプチャエリア（画像化・SNS共有用） */
@@ -1086,10 +1116,44 @@ h1 {
   text-decoration: underline;
 }
 
-/* ==================== レスポンシブ ==================== */
+/* ==================== レスポンシブ（スマホ最適化） ==================== */
+@media (max-width: 600px) {
+  .container {
+    padding: max(var(--spacing-md), env(safe-area-inset-left)) max(var(--spacing-md), env(safe-area-inset-right));
+    gap: var(--spacing-md);
+  }
+
+  .header-back {
+    min-height: 44px;
+    padding: 12px 16px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .controls .btn {
+    min-height: 48px;
+    padding: 14px 20px;
+  }
+
+  .modal {
+    padding: max(var(--spacing-sm), env(safe-area-inset-top)) var(--spacing-md);
+  }
+
+  .modal-close {
+    width: 44px;
+    height: 44px;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+  }
+
+  .screenshot-view {
+    padding: max(var(--spacing-md), env(safe-area-inset-top)) var(--spacing-md);
+  }
+}
+
 @media (max-width: 480px) {
   .container {
-    padding: var(--spacing-md);
+    padding: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
     gap: var(--spacing-md);
   }
 
@@ -1103,10 +1167,18 @@ h1 {
   h1 {
     font-size: 1.5rem;
   }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
   
   .bingo-board {
     gap: 8px;
     padding: var(--spacing-sm);
+  }
+  
+  .bingo-cell {
+    min-height: 0;
   }
   
   .cell-icon {
@@ -1123,8 +1195,13 @@ h1 {
   }
   
   .stats {
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-    gap: var(--spacing-xs);
+    grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+    gap: 6px;
+  }
+
+  .stat-item {
+    min-height: 52px;
+    padding: 8px 4px;
   }
   
   .stat-label {
@@ -1132,23 +1209,59 @@ h1 {
   }
   
   .stat-value {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   .controls {
     flex-direction: column;
+    gap: var(--spacing-sm);
   }
   
-  .btn {
+  .controls .btn {
     width: 100%;
+    min-height: 48px;
   }
   
   .modal {
     padding: var(--spacing-md);
+    align-items: flex-start;
   }
   
   .modal-content {
     padding: var(--spacing-lg);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .info-details summary {
+    padding: 12px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .footer {
+    padding: var(--spacing-md) 0;
+  }
+
+  .footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 0;
+  }
+
+  .result-share-buttons .btn,
+  .result-share-area .btn-large {
+    min-height: 48px;
+  }
+
+  .dialog-modal {
+    padding: var(--spacing-md);
+  }
+
+  .dialog-modal .dialog-btn {
+    min-height: 48px;
   }
 }
 
@@ -1168,5 +1281,9 @@ h1 {
   
   .bingo-board {
     gap: 6px;
+  }
+
+  .stat-item {
+    min-height: 48px;
   }
 }

@@ -416,13 +416,17 @@ class OsanpoBingo {
   // 結果画面のセットアップ
   setupResultView() {
     const confirmBtn = document.getElementById('resultConfirmBtn');
+    const cancelBtn = document.getElementById('resultCancelBtn');
     const downloadBtn = document.getElementById('downloadImageBtn');
     const shareBtn = document.getElementById('shareSnsBtn');
     const exitBtn = document.getElementById('exitScreenshotBtn');
-    const groupInput = document.getElementById('resultGroupInput');
     
     if (confirmBtn) {
       confirmBtn.addEventListener('click', () => this.confirmResult());
+    }
+    
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => this.cancelResultEdit());
     }
     
     if (downloadBtn) {
@@ -436,6 +440,19 @@ class OsanpoBingo {
     if (exitBtn) {
       exitBtn.addEventListener('click', () => this.exitResultView());
     }
+  }
+
+  // 結果編集をキャンセルしてゲームに戻る
+  cancelResultEdit() {
+    const view = document.getElementById('screenshotView');
+    const container = document.querySelector('.container');
+    const editArea = document.getElementById('resultEditArea');
+    const shareArea = document.getElementById('resultShareArea');
+    
+    if (view) view.style.display = 'none';
+    if (container) container.style.display = '';
+    if (editArea) editArea.style.display = 'flex';
+    if (shareArea) shareArea.style.display = 'none';
   }
   
   // 決定ボタン：編集内容を確定して共有エリアに表示
@@ -559,13 +576,22 @@ class OsanpoBingo {
     document.body.removeChild(ta);
   }
   
-  // 結果画面から戻る
+  // 結果画面からトップへ戻る（キャッシュリセットして新規開始可能に）
   exitResultView() {
-    const view = document.getElementById('screenshotView');
-    const container = document.querySelector('.container');
-    
-    if (view) view.style.display = 'none';
-    if (container) container.style.display = '';
+    this.resetAndGoToTop();
+  }
+
+  // ゲームデータ・キャッシュをクリアしてトップへ遷移
+  resetAndGoToTop() {
+    try {
+      localStorage.removeItem('osanpoBingo');
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          names.forEach((n) => caches.delete(n));
+        }).catch(() => {});
+      }
+    } catch (e) {}
+    window.location.replace('index.html');
   }
   
   // 作り直す（お題をランダムシャッフル）

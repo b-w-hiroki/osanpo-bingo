@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="グループで楽しむお散歩ビンゴ">
   <meta name="theme-color" content="#7eb89a">
   <title>お散歩ビンゴ</title>
@@ -244,7 +244,10 @@
           <label for="resultGroupInput">どんなグループで遊びましたか？</label>
           <input type="text" id="resultGroupInput" class="input-text" placeholder="例: 家族で散歩、友達3人" maxlength="50">
         </div>
-        <button id="resultConfirmBtn" class="btn btn-primary btn-large">決定</button>
+        <div class="result-edit-actions">
+          <button id="resultCancelBtn" class="btn btn-secondary">ゲームに戻る</button>
+          <button id="resultConfirmBtn" class="btn btn-primary btn-large">決定</button>
+        </div>
       </div>
       <!-- 確定モード：スクショ・共有 -->
       <div id="resultShareArea" class="result-share-area" style="display: none;">
@@ -267,7 +270,7 @@
           <button id="downloadImageBtn" class="btn btn-primary">📷 画像をダウンロード</button>
           <button type="button" id="shareSnsBtn" class="btn btn-secondary">📤 SNSで共有</button>
         </div>
-        <button id="exitScreenshotBtn" class="btn btn-secondary btn-large">← 戻る</button>
+        <button id="exitScreenshotBtn" class="btn btn-secondary btn-large">← トップへ戻る（新規開始）</button>
       </div>
     </div>
   </div>
