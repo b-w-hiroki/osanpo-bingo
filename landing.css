@@ -49,6 +49,7 @@ body {
 
 .hero-image-wrap {
   width: 100%;
+  aspect-ratio: 16 / 9;
   max-height: 420px;
   overflow: hidden;
   position: relative;
@@ -56,7 +57,9 @@ body {
 
 .hero-image {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
   display: block;
 }
 
@@ -319,6 +322,13 @@ body {
 
   .hero-image-wrap {
     max-height: none;
+    /* 横長画像をモバイル縦画面で見栄え良く表示する */
+    /* 画面幅に対して 4:3 比率の高さを確保し、object-fit: cover で中央をトリミング */
+    aspect-ratio: 4 / 3;
+  }
+
+  .hero-image {
+    object-position: center 35%;
   }
 
   .hero-content {
