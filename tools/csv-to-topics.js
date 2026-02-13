@@ -224,7 +224,12 @@ function main() {
     process.exit(1);
   }
   
-  const csvText = fs.readFileSync(CSV_PATH, 'utf-8');
+  let csvText = fs.readFileSync(CSV_PATH, 'utf-8');
+  // Excelで開いても文字化けしないよう UTF-8 BOM を付与（なければ付ける）
+  if (!csvText.startsWith('\uFEFF')) {
+    fs.writeFileSync(CSV_PATH, '\uFEFF' + csvText, 'utf-8');
+    csvText = '\uFEFF' + csvText;
+  }
   const rows = parseCSV(csvText);
   
   console.log(`📖 ${rows.length} 件のお題を読み込みました`);

@@ -23,43 +23,33 @@
   <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" href="icon-192.png">
 </head>
-<body>
-  <header class="global-header">
-    <a href="../" class="global-header-platform" aria-label="Bingo Party プラットフォームへ">
-    <img src="assets/logo-bingo-party.svg" alt="Bingo Party" width="112" height="26">
-  </a>
-    <a href="index.html" class="global-header-product" aria-label="お散歩ビンゴトップへ">
-      <img src="icon-192.png" alt="" width="28" height="28"> お散歩ビンゴ
-    </a>
-  </header>
+<body class="page-game">
   <div class="container">
     <!-- ページヘッダー -->
     <header class="header">
-      <a href="index.html" class="header-back" id="headerBackToTop" data-href="index.html">← トップへ戻る</a>
       <h1>🚶 お散歩ビンゴ</h1>
-      <p class="subtitle">グループで楽しむ散歩ゲーム</p>
     </header>
     
     <!-- 合言葉モーダル -->
     <div class="modal" id="roomCodeModal" style="display: none;">
       <div class="modal-content">
         
-        <!-- ステップ1: モード選択 -->
+        <!-- ステップ1: ふつうに遊ぶ / みんなで遊ぶ -->
         <div id="modeSelectStep" class="modal-step">
           <h2>🚶 お散歩ビンゴ</h2>
           <p class="modal-description">
             遊び方を選んでください
           </p>
           <div class="mode-select-buttons">
-            <button type="button" id="modeCreateBtn" class="mode-btn mode-btn-create">
-              <span class="mode-btn-icon">🎮</span>
-              <span class="mode-btn-label">ゲームを作る</span>
-              <span class="mode-btn-desc">お題・難易度を設定</span>
+            <button type="button" id="modeSoloBtn" class="mode-btn mode-btn-create">
+              <span class="mode-btn-icon">🙂</span>
+              <span class="mode-btn-label">ふつうに遊ぶ</span>
+              <span class="mode-btn-desc">合言葉なしでスタート</span>
             </button>
-            <button type="button" id="modeJoinBtn" class="mode-btn mode-btn-join">
-              <span class="mode-btn-icon">🤝</span>
-              <span class="mode-btn-label">ゲームに参加</span>
-              <span class="mode-btn-desc">合言葉を入力して参加</span>
+            <button type="button" id="modeGroupBtn" class="mode-btn mode-btn-join">
+              <span class="mode-btn-icon">👥</span>
+              <span class="mode-btn-label">みんなで遊ぶ</span>
+              <span class="mode-btn-desc">合言葉で同じお題・バトルも</span>
             </button>
           </div>
           <p class="modal-back-link">
@@ -67,11 +57,85 @@
           </p>
         </div>
         
-        <!-- ステップ2: ゲーム設定（作成モード） -->
+        <!-- ステップ2: ふつうに遊ぶ用（合言葉なし） -->
+        <div id="soloGameStep" class="modal-step" style="display: none;">
+          <h2>🙂 ふつうに遊ぶ</h2>
+          <p class="modal-description">
+            設定してすぐスタート
+          </p>
+          <div class="form-group">
+            <label for="playModeSolo">🎯 遊び方</label>
+            <div class="play-mode-options">
+              <label class="play-mode-option">
+                <input type="radio" name="playModeSolo" value="photo" checked>
+                <span class="play-mode-label">📷 写真で記録</span>
+                <span class="play-mode-desc">見つけたら写真を撮ってマーク</span>
+              </label>
+              <label class="play-mode-option">
+                <input type="radio" name="playModeSolo" value="markOnly">
+                <span class="play-mode-label">✓ マークだけ</span>
+                <span class="play-mode-desc">タップするだけでマーク</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="difficultySelectSolo">📊 難易度</label>
+            <select id="difficultySelectSolo" class="select-box">
+              <option value="easy">かんたん（よく見るもの）</option>
+              <option value="medium" selected>ふつう（少し探す）</option>
+              <option value="hard">むずかしい（レアなもの）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="customTopicCountSolo">✏️ フリー入力マス</label>
+            <select id="customTopicCountSolo" class="select-box">
+              <option value="0" selected>なし</option>
+              <option value="1">1マス</option>
+              <option value="2">2マス</option>
+              <option value="3">3マス</option>
+              <option value="4">4マス</option>
+              <option value="5">5マス</option>
+              <option value="6">6マス</option>
+              <option value="8">8マス</option>
+              <option value="10">10マス</option>
+              <option value="12">12マス</option>
+            </select>
+            <div id="customTopicInputsSolo" class="custom-topic-inputs" style="display: none;"></div>
+          </div>
+          <button id="startSoloGameBtn" class="btn btn-primary btn-large">✨ ゲームを始める</button>
+          <p class="modal-step-back">
+            <button type="button" id="backToModeSelectFromSolo" class="link-btn">← 戻る</button>
+          </p>
+        </div>
+        
+        <!-- ステップ2b: みんなで遊ぶ → 作る or 参加 -->
+        <div id="groupModeSelectStep" class="modal-step" style="display: none;">
+          <h2>👥 みんなで遊ぶ</h2>
+          <p class="modal-description">
+            合言葉で同じお題を共有。バトルビンゴにも対応予定です。
+          </p>
+          <div class="mode-select-buttons">
+            <button type="button" id="modeCreateBtn" class="mode-btn mode-btn-create">
+              <span class="mode-btn-icon">🎮</span>
+              <span class="mode-btn-label">ゲームを作る</span>
+              <span class="mode-btn-desc">合言葉を決めてお題を共有</span>
+            </button>
+            <button type="button" id="modeJoinBtn" class="mode-btn mode-btn-join">
+              <span class="mode-btn-icon">🤝</span>
+              <span class="mode-btn-label">ゲームに参加</span>
+              <span class="mode-btn-desc">合言葉を入力して参加</span>
+            </button>
+          </div>
+          <p class="modal-step-back">
+            <button type="button" id="backToModeSelectFromGroup" class="link-btn">← 戻る</button>
+          </p>
+        </div>
+        
+        <!-- ステップ3: ゲーム設定（作成モード・合言葉あり） -->
         <div id="createGameStep" class="modal-step" style="display: none;">
           <h2>🎮 ゲームを作る</h2>
           <p class="modal-description">
-            合言葉を友達にシェアして一緒に遊ぼう！
+            同じ合言葉で参加すると、みんな同じお題のビンゴで遊べます。友達に合言葉をシェアして一緒に遊ぼう！
           </p>
           
           <div class="form-group">
@@ -89,8 +153,24 @@
               </button>
             </div>
             <p class="form-help">
-              友達に合言葉を教えてあげよう
+              友達に合言葉を教えてあげよう（同じ合言葉なら同じお題になります）
             </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="playModeCreate">🎯 遊び方</label>
+            <div class="play-mode-options">
+              <label class="play-mode-option">
+                <input type="radio" name="playModeCreate" value="photo" checked>
+                <span class="play-mode-label">📷 写真で記録</span>
+                <span class="play-mode-desc">見つけたら写真を撮ってマーク</span>
+              </label>
+              <label class="play-mode-option">
+                <input type="radio" name="playModeCreate" value="markOnly">
+                <span class="play-mode-label">✓ マークだけ</span>
+                <span class="play-mode-desc">タップするだけでマーク</span>
+              </label>
+            </div>
           </div>
           
           <div class="form-group">
@@ -147,15 +227,15 @@
             ✨ ゲームを始める
           </button>
           <p class="modal-step-back">
-            <button type="button" id="backToModeSelect" class="link-btn">← 戻る</button>
+            <button type="button" id="backToGroupModeSelect" class="link-btn">← 戻る</button>
           </p>
         </div>
         
-        <!-- ステップ2: ゲーム設定（参加モード） -->
+        <!-- ステップ3: ゲーム設定（参加モード） -->
         <div id="joinGameStep" class="modal-step" style="display: none;">
           <h2>🤝 ゲームに参加</h2>
           <p class="modal-description">
-            作った人から合言葉と難易度を聞いてね
+            同じ合言葉で参加すると、みんな同じお題のビンゴで遊べます。作った人から合言葉と難易度を聞いてね。
           </p>
           
           <div class="form-group">
@@ -168,8 +248,24 @@
               maxlength="5"
             >
             <p class="form-help">
-              ゲームを作った人に教えてもらおう
+              ゲームを作った人に教えてもらおう（同じ合言葉なら同じお題になります）
             </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="playModeJoin">🎯 遊び方</label>
+            <div class="play-mode-options">
+              <label class="play-mode-option">
+                <input type="radio" name="playModeJoin" value="photo" checked>
+                <span class="play-mode-label">📷 写真で記録</span>
+                <span class="play-mode-desc">見つけたら写真を撮ってマーク</span>
+              </label>
+              <label class="play-mode-option">
+                <input type="radio" name="playModeJoin" value="markOnly">
+                <span class="play-mode-label">✓ マークだけ</span>
+                <span class="play-mode-desc">タップするだけでマーク</span>
+              </label>
+            </div>
           </div>
           
           <div class="form-group">
@@ -184,11 +280,31 @@
             </p>
           </div>
           
+          <div class="form-group" id="joinCustomTopicGroup">
+            <label for="joinCustomTopicCount">✏️ フリー入力マス</label>
+            <select id="joinCustomTopicCount" class="select-box">
+              <option value="0" selected>なし</option>
+              <option value="1">1マス</option>
+              <option value="2">2マス</option>
+              <option value="3">3マス</option>
+              <option value="4">4マス</option>
+              <option value="5">5マス</option>
+              <option value="6">6マス</option>
+              <option value="8">8マス</option>
+              <option value="10">10マス</option>
+              <option value="12">12マス</option>
+            </select>
+            <p class="form-help">
+              作った人に「フリー入力マスは何個？」と聞いて、同じ数を選んでね。お題は作った人から教えてもらおう（みんなで回す場合も同じお題セットを使います）
+            </p>
+            <div id="customTopicInputsJoin" class="custom-topic-inputs" style="display: none;"></div>
+          </div>
+          
           <button id="joinGameBtn" class="btn btn-primary btn-large">
             🤝 参加する
           </button>
           <p class="modal-step-back">
-            <button type="button" id="backToModeSelectFromJoin" class="link-btn">← 戻る</button>
+            <button type="button" id="backToGroupModeSelectFromJoin" class="link-btn">← 戻る</button>
           </p>
         </div>
         
@@ -206,6 +322,9 @@
           <p class="cell-modal-description">
             見つけたら写真を撮ってマークしよう！
           </p>
+          <p class="cell-modal-notice" aria-hidden="true">
+            撮影・アップロード時は、ナンバープレートや顔など個人が特定できる写り込みにご注意ください。
+          </p>
         </div>
         
         <!-- 既存の写真がある場合 -->
@@ -220,8 +339,8 @@
         <div id="cellPhotoPreview" class="photo-preview" style="display: none;">
           <img id="cellPhotoPreviewImg" alt="プレビュー">
           <div class="photo-preview-actions">
-            <button id="saveCellPhotoBtn" class="btn btn-primary">
-              💾 保存してマーク
+            <button id="saveCellPhotoBtn" class="btn btn-primary btn-large">
+              この写真でマーク
             </button>
             <button id="retakeCellPhotoBtn" class="btn btn-secondary">
               🔄 撮り直し
@@ -231,7 +350,7 @@
         
         <!-- アクションボタン -->
         <div class="cell-modal-actions">
-          <!-- 写真アップロードボタン -->
+          <!-- 写真アップロード（プレビューなし時はメインCTA） -->
           <label for="cellPhotoInput" class="btn btn-primary btn-large" id="uploadPhotoLabel">
             📷 写真を撮る・選ぶ
           </label>
@@ -265,13 +384,12 @@
     
     <!-- 統計表示 -->
     <section class="stats">
+      <button type="button" id="settingsBtn" class="stat-item stat-item-as-btn" title="設定を開く">
+        <span class="stat-label">⚙️ 設定</span>
+      </button>
       <div class="stat-item stat-item-clickable" id="roomCodeStat" title="タップでコピー">
         <span class="stat-label">🔑 合言葉</span>
         <span class="stat-value" id="roomCodeDisplay">-</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">👥 人数</span>
-        <span class="stat-value" id="playerCountDisplay">1</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">📊 難易度</span>
@@ -284,10 +402,6 @@
       <div class="stat-item">
         <span class="stat-label">✓ マーク</span>
         <span class="stat-value" id="markedCount">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">📷 写真</span>
-        <span class="stat-value" id="photoCount">0</span>
       </div>
     </section>
     
@@ -315,8 +429,8 @@
         <ul>
           <li><strong>終わる</strong>: ゲームを終了し、結果を記録・SNS共有できます</li>
           <li><strong>作り直す</strong>: お題をシャッフルして新しいボードを作ります</li>
-          <li><strong>FREE</strong>: 中央のマスは最初からマーク済みです</li>
-          <li><strong>✏️マス</strong>: 点線枠のマスは自分で設定したフリーお題です</li>
+          <li><strong>中央のマス</strong>: 最初からマーク済みです</li>
+          <li><strong>✏️マス</strong>: 自分でお題を決められるマスです</li>
         </ul>
       </details>
     </section>
@@ -336,6 +450,7 @@
           <h2 class="result-title">お散歩ビンゴ 結果</h2>
           <div class="result-meta">
             <span class="result-date" id="resultDate">-</span>
+            <span class="result-playtime" id="resultPlayTime"></span>
           </div>
           <div id="screenshotBoard" class="result-board-wrap">
             <!-- ビンゴボードを複製表示 -->
@@ -361,7 +476,9 @@
             <h2 class="result-capture-title" id="resultCaptureTitle">お散歩ビンゴ</h2>
             <p class="result-capture-meta">
               <span id="resultCaptureDate">-</span>
-              <span class="result-meta-divider">／</span>
+              <span class="result-meta-divider" id="resultCaptureDivider1">／</span>
+              <span id="resultCapturePlayTime"></span>
+              <span class="result-meta-divider" id="resultCaptureDivider2">／</span>
               <span id="resultCaptureGroup">-</span>
             </p>
           </div>
@@ -371,6 +488,9 @@
             <span>マーク <strong id="resultCaptureMarked">0</strong> マス</span>
           </div>
         </div>
+        <p class="result-notice">
+          個人が特定できる写真はSNSに上げないでください。（ナンバープレート・顔など）
+        </p>
         <div class="result-share-buttons">
           <button id="downloadImageBtn" class="btn btn-primary">📷 画像を保存</button>
           <button type="button" id="shareSnsBtn" class="btn btn-secondary">📤 共有する</button>

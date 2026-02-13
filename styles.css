@@ -66,6 +66,11 @@ body {
   padding-top: 52px; /* 固定グローバルヘッダー分 */
 }
 
+/* LP以外（ゲーム画面など）ではヘッダーを出さないため、上余白なし */
+body.page-game {
+  padding-top: 0;
+}
+
 /* ==================== グローバルヘッダー（固定・プラットフォーム⇔プロダクト行き来） ==================== */
 .global-header {
   position: fixed;
@@ -180,15 +185,15 @@ h1 {
 .bingo-board {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  gap: 4px;
   background: var(--card-bg);
-  padding: var(--spacing-md);
+  padding: 6px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   margin-bottom: var(--spacing-lg);
 }
 
-/* ビンゴセル */
+/* ビンゴセル（画像・テキストは中央寄せ） */
 .bingo-cell {
   aspect-ratio: 1;
   display: flex;
@@ -208,9 +213,9 @@ h1 {
   
   transition: var(--transition);
   
-  /* テキストの折り返しを防ぐ */
   overflow: hidden;
-  padding: var(--spacing-sm);
+  padding: 4px;
+  padding-bottom: 6px;
 }
 
 /* ホバー効果 */
@@ -233,8 +238,9 @@ h1 {
   color: white;
 }
 
-/* FREE */
+/* FREE（中央マス：中央寄せ） */
 .bingo-cell.free {
+  justify-content: center;
   background: var(--cell-free);
   border-color: var(--primary);
   color: white;
@@ -277,6 +283,7 @@ h1 {
   width: 4.2rem;
   height: 4.2rem;
   object-fit: contain;
+  object-position: center;
 }
 
 .bingo-cell:hover .cell-icon {
@@ -461,6 +468,23 @@ h1 {
 
 .stat-item-clickable:active {
   transform: translateY(0);
+}
+
+.stat-item-as-btn {
+  cursor: pointer;
+  border: none;
+  background: var(--card-bg);
+  font: inherit;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.stat-item-as-btn:hover {
+  background: var(--cell-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.stat-item-as-btn .stat-value {
+  display: none;
 }
 
 /* ==================== コントロール ==================== */
@@ -797,6 +821,42 @@ h1 {
   margin-top: var(--spacing-xs);
 }
 
+.play-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+.play-mode-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--cell-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--card-bg);
+}
+.play-mode-option:hover {
+  border-color: var(--primary-light);
+  background: var(--cell-hover);
+}
+.play-mode-option input {
+  margin: 0;
+}
+.play-mode-label {
+  font-weight: 600;
+  color: var(--text);
+}
+.play-mode-desc {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  width: 100%;
+  margin-left: 1.6rem;
+}
+
 /* フリー入力マス */
 .custom-topic-inputs {
   margin-top: var(--spacing-md);
@@ -926,6 +986,13 @@ h1 {
   margin: 0;
 }
 
+.cell-modal-notice {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin: var(--spacing-sm) 0 0 0;
+  line-height: 1.4;
+}
+
 .cell-photo-display {
   margin-bottom: var(--spacing-lg);
 }
@@ -996,43 +1063,32 @@ h1 {
   background: #e04848;
 }
 
-/* 写真付きセル */
+/* 写真付きセル：上に写真・下にテキスト（アップロード前と同じ並び） */
 .bingo-cell.has-photo {
-  position: relative;
-  background-size: cover;
-  background-position: center;
+  justify-content: flex-end;
 }
 
-.bingo-cell.has-photo::before {
-  content: '📷';
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 2px 6px;
-  border-radius: 4px;
-  box-shadow: var(--shadow-sm);
-}
-
-.bingo-cell.has-photo .cell-icon,
-.bingo-cell.has-photo .cell-text {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  color: white;
-  position: relative;
-  z-index: 1;
-}
-
-.bingo-cell.has-photo::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+.bingo-cell.has-photo .cell-photo-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: var(--radius-sm);
-  z-index: 0;
+}
+
+.bingo-cell.has-photo .cell-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.bingo-cell.has-photo .cell-text {
+  flex-shrink: 0;
+  color: inherit;
 }
 
 /* ==================== 終了・結果画面 ==================== */
@@ -1098,6 +1154,12 @@ h1 {
   color: var(--text-light);
 }
 
+.result-playtime {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-left: var(--spacing-sm);
+}
+
 .result-board-wrap {
   background: rgba(168, 213, 186, 0.12);
   padding: var(--spacing-sm);
@@ -1107,8 +1169,8 @@ h1 {
 
 .result-board-wrap .bingo-board {
   margin-bottom: 0;
-  gap: 10px;
-  padding: var(--spacing-sm);
+  gap: 4px;
+  padding: 6px;
 }
 
 /* 結果画面のビンゴマス：ゲーム画面と同サイズを維持（レスポンシブで縮小されない） */
@@ -1232,8 +1294,8 @@ h1 {
 
 .result-capture-board .bingo-board {
   margin-bottom: 0;
-  gap: 10px;
-  padding: var(--spacing-sm);
+  gap: 4px;
+  padding: 6px;
 }
 
 .result-capture-stats {
@@ -1248,6 +1310,14 @@ h1 {
 
 .result-capture-stats strong {
   color: var(--primary-dark);
+}
+
+.result-notice {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .result-share-buttons {
@@ -1439,8 +1509,8 @@ h1 {
   }
   
   .bingo-board {
-    gap: 8px;
-    padding: var(--spacing-sm);
+    gap: 4px;
+    padding: 6px;
   }
   
   .bingo-cell {
@@ -1600,7 +1670,8 @@ h1 {
   .bingo-cell.cell-len-xl .cell-icon-img { width: 1.2rem; height: 1.2rem; }
   
   .bingo-board {
-    gap: 6px;
+    gap: 3px;
+    padding: 4px;
   }
 
   .stat-item {
