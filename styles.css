@@ -63,6 +63,63 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  padding-top: 52px; /* 固定グローバルヘッダー分 */
+}
+
+/* ==================== グローバルヘッダー（固定・プラットフォーム⇔プロダクト行き来） ==================== */
+.global-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 52px;
+  background: #f2f4f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.global-header a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  transition: background 0.2s, color 0.2s;
+}
+
+.global-header a:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--primary-dark);
+}
+
+.global-header .global-header-platform {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.global-header .global-header-platform img {
+  height: 26px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.global-header .global-header-product {
+  color: var(--primary-dark);
+}
+
+.global-header .global-header-product img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: contain;
 }
 
 /* ==================== レイアウト ==================== */
