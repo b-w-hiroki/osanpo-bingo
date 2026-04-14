@@ -727,7 +727,11 @@ class OsanpoBingo {
     const bingoCountEl = document.getElementById('screenshotBingoCount');
     const markedCountEl = document.getElementById('screenshotMarkedCount');
     if (bingoCountEl) bingoCountEl.textContent = this.bingoLines.length;
-    if (markedCountEl) markedCountEl.textContent = this.markedCells.size;
+    if (markedCountEl) {
+      markedCountEl.textContent = this.gameType === 'battle'
+        ? this.getBattleCounts().selfClaims
+        : this.markedCells.size;
+    }
     
     // グループ入力欄をクリア
     const groupInput = document.getElementById('resultGroupInput');
@@ -812,7 +816,9 @@ class OsanpoBingo {
       groupEl.textContent = groupText || '-';
     }
     document.getElementById('resultCaptureBingo').textContent = this.bingoLines.length;
-    document.getElementById('resultCaptureMarked').textContent = this.markedCells.size;
+    document.getElementById('resultCaptureMarked').textContent = this.gameType === 'battle'
+      ? this.getBattleCounts().selfClaims
+      : this.markedCells.size;
     
     const captureBoard = document.getElementById('resultCaptureBoard');
     if (captureBoard && boardEl?.firstChild) {
@@ -980,7 +986,6 @@ class OsanpoBingo {
       const shuffleSalt = this.gameType === 'battle' ? '' : Date.now().toString();
       this.createBoard(this.roomCode, this.difficulty, shuffleSalt, null);
       this.markCell(12);
-      this.renderBoard();
       this.checkBingo();
       this.updateStats();
       this.saveToStorage();
@@ -1197,7 +1202,6 @@ class OsanpoBingo {
         this.playerCount = 1;
         this.createBoard('solo', this.difficulty, '', customTopics);
         this.markCell(12);
-        this.renderBoard();
         this.checkBingo();
         this.updateStats();
         if (modal) modal.style.display = 'none';
@@ -1235,7 +1239,6 @@ class OsanpoBingo {
         
         this.createBoard(roomCode, difficulty, '', customTopics);
         this.markCell(12);
-        this.renderBoard();
         this.checkBingo();
         this.updateStats();
         this.syncBattleOwnersFromServer();
@@ -1277,7 +1280,6 @@ class OsanpoBingo {
         const customTopics = customTopicInputsJoin ? this.collectCustomTopics(customTopicInputsJoin) : [];
         this.createBoard(roomCode, difficulty, '', customTopics);
         this.markCell(12);
-        this.renderBoard();
         this.checkBingo();
         this.updateStats();
         this.syncBattleOwnersFromServer();
@@ -1763,8 +1765,10 @@ class OsanpoBingo {
     // 写真を保存
     this.photos[this.currentPhotoIndex] = this.tempPhotoData;
     
-    // マークを追加
-    this.markedCells.add(this.currentPhotoIndex);
+    // バトルモードでは battleTopicOwners が唯一のソースのため追加しない
+    if (this.gameType !== 'battle') {
+      this.markedCells.add(this.currentPhotoIndex);
+    }
     
     // 再レンダリング
     this.renderBoard();
