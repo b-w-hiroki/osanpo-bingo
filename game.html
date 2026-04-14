@@ -172,6 +172,16 @@
               </label>
             </div>
           </div>
+          <div class="form-group">
+            <label for="gameTypeCreate">⚔️ ゲームタイプ</label>
+            <select id="gameTypeCreate" class="select-box">
+              <option value="normal" selected>通常ビンゴ</option>
+              <option value="battle">バトル（陣取り）</option>
+            </select>
+            <p class="form-help">
+              バトルは「写真をアップロードした人」がマスを取得します（先着1名）
+            </p>
+          </div>
           
           <div class="form-group">
             <label for="playerCountInput">👥 参加人数</label>
@@ -266,6 +276,16 @@
                 <span class="play-mode-desc">タップするだけでマーク</span>
               </label>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="gameTypeJoin">⚔️ ゲームタイプ</label>
+            <select id="gameTypeJoin" class="select-box">
+              <option value="normal" selected>通常ビンゴ</option>
+              <option value="battle">バトル（陣取り）</option>
+            </select>
+            <p class="form-help">
+              作った人と同じゲームタイプを選んでね
+            </p>
           </div>
           
           <div class="form-group">
@@ -403,6 +423,10 @@
         <span class="stat-label">✓ マーク</span>
         <span class="stat-value" id="markedCount">0</span>
       </div>
+      <div class="stat-item">
+        <span class="stat-label">🛡️ 相手取得</span>
+        <span class="stat-value" id="opponentClaimedCount">0</span>
+      </div>
     </section>
     
     <!-- コントロール -->
@@ -529,6 +553,7 @@
   <script src="lib/html2canvas.min.js"></script>
   <!-- JavaScript -->
   <script src="topics.js"></script>
+  <script src="battle-config.js"></script>
   <script src="app.js"></script>
   
   <!-- トップへ戻る（確実に遷移するためJSで補助） -->

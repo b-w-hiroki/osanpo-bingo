@@ -52,6 +52,23 @@ function showAlert(message) {
   });
 }
 
+function getBattleBackendConfig() {
+  const cfg = window.OSANPO_BATTLE_CONFIG || {};
+  const url = typeof cfg.supabaseUrl === 'string' ? cfg.supabaseUrl.trim() : '';
+  const key = typeof cfg.supabaseAnonKey === 'string' ? cfg.supabaseAnonKey.trim() : '';
+  const enabled = Boolean(url && key);
+  return { enabled, url, key };
+}
+
+function getBattlePlayerId() {
+  let id = sessionStorage.getItem('osanpo_battle_player_id');
+  if (!id) {
+    id = 'bp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    sessionStorage.setItem('osanpo_battle_player_id', id);
+  }
+  return id;
+}
+
 class OsanpoBingo {
   constructor() {
     this.boardSize = 5;
@@ -75,6 +92,18 @@ class OsanpoBingo {
     // 遊び方（写真で記録 / マークだけ）
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
+    this.gameType = 'normal';     // 'normal' | 'battle'
+    this.cellOwners = {};         // バトル用: {index: userId}
+    this.battleTopicOwners = {};  // バトル用: {topicKey: userId}
+    this.battlePlayerId = getBattlePlayerId();
+    this.battleBackend = getBattleBackendConfig();
+    this.battleTable = 'battle_cell_owners';
+    this.battleSyncTimer = null;
+    this.debugBattle = new URLSearchParams(window.location.search).get('debugBattle') === '1';
+    this.lastBattleSyncAt = 0;
+    this.lastBattleSyncStatus = 'idle';
+    this.lastBattleSyncError = '';
+    this.debugPanelEl = null;
     
     // DOM要素（初期化時に取得）
     this.boardElement = null;
@@ -85,6 +114,7 @@ class OsanpoBingo {
     this.roomCodeDisplay = null;
     this.difficultyDisplay = null;
     this.playerCountDisplay = null;
+    this.opponentClaimedCountElement = null;
   }
   
   // 初期化
@@ -101,11 +131,13 @@ class OsanpoBingo {
     this.roomCodeDisplay = document.getElementById('roomCodeDisplay');
     this.difficultyDisplay = document.getElementById('difficultyDisplay');
     this.playerCountDisplay = document.getElementById('playerCountDisplay');
+    this.opponentClaimedCountElement = document.getElementById('opponentClaimedCount');
     
     if (!this.boardElement) {
       console.error('❌ bingoBoard 要素が見つかりません');
       return;
     }
+    this.setupDebugPanel();
     
     // イベントリスナーを設定
     this.setupEventListeners();
@@ -122,6 +154,12 @@ class OsanpoBingo {
       this.renderBoard();
       this.checkBingo();
       this.updateStats();
+      if (this.gameType === 'battle') {
+        this.syncBattleOwnersFromServer();
+        this.startBattleSyncLoop();
+      } else {
+        this.stopBattleSyncLoop();
+      }
     }
     
   }
@@ -173,6 +211,13 @@ class OsanpoBingo {
     
     // 写真モーダル
     this.setupPhotoModal();
+
+    // タブ再表示時は即同期
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.syncBattleOwnersFromServer();
+      }
+    });
   }
   
   // ボードを作成（お題を配置）
@@ -192,17 +237,18 @@ class OsanpoBingo {
     const customCount = this.customTopics.length;
     const randomCount = 24 - customCount;
     
+    const boardSeedUserId = this.userId;
     // 難易度に応じてランダムお題を取得
     const randomTopics = selectTopicsByDifficulty(
       this.difficulty, 
       this.roomCode, 
-      this.userId,
+      boardSeedUserId,
       shuffleSalt
     ).slice(0, randomCount);
     
     // カスタムお題 + ランダムお題を合わせてシャッフル
     const allTopics = [...this.customTopics, ...randomTopics];
-    const seedStr = [this.roomCode, this.userId, shuffleSalt, 'mix'].filter(Boolean).join('-');
+    const seedStr = [this.roomCode, boardSeedUserId, shuffleSalt, 'mix'].filter(Boolean).join('-');
     const seed = stringToSeed(seedStr);
     const shuffledTopics = shuffleWithSeed(allTopics, seed);
     
@@ -221,9 +267,120 @@ class OsanpoBingo {
     this.markedCells.clear();
     this.bingoLines = [];
     this.photos = {};
+    this.cellOwners = {};
+    this.battleTopicOwners = {};
     
     // 保存
     this.saveToStorage();
+  }
+
+  async syncBattleOwnersFromServer() {
+    if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
+      return;
+    }
+    try {
+      const endpointUrl = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
+      endpointUrl.searchParams.set('select', 'topic_key,cell_index,owner_user_id');
+      endpointUrl.searchParams.set('room_code', `eq.${this.roomCode}`);
+      const res = await fetch(endpointUrl.toString(), {
+        headers: {
+          apikey: this.battleBackend.key,
+          Authorization: `Bearer ${this.battleBackend.key}`
+        }
+      });
+      if (!res.ok) {
+        this.lastBattleSyncStatus = `http_${res.status}`;
+        this.lastBattleSyncError = 'sync_get_failed';
+        this.updateDebugPanel();
+        return;
+      }
+      const rows = await res.json();
+      const nextOwners = {};
+      (rows || []).forEach((row) => {
+        let topicKey = typeof row?.topic_key === 'string' ? row.topic_key : '';
+        if (!topicKey) {
+          const idx = Number(row?.cell_index);
+          if (Number.isInteger(idx) && idx >= 0 && idx < 25) {
+            topicKey = this.getTopicKeyByIndex(idx);
+          }
+        }
+        const ownerId = typeof row?.owner_user_id === 'string' ? row.owner_user_id : '';
+        if (topicKey && ownerId) {
+          nextOwners[topicKey] = ownerId;
+        }
+      });
+      this.battleTopicOwners = nextOwners;
+      this.renderBoard();
+      this.updateStats();
+      this.saveToStorage();
+      this.lastBattleSyncAt = Date.now();
+      this.lastBattleSyncStatus = 'ok';
+      this.lastBattleSyncError = '';
+      this.updateDebugPanel();
+    } catch (e) {
+      console.warn('battle owners sync failed', e);
+      this.lastBattleSyncStatus = 'exception';
+      this.lastBattleSyncError = e?.message || 'unknown';
+      this.updateDebugPanel();
+    }
+  }
+
+  startBattleSyncLoop() {
+    this.stopBattleSyncLoop();
+    if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
+      return;
+    }
+    this.syncBattleOwnersFromServer();
+    this.battleSyncTimer = setInterval(() => {
+      this.syncBattleOwnersFromServer();
+    }, 4000);
+  }
+
+  stopBattleSyncLoop() {
+    if (this.battleSyncTimer) {
+      clearInterval(this.battleSyncTimer);
+      this.battleSyncTimer = null;
+    }
+  }
+
+  async claimBattleCellOnServer(index) {
+    if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
+      return true;
+    }
+    const topicKey = this.getTopicKeyByIndex(index);
+    if (!topicKey) return true;
+    const endpoint = `${this.battleBackend.url}/rest/v1/${this.battleTable}`;
+    const payload = {
+      room_code: this.roomCode,
+      topic_key: topicKey,
+      cell_index: index,
+      owner_user_id: this.battlePlayerId
+    };
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: this.battleBackend.key,
+        Authorization: `Bearer ${this.battleBackend.key}`,
+        Prefer: 'resolution=ignore-duplicates,return=representation'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      this.lastBattleSyncStatus = `claim_http_${res.status}`;
+      this.lastBattleSyncError = 'claim_failed';
+      this.updateDebugPanel();
+      throw new Error(`claim failed: ${res.status}`);
+    }
+    const rows = await res.json();
+    const accepted = Array.isArray(rows) && rows.length > 0;
+    if (!accepted) {
+      await this.syncBattleOwnersFromServer();
+    }
+    this.lastBattleSyncStatus = 'claim_ok';
+    this.lastBattleSyncError = '';
+    this.updateDebugPanel();
+    return accepted;
   }
   
   // ボードをレンダリング
@@ -236,6 +393,7 @@ class OsanpoBingo {
       const cell = document.createElement('div');
       cell.className = 'bingo-cell';
       cell.dataset.index = index;
+      const ownerId = this.getCellOwnerId(index);
       
       // 写真がある場合（上に写真・下にテキストの構成で描画）
       const hasPhoto = !!this.photos[index];
@@ -243,8 +401,13 @@ class OsanpoBingo {
         cell.classList.add('has-photo');
       }
       
-      // マーク済みかFREEの場合
-      if (this.markedCells.has(index) || topic.isFree) {
+      // マーク状態（バトル時は所有者ベースで判定）
+      const isMarked = topic.isFree || (
+        this.gameType === 'battle'
+          ? ownerId === this.battlePlayerId
+          : this.markedCells.has(index)
+      );
+      if (isMarked) {
         cell.classList.add('marked');
       }
       
@@ -262,6 +425,14 @@ class OsanpoBingo {
       const isInBingoLine = this.bingoLines.some(line => line.includes(index));
       if (isInBingoLine) {
         cell.classList.add('bingo');
+      }
+      if (this.gameType === 'battle' && ownerId) {
+        cell.classList.add('claimed');
+        if (ownerId !== this.battlePlayerId) {
+          cell.classList.add('locked');
+        } else {
+          cell.classList.add('claimed-self');
+        }
       }
       
       // 中央マスはテキスト非表示（アイコンのみ）
@@ -299,8 +470,18 @@ class OsanpoBingo {
   // セルクリック処理
   handleCellClick(index) {
     if (index === 12) return;
+    const ownerId = this.getCellOwnerId(index);
+    if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
+      showAlert('このマスはすでに他の人が取得しています。');
+      return;
+    }
     
     if (this.playMode === 'markOnly') {
+      if (this.gameType === 'battle') {
+        showAlert('バトルでは写真アップロード時にマス取得となります。');
+        this.showCellModal(index);
+        return;
+      }
       this.toggleMark(index);
       return;
     }
@@ -400,6 +581,48 @@ class OsanpoBingo {
     if (this.playerCountDisplay) {
       this.playerCountDisplay.textContent = this.playerCount || 1;
     }
+    if (this.opponentClaimedCountElement) {
+      const battleCounts = this.getBattleCounts();
+      this.opponentClaimedCountElement.textContent = battleCounts.opponentClaims;
+    }
+    this.updateDebugPanel();
+  }
+
+  getBattleCounts() {
+    const counts = {
+      selfClaims: 0,
+      opponentClaims: 0,
+      unclaimed: 24
+    };
+    if (this.gameType !== 'battle') return counts;
+    let claimed = 0;
+    for (let i = 0; i < 25; i++) {
+      if (i === 12) continue;
+      const ownerId = this.getCellOwnerId(i);
+      if (!ownerId) continue;
+      claimed += 1;
+      if (ownerId === this.battlePlayerId) counts.selfClaims += 1;
+      else counts.opponentClaims += 1;
+    }
+    counts.unclaimed = Math.max(0, 24 - claimed);
+    return counts;
+  }
+
+  setupDebugPanel() {
+    if (!this.debugBattle || this.debugPanelEl) return;
+    const panel = document.createElement('div');
+    panel.id = 'battleDebugPanel';
+    panel.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:3000;background:rgba(0,0,0,0.78);color:#fff;font-size:12px;line-height:1.4;padding:8px 10px;border-radius:8px;max-width:320px;';
+    document.body.appendChild(panel);
+    this.debugPanelEl = panel;
+    this.updateDebugPanel();
+  }
+
+  updateDebugPanel() {
+    if (!this.debugBattle || !this.debugPanelEl) return;
+    const ownerCount = Object.keys(this.battleTopicOwners || {}).length;
+    const syncText = this.lastBattleSyncAt ? new Date(this.lastBattleSyncAt).toLocaleTimeString() : '-';
+    this.debugPanelEl.textContent = `debug battle | room=${this.roomCode || '-'} | mode=${this.gameType} | player=${this.battlePlayerId} | owners=${ownerCount} | lastSync=${syncText} | status=${this.lastBattleSyncStatus} | err=${this.lastBattleSyncError || '-'}`;
   }
   
   // 終了（結果記録・共有画面を表示）
@@ -672,6 +895,7 @@ class OsanpoBingo {
 
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
+    this.stopBattleSyncLoop();
     try {
       localStorage.removeItem('osanpoBingo');
     } catch (e) {}
@@ -704,12 +928,15 @@ class OsanpoBingo {
   newGame() {
     showConfirm('お題をシャッフルして\n新しいビンゴを作りますか？').then((ok) => {
       if (!ok) return;
-      this.createBoard(this.roomCode, this.difficulty, Date.now().toString(), null);
+      // バトルは同じ合言葉で同じシートを維持する
+      const shuffleSalt = this.gameType === 'battle' ? '' : Date.now().toString();
+      this.createBoard(this.roomCode, this.difficulty, shuffleSalt, null);
       this.markCell(12);
       this.renderBoard();
       this.checkBingo();
       this.updateStats();
       this.saveToStorage();
+      this.syncBattleOwnersFromServer();
       if (this.messageElement) {
         this.messageElement.style.display = 'none';
       }
@@ -734,6 +961,8 @@ class OsanpoBingo {
     const roomCodeInput = document.getElementById('roomCodeInput');
     const difficultySelect = document.getElementById('difficultySelect');
     const playerCountInput = document.getElementById('playerCountInput');
+    const gameTypeCreate = document.getElementById('gameTypeCreate');
+    const gameTypeJoin = document.getElementById('gameTypeJoin');
     const customTopicCountSelect = document.getElementById('customTopicCount');
     const customTopicInputsContainer = document.getElementById('customTopicInputs');
     
@@ -761,6 +990,8 @@ class OsanpoBingo {
     const customTopicCountSolo = document.getElementById('customTopicCountSolo');
     const customTopicInputsSolo = document.getElementById('customTopicInputsSolo');
     if (difficultySelectSolo) difficultySelectSolo.value = this.difficulty || 'medium';
+    if (gameTypeCreate) gameTypeCreate.value = this.gameType || 'normal';
+    if (gameTypeJoin) gameTypeJoin.value = this.gameType || 'normal';
     if (customTopicCountSolo && customTopicInputsSolo) {
       const n = this.customTopics.length;
       customTopicCountSolo.value = String(n);
@@ -833,6 +1064,7 @@ class OsanpoBingo {
     }
     
     const modeCreateBtn = document.getElementById('modeCreateBtn');
+    const modeJoinBtn = document.getElementById('modeJoinBtn');
     if (modeCreateBtn) {
       modeCreateBtn.addEventListener('click', () => {
         hideAll();
@@ -841,8 +1073,8 @@ class OsanpoBingo {
       });
     }
     
-    if (joinGameBtn) {
-      joinGameBtn.addEventListener('click', () => {
+    if (modeJoinBtn) {
+      modeJoinBtn.addEventListener('click', () => {
         hideAll();
         if (joinGameStep) joinGameStep.style.display = 'block';
       });
@@ -903,11 +1135,15 @@ class OsanpoBingo {
     // ふつうに遊ぶ：ゲーム開始
     if (startSoloGameBtn) {
       startSoloGameBtn.addEventListener('click', () => {
+        this.stopBattleSyncLoop();
         const difficultySelectSolo = document.getElementById('difficultySelectSolo');
         const modal = document.getElementById('roomCodeModal');
         const playModeRadio = document.querySelector('input[name="playModeSolo"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
         this.difficulty = difficultySelectSolo?.value || 'medium';
+        this.gameType = 'normal';
+        this.cellOwners = {};
+        this.battleTopicOwners = {};
         const customTopics = this.collectCustomTopics(customTopicInputsSolo);
         this.gameStartTime = Date.now();
         this.roomCode = 'solo';
@@ -925,8 +1161,10 @@ class OsanpoBingo {
     // ゲーム開始ボタン（みんなで・作成モード）
     if (startGameBtn) {
       startGameBtn.addEventListener('click', () => {
+        this.stopBattleSyncLoop();
         const difficultySelect = document.getElementById('difficultySelect');
         const playerCountInput = document.getElementById('playerCountInput');
+        const gameTypeCreate = document.getElementById('gameTypeCreate');
         const modal = document.getElementById('roomCodeModal');
         
         const roomCode = roomCodeInput?.value.trim() || this.generateRoomCode();
@@ -941,13 +1179,21 @@ class OsanpoBingo {
         
         const playModeRadio = document.querySelector('input[name="playModeCreate"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
+        this.gameType = gameTypeCreate?.value === 'battle' ? 'battle' : 'normal';
+        if (this.gameType === 'battle' && !this.battleBackend.enabled) {
+          showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
+        }
         this.gameStartTime = Date.now();
+        this.cellOwners = {};
+        this.battleTopicOwners = {};
         
         this.createBoard(roomCode, difficulty, '', customTopics);
         this.markCell(12);
         this.renderBoard();
         this.checkBingo();
         this.updateStats();
+        this.syncBattleOwnersFromServer();
+        this.startBattleSyncLoop();
         
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
@@ -957,8 +1203,10 @@ class OsanpoBingo {
     // 参加ボタン（参加モード）
     if (joinGameBtn) {
       joinGameBtn.addEventListener('click', () => {
+        this.stopBattleSyncLoop();
         const joinRoomCode = document.getElementById('joinRoomCodeInput');
         const joinDifficulty = document.getElementById('joinDifficultySelect');
+        const gameTypeJoin = document.getElementById('gameTypeJoin');
         const modal = document.getElementById('roomCodeModal');
         const customTopicInputsJoin = document.getElementById('customTopicInputsJoin');
         
@@ -971,7 +1219,13 @@ class OsanpoBingo {
         const difficulty = joinDifficulty?.value || 'medium';
         const playModeRadio = document.querySelector('input[name="playModeJoin"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
+        this.gameType = gameTypeJoin?.value === 'battle' ? 'battle' : 'normal';
+        if (this.gameType === 'battle' && !this.battleBackend.enabled) {
+          showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
+        }
         this.gameStartTime = Date.now();
+        this.cellOwners = {};
+        this.battleTopicOwners = {};
         
         this.playerCount = 1;
         // グループ＋自由記載：作った人から教えてもらったお題を入力（同じお題セットで並びだけ各自違うボードになる）
@@ -981,6 +1235,8 @@ class OsanpoBingo {
         this.renderBoard();
         this.checkBingo();
         this.updateStats();
+        this.syncBattleOwnersFromServer();
+        this.startBattleSyncLoop();
         
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
@@ -1189,7 +1445,9 @@ class OsanpoBingo {
     }
     
     if (toggleMarkBtn) {
-      if (this.photos[index]) {
+      if (this.gameType === 'battle') {
+        toggleMarkBtn.style.display = 'none';
+      } else if (this.photos[index]) {
         toggleMarkBtn.style.display = 'none';
       } else {
         toggleMarkBtn.style.display = '';
@@ -1319,6 +1577,10 @@ class OsanpoBingo {
   
   // マークを切り替え
   toggleMark(index) {
+    if (this.gameType === 'battle' && index !== 12) {
+      showAlert('バトルではマークだけで取得できません。写真をアップロードしてください。');
+      return;
+    }
     const wasMarked = this.markedCells.has(index);
     if (wasMarked) {
       this.markedCells.delete(index);
@@ -1421,8 +1683,29 @@ class OsanpoBingo {
   }
   
   // セル写真を保存
-  saveCellPhoto() {
+  async saveCellPhoto() {
     if (this.currentPhotoIndex === null || !this.tempPhotoData) return;
+    if (this.gameType === 'battle') {
+      const topicKey = this.getTopicKeyByIndex(this.currentPhotoIndex);
+      const ownerId = this.getCellOwnerId(this.currentPhotoIndex);
+      if (ownerId && ownerId !== this.battlePlayerId) {
+        showAlert('このマスはすでに他の人が取得していました。');
+        this.closeCellModal();
+        return;
+      }
+      try {
+        const accepted = await this.claimBattleCellOnServer(this.currentPhotoIndex);
+        if (!accepted) {
+          showAlert('このマスはすでに他の人が取得していました。');
+          this.closeCellModal();
+          return;
+        }
+      } catch (e) {
+        showAlert('取得確認に失敗しました。通信環境を確認して再試行してください。');
+        return;
+      }
+      if (topicKey) this.battleTopicOwners[topicKey] = this.battlePlayerId;
+    }
     
     // 振動フィードバック
     if (navigator.vibrate) navigator.vibrate(30);
@@ -1457,7 +1740,10 @@ class OsanpoBingo {
         photos: this.photos,
         customTopics: this.customTopics,
         playMode: this.playMode,
-        gameStartTime: this.gameStartTime
+        gameStartTime: this.gameStartTime,
+        gameType: this.gameType,
+        cellOwners: this.cellOwners,
+        battleTopicOwners: this.battleTopicOwners
       };
       localStorage.setItem('osanpoBingo', JSON.stringify(data));
     } catch (error) {
@@ -1513,12 +1799,40 @@ class OsanpoBingo {
       if (data.gameStartTime != null) {
         this.gameStartTime = data.gameStartTime;
       }
+      if (data.gameType === 'photo' || data.gameType === 'markOnly') {
+        // 旧データ誤保存の互換回避
+        this.gameType = 'normal';
+      } else if (data.gameType === 'battle' || data.gameType === 'normal') {
+        this.gameType = data.gameType;
+      }
+      if (data.cellOwners && typeof data.cellOwners === 'object') {
+        this.cellOwners = data.cellOwners;
+      }
+      if (data.battleTopicOwners && typeof data.battleTopicOwners === 'object') {
+        this.battleTopicOwners = data.battleTopicOwners;
+      }
       
       return true;
     } catch (error) {
       console.error('❌ 読み込みエラー:', error);
       return false;
     }
+  }
+
+  normalizeTopicKey(text) {
+    return String(text || '').trim().toLowerCase();
+  }
+
+  getTopicKeyByIndex(index) {
+    const topic = this.board[index];
+    if (!topic || topic.isFree) return '';
+    return this.normalizeTopicKey(topic.text);
+  }
+
+  getCellOwnerId(index) {
+    const topicKey = this.getTopicKeyByIndex(index);
+    if (!topicKey) return '';
+    return this.battleTopicOwners[topicKey] || '';
   }
 }
 
