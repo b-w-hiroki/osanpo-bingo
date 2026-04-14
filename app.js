@@ -150,7 +150,6 @@ class OsanpoBingo {
       // 既存データを使用（モーダルを確実に非表示にしてボードを操作可能に）
       const roomModal = document.getElementById('roomCodeModal');
       if (roomModal) roomModal.style.display = 'none';
-      this.renderBoard();
       this.checkBingo();
       this.updateStats();
       if (this.gameType === 'battle') {
@@ -211,10 +210,12 @@ class OsanpoBingo {
     // 写真モーダル
     this.setupPhotoModal();
 
-    // タブ再表示時は即同期
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
+        this.startBattleSyncLoop();
         this.syncBattleOwnersFromServer();
+      } else {
+        this.stopBattleSyncLoop();
       }
     });
   }
@@ -308,7 +309,6 @@ class OsanpoBingo {
         }
       });
       this.battleTopicOwners = nextOwners;
-      this.renderBoard();
       this.checkBingo();
       this.updateStats();
       this.saveToStorage();
@@ -386,11 +386,20 @@ class OsanpoBingo {
     }
 
     // 空配列 → 既に誰かが持っている → GET で実オーナーを確認（冪等性チェック）
-    const getRes = await fetch(
-      `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&topic_key=eq.${encodeURIComponent(topicKey)}&select=owner_user_id`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
-    );
-    const getRows = await getRes.json();
+    let getRows = [];
+    try {
+      const getRes = await fetch(
+        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&topic_key=eq.${encodeURIComponent(topicKey)}&select=owner_user_id`,
+        { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+      );
+      getRows = await getRes.json();
+    } catch (e) {
+      console.warn('battle claim GET failed', e);
+      this.lastBattleSyncStatus = 'claim_get_failed';
+      this.lastBattleSyncError = e?.message || 'unknown';
+      this.updateDebugPanel();
+      return 'unknown';
+    }
     if (Array.isArray(getRows) && getRows.length > 0 && getRows[0].owner_user_id === this.battlePlayerId) {
       this.lastBattleSyncStatus = 'claim_ok';
       this.lastBattleSyncError = '';
@@ -515,6 +524,7 @@ class OsanpoBingo {
     if (this.board[index]?.isFree) return true;
     if (this.gameType === 'battle') {
       const topicKey = this.getTopicKeyByIndex(index);
+      if (!topicKey) return false;
       return this.battleTopicOwners[topicKey] === this.battlePlayerId;
     }
     return this.markedCells.has(index);
@@ -536,10 +546,10 @@ class OsanpoBingo {
     const oldCount = this.bingoLines.length;
     this.bingoLines = newBingoLines;
     const newCount = this.bingoLines.length;
-    
+
+    this.renderBoard();
     if (newCount > oldCount) {
       this.showBingoMessage(newCount);
-      this.renderBoard(); // ビンゴラインをハイライト
     }
     
     return this.bingoLines;
@@ -965,6 +975,8 @@ class OsanpoBingo {
     showConfirm('お題をシャッフルして\n新しいビンゴを作りますか？').then((ok) => {
       if (!ok) return;
       // バトルは同じ合言葉で同じシートを維持する
+      // バトルは shuffleSalt を固定するが、createBoard 内で userId がシードに含まれるため
+      // 各プレイヤーのマス配置は異なる。競合判定は topic_key ベースで行うため問題なし。
       const shuffleSalt = this.gameType === 'battle' ? '' : Date.now().toString();
       this.createBoard(this.roomCode, this.difficulty, shuffleSalt, null);
       this.markCell(12);
@@ -1731,6 +1743,10 @@ class OsanpoBingo {
         if (claimResult === 'taken') {
           showAlert('このマスはすでに他の人が取得していました。');
           this.closeCellModal();
+          return;
+        }
+        if (claimResult === 'unknown') {
+          showAlert('通信エラーが発生しました。数秒後に自動で反映されます。');
           return;
         }
         // 'claimed' または 'self'（冪等）→ 写真保存処理を続行
