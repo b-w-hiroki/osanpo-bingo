@@ -30,6 +30,16 @@
 - `battle-config.js` に `supabaseUrl` と `supabaseAnonKey` を設定すると、端末間で先着取得判定が有効になります。
 - 未設定時はローカル挙動（同一端末内）で動作します。
 
+## バトルモードのセットアップ
+
+バトルモードを使うには Supabase の設定が必要です。
+
+1. `battle-config.example.js` を `battle-config.js` にコピー
+2. `battle-config.js` に Supabase の URL と anon key を入力
+3. Supabase に `battle_cell_owners` テーブルを作成（カラム: `room_code`, `topic_key`, `cell_index`, `owner_user_id`、UNIQUE制約: `(room_code, topic_key)`）
+
+`battle-config.js` は `.gitignore` に登録されているため、誤って公開される心配はありません。
+
 ### 難易度設定
 - **かんたん**: 見つけやすいお題のみ（信号、ネコ、花など）
 - **ふつう**: バランスの取れた難易度（おすすめ）

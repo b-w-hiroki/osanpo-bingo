@@ -899,7 +899,9 @@ class OsanpoBingo {
     const dateEl = document.getElementById('resultCaptureDate');
     const playTimeEl = document.getElementById('resultCapturePlayTime')?.textContent || '';
     const bingo = this.bingoLines.length;
-    const marked = this.markedCells.size;
+    const marked = this.gameType === 'battle'
+      ? this.getBattleCounts().selfClaims
+      : this.markedCells.size;
     return [
       'お散歩ビンゴで遊んだ！',
       dateEl?.textContent || '',
