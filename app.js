@@ -1651,7 +1651,6 @@ class OsanpoBingo {
     }
     
     // 再レンダリング
-    this.renderBoard();
     this.checkBingo();
     this.updateStats();
     this.saveToStorage();
@@ -1773,7 +1772,6 @@ class OsanpoBingo {
     }
     
     // 再レンダリング
-    this.renderBoard();
     this.checkBingo();
     this.updateStats();
     this.saveToStorage();
