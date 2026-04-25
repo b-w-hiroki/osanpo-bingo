@@ -732,7 +732,7 @@ class OsanpoBingo {
     const markedCountEl = document.getElementById('screenshotMarkedCount');
     if (bingoCountEl) bingoCountEl.textContent = this.bingoLines.length;
     if (markedCountEl) {
-      markedCountEl.textContent = this.gameType === 'battle'
+      markedCountEl.textContent = (BATTLE_MODE_ENABLED && this.gameType === 'battle')
         ? this.getBattleCounts().selfClaims
         : this.markedCells.size;
     }
@@ -820,9 +820,10 @@ class OsanpoBingo {
       groupEl.textContent = groupText || '-';
     }
     document.getElementById('resultCaptureBingo').textContent = this.bingoLines.length;
-    document.getElementById('resultCaptureMarked').textContent = this.gameType === 'battle'
-      ? this.getBattleCounts().selfClaims
-      : this.markedCells.size;
+    document.getElementById('resultCaptureMarked').textContent =
+      (BATTLE_MODE_ENABLED && this.gameType === 'battle')
+        ? this.getBattleCounts().selfClaims
+        : this.markedCells.size;
     
     const captureBoard = document.getElementById('resultCaptureBoard');
     if (captureBoard && boardEl?.firstChild) {
@@ -903,7 +904,7 @@ class OsanpoBingo {
     const dateEl = document.getElementById('resultCaptureDate');
     const playTimeEl = document.getElementById('resultCapturePlayTime')?.textContent || '';
     const bingo = this.bingoLines.length;
-    const marked = this.gameType === 'battle'
+    const marked = (BATTLE_MODE_ENABLED && this.gameType === 'battle')
       ? this.getBattleCounts().selfClaims
       : this.markedCells.size;
     return [
