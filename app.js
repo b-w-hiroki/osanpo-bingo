@@ -1,3 +1,6 @@
+// バトルモード: v1.0では封印中。有効化するには true に変更する。
+const BATTLE_MODE_ENABLED = false;
+
 // お散歩ビンゴ - Phase 2: グループ機能 + 写真機能
 
 // カスタム確認・通知モーダル（confirm/alert の代わり）
@@ -152,7 +155,7 @@ class OsanpoBingo {
       if (roomModal) roomModal.style.display = 'none';
       this.checkBingo();
       this.updateStats();
-      if (this.gameType === 'battle') {
+      if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
         this.syncBattleOwnersFromServer();
         this.startBattleSyncLoop();
       } else {
@@ -211,6 +214,7 @@ class OsanpoBingo {
     this.setupPhotoModal();
 
     document.addEventListener('visibilitychange', () => {
+      if (!BATTLE_MODE_ENABLED) return;
       if (document.visibilityState === 'visible') {
         this.startBattleSyncLoop();
         this.syncBattleOwnersFromServer();
@@ -1232,7 +1236,9 @@ class OsanpoBingo {
         
         const playModeRadio = document.querySelector('input[name="playModeCreate"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
-        this.gameType = gameTypeCreate?.value === 'battle' ? 'battle' : 'normal';
+        this.gameType = BATTLE_MODE_ENABLED
+          ? (gameTypeCreate?.value || 'normal')
+          : 'normal';
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
@@ -1270,7 +1276,9 @@ class OsanpoBingo {
         const difficulty = joinDifficulty?.value || 'medium';
         const playModeRadio = document.querySelector('input[name="playModeJoin"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
-        this.gameType = gameTypeJoin?.value === 'battle' ? 'battle' : 'normal';
+        this.gameType = BATTLE_MODE_ENABLED
+          ? (gameTypeJoin?.value || 'normal')
+          : 'normal';
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
