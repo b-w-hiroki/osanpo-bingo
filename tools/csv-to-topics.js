@@ -18,17 +18,24 @@ const path = require('path');
 const CSV_PATH = path.join(__dirname, '..', 'topics_list.csv');
 const OUTPUT_PATH = path.join(__dirname, '..', 'topics.js');
 
+// 先頭の真のBOM / 誤って文字列化された「\uFEFF」表記を除去
+function trimCsvCell(s) {
+  if (!s) return '';
+  return s.replace(/^\uFEFF+/g, '').replace(/^\\uFEFF/i, '').trim();
+}
+
 // CSV読み込み・パース
 function parseCSV(csvText) {
   const lines = csvText.split('\n').filter(line => line.trim());
-  const headers = lines[0].replace(/^\uFEFF/, '').split(','); // BOM除去
+  const firstLine = trimCsvCell(lines[0]);
+  const headers = firstLine.split(',').map(trimCsvCell);
   
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',');
+    const values = lines[i].split(',').map(trimCsvCell);
     const row = {};
     headers.forEach((h, idx) => {
-      row[h.trim()] = (values[idx] || '').trim();
+      row[h] = (values[idx] || '').trim();
     });
     rows.push(row);
   }
@@ -80,6 +87,11 @@ function generateTopicsJS(rows) {
     ).join(',\n');
   }
 
+  const topicSetsBundled = fs.readFileSync(
+    path.join(__dirname, 'topic-sets-bundled.txt'),
+    'utf8'
+  );
+
   const code = `// お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
@@ -115,50 +127,7 @@ ${topicArrayStr(groups.hard)}
   ]
 };
 
-// 難易度に応じてお題を選択する関数
-// shuffleSalt: 作り直し時に毎回異なるシャッフルにするため（省略時は合言葉で固定）
-function selectTopicsByDifficulty(difficulty, roomCode = '', userId = '', shuffleSalt = '') {
-  let selectedTopics = [];
-  
-  switch(difficulty) {
-    case 'easy':
-      // かんたん: easy のみから24個
-      selectedTopics = [...topicDatabase.easy];
-      break;
-      
-    case 'medium':
-      // ふつう: easy 12個 + medium 12個
-      selectedTopics = [
-        ...topicDatabase.easy.slice(0, 12),
-        ...topicDatabase.medium.slice(0, 12)
-      ];
-      break;
-      
-    case 'hard':
-      // むずかしい: easy 8個 + medium 8個 + hard 8個
-      selectedTopics = [
-        ...topicDatabase.easy.slice(0, 8),
-        ...topicDatabase.medium.slice(0, 8),
-        ...topicDatabase.hard.slice(0, 8)
-      ];
-      break;
-      
-    default:
-      selectedTopics = [...topicDatabase.easy];
-  }
-  
-  // シャッフル（合言葉・ユーザーID・塩でシード生成。塩があれば毎回異なる並びに）
-  const seedStr = [roomCode, userId, shuffleSalt].filter(Boolean).join('-');
-  if (seedStr) {
-    const seed = stringToSeed(seedStr);
-    selectedTopics = shuffleWithSeed(selectedTopics, seed);
-  } else {
-    selectedTopics = shuffle(selectedTopics);
-  }
-  
-  return selectedTopics.slice(0, 24); // FREE分を除いて24個
-}
-
+${topicSetsBundled}
 // 文字列からシード値を生成
 function stringToSeed(str) {
   let hash = 0;
@@ -231,7 +200,7 @@ function main() {
     csvText = '\uFEFF' + csvText;
   }
   const rows = parseCSV(csvText);
-  
+
   console.log(`📖 ${rows.length} 件のお題を読み込みました`);
   
   // 難易度別カウント

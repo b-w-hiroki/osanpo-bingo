@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osanpo-bingo-v4';
+const CACHE_NAME = 'osanpo-bingo-v5';
 const urlsToCache = [
   'index.html',
   'game.html',
@@ -10,7 +10,7 @@ const urlsToCache = [
   'lib/html2canvas.min.js',
   'icon-192.png',
   'icon-512.png',
-  'assets/hero-osanpo-combined-v4.png'
+  'assets/hero-osanpo-2026.png'
 ];
 
 // インストール時にキャッシュを作成

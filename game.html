@@ -10,7 +10,7 @@
   <!-- OGP -->
   <meta property="og:title" content="お散歩ビンゴ">
   <meta property="og:description" content="グループで楽しむお散歩ビンゴゲーム。散歩中に見つけたものをマークしてビンゴを目指そう！">
-  <meta property="og:image" content="assets/hero-osanpo-combined-v4.png">
+  <meta property="og:image" content="assets/hero-osanpo-2026.png">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   
@@ -85,6 +85,11 @@
               <option value="medium" selected>ふつう（少し探す）</option>
               <option value="hard">むずかしい（レアなもの）</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label for="topicSetSelectSolo">📚 お題セット</label>
+            <select id="topicSetSelectSolo" class="select-box topic-set-select" aria-describedby="topicSetHelpSolo"></select>
+            <p class="form-help topic-set-help" id="topicSetHelpSolo"></p>
           </div>
           <div class="form-group">
             <label for="customTopicCountSolo">✏️ フリー入力マス</label>
@@ -212,6 +217,12 @@
           </div>
           
           <div class="form-group">
+            <label for="topicSetSelectCreate">📚 お題セット</label>
+            <select id="topicSetSelectCreate" class="select-box topic-set-select" aria-describedby="topicSetHelpCreate"></select>
+            <p class="form-help topic-set-help" id="topicSetHelpCreate"></p>
+          </div>
+          
+          <div class="form-group">
             <label for="customTopicCount">✏️ フリー入力マス</label>
             <select id="customTopicCount" class="select-box">
               <option value="0" selected>なし</option>
@@ -298,6 +309,12 @@
             <p class="form-help">
               作った人と同じ難易度を選んでね
             </p>
+          </div>
+          
+          <div class="form-group">
+            <label for="topicSetSelectJoin">📚 お題セット</label>
+            <select id="topicSetSelectJoin" class="select-box topic-set-select" aria-describedby="topicSetHelpJoin"></select>
+            <p class="form-help topic-set-help" id="topicSetHelpJoin">作った人と同じお題セットを選んでください。</p>
           </div>
           
           <div class="form-group" id="joinCustomTopicGroup">

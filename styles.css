@@ -1796,3 +1796,15 @@ h1 {
     height: 60px;
   }
 }
+
+/* お題セット選択（将来の有料・スポンサー拡張の受け口） */
+.topic-set-select {
+  max-width: 100%;
+}
+
+.form-help.topic-set-help {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #3d5a4a;
+  margin-top: 6px;
+}

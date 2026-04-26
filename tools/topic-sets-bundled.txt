@@ -1,0 +1,164 @@
+
+/**
+ * お題セット（将来: 有料・スポンサー拡張用。MVP では free のみ使用）
+ * topicIds が空 = 従来どおり難易度プール全件から。非空 = 難易度プール内の当該IDに限定（不足分は従来ロジックで補完）
+ */
+const topicSets = [
+  {
+    id: 'default',
+    name: 'いつものお散歩',
+    description: '道ばたや公園で見つけやすい、基本のお題セットです。',
+    monetizationType: 'free',
+    topicIds: []
+  },
+  {
+    id: 'park',
+    name: '公園さんぽ',
+    description: '公園で見つけやすいものを集めたお題セットです。',
+    monetizationType: 'free',
+    topicIds: [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 32, 33, 34, 50, 51, 52, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 80, 90, 91, 92, 93, 95, 98, 99, 100, 102, 104, 105, 106, 108, 110, 111, 112, 113
+    ]
+  },
+  {
+    id: 'family',
+    name: '親子で発見',
+    description: '親子で一緒に探しやすいお題セットです。',
+    monetizationType: 'free',
+    topicIds: [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 32, 33, 40, 68, 69, 70, 91, 92, 93, 99, 100, 5, 11, 14, 15, 16, 17, 30, 31, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 80
+    ]
+  },
+  {
+    id: 'shopping-street',
+    name: '商店街さんぽ',
+    description: 'お店や街なかで楽しめるお題セットです。',
+    monetizationType: 'sponsored-ready',
+    sponsorName: null,
+    sponsorLogo: null,
+    campaignUrl: null,
+    topicIds: [
+      6, 7, 8, 12, 14, 15, 18, 25, 26, 27, 28, 29, 30, 31, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 86, 88, 89, 90, 1, 2, 3, 4, 5, 9, 10, 11, 19, 20, 32, 33, 34, 68, 69, 70, 71, 72, 80
+    ]
+  }
+];
+
+function getTopicSetById(id) {
+  return topicSets.find((s) => s.id === id) || topicSets[0];
+}
+
+function getTopicById(id) {
+  for (const key of ['easy', 'medium', 'hard']) {
+    const t = topicDatabase[key].find((x) => x.id === id);
+    if (t) return t;
+  }
+  return null;
+}
+
+// 難易度に対応するプール（未シャッフル）
+function selectTopicsByDifficultyList(difficulty) {
+  let selectedTopics = [];
+  switch (difficulty) {
+    case 'easy':
+      selectedTopics = [...topicDatabase.easy];
+      break;
+    case 'medium':
+      selectedTopics = [
+        ...topicDatabase.easy.slice(0, 12),
+        ...topicDatabase.medium.slice(0, 12)
+      ];
+      break;
+    case 'hard':
+      selectedTopics = [
+        ...topicDatabase.easy.slice(0, 8),
+        ...topicDatabase.medium.slice(0, 8),
+        ...topicDatabase.hard.slice(0, 8)
+      ];
+      break;
+    default:
+      selectedTopics = [...topicDatabase.easy];
+  }
+  return selectedTopics;
+}
+
+// 難易度に応じてお題を選択する関数
+// shuffleSalt: 作り直し時に毎回異なるシャッフルにするため（省略時は合言葉で固定）
+function selectTopicsByDifficulty(difficulty, roomCode = '', userId = '', shuffleSalt = '') {
+  let selectedTopics = selectTopicsByDifficultyList(difficulty);
+  const seedStr = [roomCode, userId, shuffleSalt].filter(Boolean).join('-');
+  if (seedStr) {
+    const seed = stringToSeed(seedStr);
+    selectedTopics = shuffleWithSeed(selectedTopics, seed);
+  } else {
+    selectedTopics = shuffle(selectedTopics);
+  }
+  return selectedTopics.slice(0, 24);
+}
+
+/**
+ * 難易度プール＋任意のお題セット制限に基づき24件を返す
+ */
+function selectTopicsForGame(
+  difficulty,
+  roomCode = '',
+  userId = '',
+  shuffleSalt = '',
+  topicSetId = 'default'
+) {
+  const set = getTopicSetById(topicSetId);
+  const useSetInSeed =
+    set.id !== 'default' || (set.topicIds && set.topicIds.length > 0);
+  const seedStr = (useSetInSeed
+    ? [roomCode, userId, shuffleSalt, set.id]
+    : [roomCode, userId, shuffleSalt]
+  )
+    .filter(Boolean)
+    .join('-');
+
+  const baseList = selectTopicsByDifficultyList(difficulty);
+  const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
+  let pool = allowed
+    ? baseList.filter((t) => allowed.has(t.id))
+    : [...baseList];
+
+  if (allowed && pool.length < 24) {
+    const filler = selectTopicsByDifficulty(
+      difficulty,
+      roomCode,
+      userId,
+      `${shuffleSalt}-topicset-fill`
+    );
+    for (const t of filler) {
+      if (pool.length >= 24) break;
+      if (!pool.some((p) => p.id === t.id)) pool.push(t);
+    }
+  }
+
+  if (pool.length < 24) {
+    const flat = topicDatabase.easy.concat(
+      topicDatabase.medium,
+      topicDatabase.hard
+    );
+    for (const t of flat) {
+      if (pool.length >= 24) break;
+      if (allowed && !allowed.has(t.id)) continue;
+      if (!pool.some((p) => p.id === t.id)) pool.push(t);
+    }
+  }
+
+  if (pool.length < 24) {
+    for (const t of topicDatabase.hard) {
+      if (pool.length >= 24) break;
+      if (!pool.some((p) => p.id === t.id)) pool.push(t);
+    }
+  }
+
+  let selectedTopics = pool;
+  if (seedStr) {
+    const seed = stringToSeed(seedStr);
+    selectedTopics = shuffleWithSeed([...pool], seed);
+  } else {
+    selectedTopics = shuffle([...pool]);
+  }
+  return selectedTopics.slice(0, 24);
+}

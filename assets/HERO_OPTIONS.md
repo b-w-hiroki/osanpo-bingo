@@ -1,10 +1,10 @@
 # ヒーロー画像
 
 ## 採用中
-**hero-osanpo-combined-v4.png**
+**hero-osanpo-2026.png**
 
-- 男性＋マスコット2体（うさぎ・ハムスター）が一緒に散歩
-- OSANPO BINGO ロゴ入り
+- 公園の散歩道・家族と犬、3×3ビンゴカード風（花・猫・木など）の明るいイラスト
+- 旧: **hero-osanpo-combined-v4.png**（男性＋マスコット2体・ロゴ入りのバリエーション）
 
 **hero-bingo-party.png** は bingo-platform 用に `../bingo-platform/assets/` へ移動済み。
 
