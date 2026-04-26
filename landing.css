@@ -62,16 +62,11 @@ body {
   color: var(--primary-dark);
 }
 
-.global-header .global-header-platform {
-  color: var(--text);
-  font-weight: 500;
-}
-
-.global-header .global-header-platform img {
-  height: 26px;
-  width: auto;
-  display: block;
-  object-fit: contain;
+.global-header .global-header-back {
+  color: var(--text-light);
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
 }
 
 .global-header .global-header-product {
@@ -93,14 +88,14 @@ body {
   flex-direction: column;
 }
 
-/* ========== ヒーロー（フルブリード・ビューポート最適化） ========== */
+/* ========== ヒーロー（画像＋下にライト系カード） ========== */
 .hero {
   flex-shrink: 0;
-  padding: 0 0 40px;
-  background: linear-gradient(180deg, #a8d5ba 0%, #7eb89a 100%);
-  color: white;
+  padding: 0 0 8px;
+  background: var(--bg);
+  color: var(--text);
   text-align: center;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -110,6 +105,8 @@ body {
   max-height: 420px;
   overflow: hidden;
   position: relative;
+  background: #e8eeea;
+  border-bottom: 1px solid rgba(90, 155, 125, 0.15);
 }
 
 .hero-image {
@@ -120,22 +117,16 @@ body {
   display: block;
 }
 
-.hero-title-logo {
-  position: absolute;
-  top: 9%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(180px, 42vw, 420px);
-  height: auto;
-  z-index: 2;
-  pointer-events: none;
-}
-
 .hero-content {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 24px 24px 0;
+  max-width: 480px;
+  margin: -18px auto 0;
+  padding: 22px 22px 24px;
   position: relative;
+  z-index: 2;
+  background: var(--card-bg);
+  border-radius: 18px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(126, 184, 154, 0.22);
 }
 
 .hero-title {
@@ -145,12 +136,34 @@ body {
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
+.hero-br {
+  display: none;
+}
+
+@media (min-width: 400px) {
+  .hero-br { display: inline; }
+}
+
 .hero-tagline {
-  font-size: 1rem;
-  opacity: 0.95;
-  margin-top: 12px;
-  margin-bottom: 24px;
-  line-height: 1.6;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin: 0 0 10px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+.hero-lead {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-light);
+  margin: 0 0 20px;
+  text-align: left;
+}
+
+.hero-lead strong {
+  color: var(--primary-dark);
+  font-weight: 700;
 }
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
@@ -164,11 +177,11 @@ body {
   font-weight: 700;
   text-decoration: none;
   border-radius: 14px;
-  border: 3px solid rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(90, 155, 125, 0.35);
   box-shadow:
-    0 4px 0 #c5d9cd,
-    0 6px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 3px 0 #b8d4c4,
+    0 6px 16px rgba(45, 52, 54, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
@@ -212,7 +225,7 @@ body {
 }
 
 .btn-start:focus-visible {
-  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline: 3px solid var(--primary-light);
   outline-offset: 3px;
 }
 
@@ -444,13 +457,12 @@ body {
 @media (max-width: 600px) {
   /* ヒーロー: 横フルブリード・余白を詰める */
   .hero {
-    padding: 0 0 16px;
+    padding: 0 0 4px;
   }
 
   .hero-image-wrap {
     max-height: none;
     /* 横長画像をモバイル縦画面で見栄え良く表示する */
-    /* 画面幅に対して 4:3 比率の高さを確保し、object-fit: cover で中央をトリミング */
     aspect-ratio: 4 / 3;
   }
 
@@ -458,19 +470,20 @@ body {
     object-position: center 35%;
   }
 
-  .hero-title-logo {
-    top: 8%;
-    width: clamp(160px, 56vw, 320px);
-  }
-
   .hero-content {
-    padding: 12px 20px 0;
+    margin: -12px 14px 0;
+    max-width: none;
+    padding: 18px 18px 20px;
   }
 
   .hero-tagline {
-    font-size: 0.95rem;
-    margin-top: 4px;
-    margin-bottom: 14px;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .hero-lead {
+    font-size: 0.86rem;
+    margin-bottom: 16px;
   }
 
   /* メインコンテンツ: 詰めた余白 */
@@ -524,11 +537,12 @@ body {
 /* 超小型スマホ（ノッチ対策） */
 @media (max-width: 380px) {
   .hero-content {
-    padding: 10px 16px 0;
+    margin-inline: 12px;
+    padding: 16px 14px 18px;
   }
 
   .hero-tagline {
-    margin-bottom: 12px;
+    margin-bottom: 6px;
   }
 
   .main-content {
