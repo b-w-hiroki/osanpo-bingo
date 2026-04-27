@@ -102,7 +102,7 @@ body {
 .hero-image-wrap {
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 420px;
+  max-height: none;
   overflow: hidden;
   position: relative;
   background: #e8eeea;
@@ -112,58 +112,21 @@ body {
 .hero-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 40%;
+  object-fit: contain;
+  object-position: center center;
   display: block;
 }
 
 .hero-content {
   max-width: 480px;
-  margin: -18px auto 0;
-  padding: 22px 22px 24px;
+  margin: -14px 16px 0;
+  padding: 20px 22px;
   position: relative;
   z-index: 2;
   background: var(--card-bg);
   border-radius: 18px;
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(126, 184, 154, 0.22);
-}
-
-.hero-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  margin-bottom: 8px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.hero-br {
-  display: none;
-}
-
-@media (min-width: 400px) {
-  .hero-br { display: inline; }
-}
-
-.hero-tagline {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--primary-dark);
-  margin: 0 0 10px;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-}
-
-.hero-lead {
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--text-light);
-  margin: 0 0 20px;
-  text-align: left;
-}
-
-.hero-lead strong {
-  color: var(--primary-dark);
-  font-weight: 700;
 }
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
@@ -462,28 +425,13 @@ body {
 
   .hero-image-wrap {
     max-height: none;
-    /* 横長画像をモバイル縦画面で見栄え良く表示する */
-    aspect-ratio: 4 / 3;
-  }
-
-  .hero-image {
-    object-position: center 35%;
+    aspect-ratio: 16 / 9;
   }
 
   .hero-content {
-    margin: -12px 14px 0;
+    margin: -10px 14px 0;
     max-width: none;
-    padding: 18px 18px 20px;
-  }
-
-  .hero-tagline {
-    font-size: 1.1rem;
-    margin-bottom: 8px;
-  }
-
-  .hero-lead {
-    font-size: 0.86rem;
-    margin-bottom: 16px;
+    padding: 18px;
   }
 
   /* メインコンテンツ: 詰めた余白 */
@@ -538,11 +486,7 @@ body {
 @media (max-width: 380px) {
   .hero-content {
     margin-inline: 12px;
-    padding: 16px 14px 18px;
-  }
-
-  .hero-tagline {
-    margin-bottom: 6px;
+    padding: 16px 14px;
   }
 
   .main-content {
