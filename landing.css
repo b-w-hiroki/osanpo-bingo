@@ -144,7 +144,7 @@ body {
 
 /* CTA帯：角丸で画像とつなぐ（水平の「張り付き」感を弱める） */
 .hero-cta-strip {
-  margin: clamp(-36px, -5vw, -20px) clamp(14px, 4vw, 28px) 0;
+  margin: 0 clamp(14px, 4vw, 28px) 0;
   padding: clamp(18px, 3.5vw, 26px) clamp(16px, 4vw, 28px) clamp(6px, 2vw, 10px);
   display: flex;
   justify-content: center;
@@ -542,7 +542,7 @@ body {
   }
 
   .hero-cta-strip {
-    margin: -24px 12px 0;
+    margin: 0 12px 0;
     padding: 16px 14px 8px;
   }
 
@@ -619,7 +619,7 @@ body {
 /* 超小型スマホ（ノッチ対策） */
 @media (max-width: 380px) {
   .hero-cta-strip {
-    margin: -20px 10px 0;
+    margin: 0 10px 0;
     padding: 14px 12px 6px;
   }
 
