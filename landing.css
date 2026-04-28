@@ -147,18 +147,44 @@ body {
   width: min(480px, calc(100% - 32px));
   max-width: 480px;
   margin: -14px 0 0;
-  padding: 20px 22px;
+  padding: 14px 18px;
   position: relative;
   z-index: 2;
   background: var(--card-bg);
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow:
-    0 0 0 10px rgba(168, 213, 186, 0.38),
+    0 0 0 8px rgba(168, 213, 186, 0.38),
     var(--shadow-md);
   border: 1px solid rgba(126, 184, 154, 0.22);
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* ヒーロー内: 緑マット＋白カードを主役にし、ボタン側の二重枠は付けない */
+.hero-content .btn-start {
+  padding: 16px 32px;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f6faf8 0%, #e8f2ec 100%);
+  color: var(--primary-dark);
+  box-shadow: 0 1px 3px rgba(45, 52, 54, 0.08);
+  animation: none;
+}
+
+.hero-content .btn-start::before {
+  display: none;
+}
+
+.hero-content .btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(90, 155, 125, 0.22);
+}
+
+.hero-content .btn-start:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(45, 52, 54, 0.1);
 }
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
@@ -464,10 +490,18 @@ body {
     width: min(480px, calc(100% - 28px));
     max-width: none;
     margin: -10px 0 0;
-    padding: 18px;
+    padding: 12px 14px;
+    border-radius: 14px;
     box-shadow:
-      0 0 0 8px rgba(168, 213, 186, 0.38),
+      0 0 0 6px rgba(168, 213, 186, 0.38),
       var(--shadow-md);
+  }
+
+  .hero-content .btn-start {
+    padding: 14px 24px;
+    min-height: 46px;
+    font-size: 1.05rem;
+    border-radius: 10px;
   }
 
   /* メインコンテンツ: 詰めた余白 */
@@ -523,7 +557,7 @@ body {
   .hero-content {
     width: calc(100% - 24px);
     margin: -10px 0 0;
-    padding: 16px 14px;
+    padding: 12px 12px;
   }
 
   .main-content {
