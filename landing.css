@@ -141,35 +141,35 @@ body {
   z-index: 0;
 }
 
+/* 白い内枠は置かず、ボタン＋緑マットだけを画像下に重ねる（ずれ・大きすぎ解消） */
 .hero-content {
   align-self: center;
   box-sizing: border-box;
-  width: min(480px, calc(100% - 32px));
-  max-width: 480px;
-  margin: -14px 0 0;
-  padding: 14px 18px;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: -12px 0 0;
+  padding: 0;
   position: relative;
   z-index: 2;
-  background: var(--card-bg);
-  border-radius: 16px;
-  box-shadow:
-    0 0 0 8px rgba(168, 213, 186, 0.38),
-    var(--shadow-md);
-  border: 1px solid rgba(126, 184, 154, 0.22);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* ヒーロー内: 緑マット＋白カードを主役にし、ボタン側の二重枠は付けない */
 .hero-content .btn-start {
-  padding: 16px 32px;
+  padding: 16px 28px;
   min-height: 48px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #f6faf8 0%, #e8f2ec 100%);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f7f3 100%);
   color: var(--primary-dark);
-  box-shadow: 0 1px 3px rgba(45, 52, 54, 0.08);
+  box-shadow:
+    0 0 0 8px rgba(168, 213, 186, 0.42),
+    0 8px 24px rgba(45, 52, 54, 0.1);
   animation: none;
 }
 
@@ -179,12 +179,16 @@ body {
 
 .hero-content .btn-start:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(90, 155, 125, 0.22);
+  box-shadow:
+    0 0 0 8px rgba(168, 213, 186, 0.5),
+    0 12px 28px rgba(90, 155, 125, 0.2);
 }
 
 .hero-content .btn-start:active {
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(45, 52, 54, 0.1);
+  box-shadow:
+    0 0 0 6px rgba(168, 213, 186, 0.4),
+    0 4px 12px rgba(45, 52, 54, 0.08);
 }
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
@@ -487,21 +491,26 @@ body {
   }
 
   .hero-content {
-    width: min(480px, calc(100% - 28px));
-    max-width: none;
-    margin: -10px 0 0;
-    padding: 12px 14px;
-    border-radius: 14px;
-    box-shadow:
-      0 0 0 6px rgba(168, 213, 186, 0.38),
-      var(--shadow-md);
+    width: fit-content;
+    max-width: calc(100% - 28px);
+    margin: -8px 0 0;
+    padding: 0;
   }
 
   .hero-content .btn-start {
-    padding: 14px 24px;
+    padding: 14px 22px;
     min-height: 46px;
     font-size: 1.05rem;
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow:
+      0 0 0 6px rgba(168, 213, 186, 0.42),
+      0 6px 18px rgba(45, 52, 54, 0.09);
+  }
+
+  .hero-content .btn-start:hover {
+    box-shadow:
+      0 0 0 6px rgba(168, 213, 186, 0.5),
+      0 10px 22px rgba(90, 155, 125, 0.18);
   }
 
   /* メインコンテンツ: 詰めた余白 */
@@ -555,9 +564,15 @@ body {
 /* 超小型スマホ（ノッチ対策） */
 @media (max-width: 380px) {
   .hero-content {
-    width: calc(100% - 24px);
-    margin: -10px 0 0;
-    padding: 12px 12px;
+    width: fit-content;
+    max-width: calc(100% - 24px);
+    margin: -8px 0 0;
+    padding: 0;
+  }
+
+  .hero-content .btn-start {
+    padding: 13px 18px;
+    font-size: 1rem;
   }
 
   .main-content {
