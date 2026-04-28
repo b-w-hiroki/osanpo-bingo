@@ -81,7 +81,7 @@ body {
 }
 
 .landing-container {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
@@ -94,9 +94,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 0 0 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, var(--bg) 0%, #e8f2ec 72%, #dff0e6 100%);
+  padding: 0;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, var(--bg) 0%, #e8f2ec 55%, #d8ece2 100%);
   color: var(--text);
   text-align: center;
   overflow: visible;
@@ -110,22 +110,23 @@ body {
   overflow: hidden;
   position: relative;
   background: linear-gradient(180deg, #dceee3 0%, #e8eeea 55%, #d4e8dd 100%);
-  border-bottom: 1px solid rgba(90, 155, 125, 0.2);
+  border-radius: 0 0 clamp(18px, 4vw, 28px) clamp(18px, 4vw, 28px);
+  box-shadow: 0 10px 32px rgba(90, 120, 100, 0.08);
 }
 
-/* ボタン帯に繋がる緑の下地（画像下〜CTA周り） */
+/* ボタン帯へ自然にフェード（イラストと一体感） */
 .hero-image-wrap::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 42%;
+  height: 48%;
   background: linear-gradient(
     180deg,
     rgba(232, 238, 234, 0) 0%,
-    rgba(184, 212, 196, 0.35) 45%,
-    rgba(168, 213, 186, 0.55) 100%
+    rgba(200, 225, 210, 0.25) 40%,
+    rgba(175, 215, 195, 0.5) 100%
   );
   pointer-events: none;
   z-index: 1;
@@ -141,35 +142,50 @@ body {
   z-index: 0;
 }
 
-/* 白い内枠は置かず、ボタン＋緑マットだけを画像下に重ねる（ずれ・大きすぎ解消） */
+/* CTA帯：角丸で画像とつなぐ（水平の「張り付き」感を弱める） */
+.hero-cta-strip {
+  margin: clamp(-36px, -5vw, -20px) clamp(14px, 4vw, 28px) 0;
+  padding: clamp(18px, 3.5vw, 26px) clamp(16px, 4vw, 28px) clamp(6px, 2vw, 10px);
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(
+    165deg,
+    rgba(238, 248, 242, 0.92) 0%,
+    rgba(218, 236, 226, 0.88) 45%,
+    rgba(205, 230, 216, 0.95) 100%
+  );
+  border-radius: clamp(18px, 4vw, 26px);
+  border: 1px solid rgba(90, 155, 125, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 12px 40px rgba(60, 100, 80, 0.1);
+}
+
 .hero-content {
   align-self: center;
   box-sizing: border-box;
   width: fit-content;
-  max-width: calc(100% - 32px);
-  margin: -12px 0 0;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
   position: relative;
-  z-index: 2;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .hero-content .btn-start {
-  padding: 16px 28px;
-  min-height: 48px;
+  padding: 16px 32px;
+  min-height: 50px;
   border: none;
   border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff 0%, #f0f7f3 100%);
-  color: var(--primary-dark);
+  background: linear-gradient(165deg, #ffffff 0%, #eaf5ef 55%, #e2f0ea 100%);
+  color: #3d7a62;
+  font-weight: 800;
   box-shadow:
-    0 0 0 8px rgba(168, 213, 186, 0.42),
-    0 8px 24px rgba(45, 52, 54, 0.1);
+    0 0 0 1px rgba(90, 155, 125, 0.18),
+    0 3px 0 rgba(90, 155, 125, 0.22),
+    0 10px 28px rgba(45, 80, 65, 0.14);
   animation: none;
 }
 
@@ -180,15 +196,17 @@ body {
 .hero-content .btn-start:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 8px rgba(168, 213, 186, 0.5),
-    0 12px 28px rgba(90, 155, 125, 0.2);
+    0 0 0 1px rgba(90, 155, 125, 0.25),
+    0 5px 0 rgba(90, 155, 125, 0.2),
+    0 16px 36px rgba(45, 80, 65, 0.18);
 }
 
 .hero-content .btn-start:active {
   transform: translateY(0);
   box-shadow:
-    0 0 0 6px rgba(168, 213, 186, 0.4),
-    0 4px 12px rgba(45, 52, 54, 0.08);
+    0 0 0 1px rgba(90, 155, 125, 0.2),
+    0 2px 0 rgba(90, 155, 125, 0.18),
+    0 6px 16px rgba(45, 52, 54, 0.1);
 }
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
@@ -287,81 +305,112 @@ body {
 /* ========== メインコンテンツ（1ブロック） ========== */
 .main-content {
   flex: 1;
-  padding: 32px 24px 40px;
+  padding: clamp(28px, 5vw, 44px) clamp(18px, 5vw, 40px) 44px;
 }
 
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: clamp(18px, 3vw, 28px);
+  align-items: stretch;
+  margin-bottom: 28px;
 }
 
 .content-block {
   background: var(--card-bg);
-  padding: 20px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  padding: clamp(20px, 3.5vw, 26px);
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .block-title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--primary-dark);
-  margin-bottom: 16px;
-  padding-bottom: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
   border-bottom: 2px solid var(--primary-light);
+  letter-spacing: 0.02em;
 }
 
 /* 特徴リスト */
-.feature-list { display: flex; flex-direction: column; gap: 12px; }
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.5vw, 22px);
+  flex: 1;
+}
 .feature-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  padding-bottom: clamp(14px, 2vw, 18px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.feature-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .feature-item strong {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
   color: var(--text);
 }
 .feature-item span {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
   color: var(--text-light);
 }
 
-/* 遊び方 */
-.howto-list { display: flex; flex-direction: column; gap: 12px; }
+/* 遊び方（カード高さに合わせて縦バランス） */
+.howto-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(14px, 2.2vw, 20px);
+  flex: 1;
+  padding: 6px 0 4px;
+}
 .howto-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 44px;
+  padding: 8px 0;
 }
 .step-num {
-  width: 28px;
-  height: 28px;
-  background: var(--primary);
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(145deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 700;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(90, 155, 125, 0.35);
 }
 .howto-item span:last-child {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
   color: var(--text);
+  padding-top: 3px;
 }
 
 /* おすすめブロック */
 .recommend-block {
   background: var(--card-bg);
-  padding: 20px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 24px;
+  padding: clamp(20px, 3.5vw, 26px);
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 28px;
 }
 
 .recommend-block .block-title {
@@ -480,53 +529,57 @@ body {
 
 /* ========== レスポンシブ（モバイルファースト・余白ゼロ設計） ========== */
 @media (max-width: 600px) {
-  /* ヒーロー: 横フルブリード・余白を詰める */
   .hero {
-    padding: 0 0 14px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
   }
 
   .hero-image-wrap {
     max-height: none;
     aspect-ratio: 16 / 9;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .hero-cta-strip {
+    margin: -24px 12px 0;
+    padding: 16px 14px 8px;
   }
 
   .hero-content {
-    width: fit-content;
-    max-width: calc(100% - 28px);
-    margin: -8px 0 0;
-    padding: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
   .hero-content .btn-start {
+    width: 100%;
+    max-width: 340px;
     padding: 14px 22px;
-    min-height: 46px;
+    min-height: 48px;
     font-size: 1.05rem;
     border-radius: 12px;
-    box-shadow:
-      0 0 0 6px rgba(168, 213, 186, 0.42),
-      0 6px 18px rgba(45, 52, 54, 0.09);
   }
 
   .hero-content .btn-start:hover {
-    box-shadow:
-      0 0 0 6px rgba(168, 213, 186, 0.5),
-      0 10px 22px rgba(90, 155, 125, 0.18);
+    transform: translateY(-1px);
   }
 
   /* メインコンテンツ: 詰めた余白 */
   .content-grid {
     grid-template-columns: 1fr;
-    gap: 14px;
-    margin-bottom: 16px;
+    gap: 16px;
+    margin-bottom: 20px;
   }
 
   .content-block {
-    padding: 16px;
+    padding: 18px;
+  }
+
+  .howto-list {
+    padding: 2px 0 0;
   }
 
   .recommend-block {
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
   }
 
   .recommend-grid {
@@ -535,7 +588,7 @@ body {
   }
 
   .main-content {
-    padding: 18px 16px 28px;
+    padding: 22px 16px 32px;
     padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
   }
 
@@ -563,11 +616,9 @@ body {
 
 /* 超小型スマホ（ノッチ対策） */
 @media (max-width: 380px) {
-  .hero-content {
-    width: fit-content;
-    max-width: calc(100% - 24px);
-    margin: -8px 0 0;
-    padding: 0;
+  .hero-cta-strip {
+    margin: -20px 10px 0;
+    padding: 14px 12px 6px;
   }
 
   .hero-content .btn-start {
@@ -576,7 +627,7 @@ body {
   }
 
   .main-content {
-    padding: 16px 12px 24px;
+    padding: 18px 12px 28px;
     padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
   }
 }
