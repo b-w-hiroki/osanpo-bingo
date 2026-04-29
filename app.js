@@ -112,6 +112,8 @@ class OsanpoBingo {
     this.totalDistance = 0;      // 累積メートル
     this.lastPosition = null;    // 最後の GeolocationCoordinates
     this.watchId = null;         // watchPosition ID
+    // 'idle' | 'active' | 'denied' | 'unavailable'
+    this.locationState = 'idle';
 
     // DOM要素（初期化時に取得）
     this.boardElement = null;
@@ -529,6 +531,11 @@ class OsanpoBingo {
     const textEl = cell.querySelector('.cell-text');
     if (!textEl || !textEl.textContent.trim()) return;
 
+    // インラインスタイルをリセット（クローン引き継ぎ・再計測時の残骸を除去）
+    textEl.style.fontSize = '';
+    textEl.style.whiteSpace = '';
+    textEl.style.lineHeight = '';
+
     const MIN_PX = 8;
 
     // nowrapで計測 → はみ出しがなければそのまま終了
@@ -657,16 +664,29 @@ class OsanpoBingo {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  /** メートルを "120m" / "1.2km" の文字列にフォーマット */
+  /**
+   * メートルを表示文字列にフォーマット
+   * GPS が使えない場合は「測定なし」を返す
+   */
   formatDistance(meters) {
+    if (this.locationState === 'unavailable' || this.locationState === 'denied') {
+      return '測定なし';
+    }
+    if (this.locationState === 'idle') return '測定なし';
     if (meters < 1000) return `${Math.round(meters)}m`;
     return `${(meters / 1000).toFixed(1)}km`;
   }
 
   /** GPS トラッキング開始（パーミッション確認あり） */
   startLocationTracking() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      this.locationState = 'unavailable';
+      this.updateStats();
+      return;
+    }
     if (this.watchId != null) return; // 二重起動防止
+
+    this.locationState = 'idle';
 
     const options = {
       enableHighAccuracy: true,
@@ -676,7 +696,15 @@ class OsanpoBingo {
 
     this.watchId = navigator.geolocation.watchPosition(
       (pos) => this.onLocationUpdate(pos),
-      () => {/* 位置情報エラーは無視（許可しない場合も含む） */},
+      (err) => {
+        // PERMISSION_DENIED(1) or POSITION_UNAVAILABLE(2) or TIMEOUT(3)
+        if (err.code === 1) {
+          this.locationState = 'denied';
+        } else {
+          this.locationState = 'unavailable';
+        }
+        this.updateStats();
+      },
       options
     );
   }
@@ -698,6 +726,9 @@ class OsanpoBingo {
 
     // 精度 30m 超はノイズとして無視
     if (accuracy > 30) return;
+
+    // 最初の有効な位置が取れた → active に
+    this.locationState = 'active';
 
     if (this.lastPosition) {
       const dist = this.haversineDistance(
@@ -1138,6 +1169,7 @@ class OsanpoBingo {
       // 距離リセット＆再トラッキング
       this.totalDistance = 0;
       this.lastPosition = null;
+      this.locationState = 'idle';
       this.stopLocationTracking();
       this.startLocationTracking();
       this.updateStats();
@@ -2095,6 +2127,8 @@ class OsanpoBingo {
       }
       if (typeof data.totalDistance === 'number') {
         this.totalDistance = data.totalDistance;
+        // 保存時点での距離があればactiveとして扱う
+        if (data.totalDistance > 0) this.locationState = 'active';
       }
 
       return true;
