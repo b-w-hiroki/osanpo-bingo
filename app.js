@@ -107,7 +107,12 @@ class OsanpoBingo {
     this.lastBattleSyncStatus = 'idle';
     this.lastBattleSyncError = '';
     this.debugPanelEl = null;
-    
+
+    // 移動距離トラッキング
+    this.totalDistance = 0;      // 累積メートル
+    this.lastPosition = null;    // 最後の GeolocationCoordinates
+    this.watchId = null;         // watchPosition ID
+
     // DOM要素（初期化時に取得）
     this.boardElement = null;
     this.messageElement = null;
@@ -118,6 +123,7 @@ class OsanpoBingo {
     this.difficultyDisplay = null;
     this.playerCountDisplay = null;
     this.opponentClaimedCountElement = null;
+    this.distanceElement = null;
   }
   
   // 初期化
@@ -135,6 +141,7 @@ class OsanpoBingo {
     this.difficultyDisplay = document.getElementById('difficultyDisplay');
     this.playerCountDisplay = document.getElementById('playerCountDisplay');
     this.opponentClaimedCountElement = document.getElementById('opponentClaimedCount');
+    this.distanceElement = document.getElementById('distanceDisplay');
     
     if (!this.boardElement) {
       console.error('❌ bingoBoard 要素が見つかりません');
@@ -162,8 +169,10 @@ class OsanpoBingo {
       } else {
         this.stopBattleSyncLoop();
       }
+      // 位置情報トラッキング開始
+      this.startLocationTracking();
     }
-    
+
   }
   
   // イベントリスナーを設定
@@ -630,6 +639,86 @@ class OsanpoBingo {
     }, 10);
   }
   
+  // ==================== 移動距離トラッキング ====================
+
+  /**
+   * Haversine 式で2点間の距離（メートル）を返す
+   * @param {number} lat1 @param {number} lon1 @param {number} lat2 @param {number} lon2
+   * @returns {number}
+   */
+  haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // 地球半径 (m)
+    const toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  /** メートルを "120m" / "1.2km" の文字列にフォーマット */
+  formatDistance(meters) {
+    if (meters < 1000) return `${Math.round(meters)}m`;
+    return `${(meters / 1000).toFixed(1)}km`;
+  }
+
+  /** GPS トラッキング開始（パーミッション確認あり） */
+  startLocationTracking() {
+    if (!navigator.geolocation) return;
+    if (this.watchId != null) return; // 二重起動防止
+
+    const options = {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 10000
+    };
+
+    this.watchId = navigator.geolocation.watchPosition(
+      (pos) => this.onLocationUpdate(pos),
+      () => {/* 位置情報エラーは無視（許可しない場合も含む） */},
+      options
+    );
+  }
+
+  /** GPS トラッキング停止 */
+  stopLocationTracking() {
+    if (this.watchId != null) {
+      navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+    }
+  }
+
+  /**
+   * 位置情報更新ハンドラ
+   * 精度が低い点・GPS ジャンプはフィルタリングして無視する
+   */
+  onLocationUpdate(pos) {
+    const { latitude, longitude, accuracy } = pos.coords;
+
+    // 精度 30m 超はノイズとして無視
+    if (accuracy > 30) return;
+
+    if (this.lastPosition) {
+      const dist = this.haversineDistance(
+        this.lastPosition.latitude,
+        this.lastPosition.longitude,
+        latitude,
+        longitude
+      );
+      // GPS ジャンプ（150m 以上の瞬間移動）も無視
+      if (dist < 150) {
+        this.totalDistance += dist;
+        this.updateStats();
+        this.saveToStorage();
+      }
+    }
+
+    this.lastPosition = { latitude, longitude };
+  }
+
+  // ==================== 統計を更新 ====================
+
   // 統計を更新
   updateStats() {
     if (this.bingoCountElement) {
@@ -670,6 +759,9 @@ class OsanpoBingo {
       } else {
         if (statItem) statItem.style.display = 'none';
       }
+    }
+    if (this.distanceElement) {
+      this.distanceElement.textContent = this.formatDistance(this.totalDistance);
     }
     this.updateDebugPanel();
   }
@@ -776,11 +868,20 @@ class OsanpoBingo {
         ? this.getBattleCounts().selfClaims
         : this.markedCells.size;
     }
-    
+
+    // 距離を表示
+    const distEl = document.getElementById('screenshotDistance');
+    if (distEl) distEl.textContent = this.formatDistance(this.totalDistance);
+    const distDivider = document.getElementById('screenshotDistanceDivider');
+    if (distDivider) distDivider.classList.remove('hidden');
+
+    // 結果確定時にトラッキング停止
+    this.stopLocationTracking();
+
     // グループ入力欄をクリア
     const groupInput = document.getElementById('resultGroupInput');
     if (groupInput) groupInput.value = '';
-    
+
     view.style.display = 'flex';
   }
   
@@ -952,7 +1053,7 @@ class OsanpoBingo {
       dateEl?.textContent || '',
       playTimeEl ? playTimeEl + ' ' : '',
       groupText ? groupText + ' ' : '',
-      'ビンゴ' + bingo + '本・マーク' + marked + 'マス',
+      'ビンゴ' + bingo + '本・マーク' + marked + 'マス' + (this.totalDistance > 0 ? '・' + this.formatDistance(this.totalDistance) + '歩いた' : ''),
       '#お散歩ビンゴ #散歩 #ビンゴ'
     ].filter(Boolean).join('\n');
   }
@@ -1034,6 +1135,11 @@ class OsanpoBingo {
       this.createBoard(this.roomCode, this.difficulty, shuffleSalt, null);
       this.markCell(12);
       this.checkBingo();
+      // 距離リセット＆再トラッキング
+      this.totalDistance = 0;
+      this.lastPosition = null;
+      this.stopLocationTracking();
+      this.startLocationTracking();
       this.updateStats();
       this.saveToStorage();
       this.syncBattleOwnersFromServer();
@@ -1307,6 +1413,10 @@ class OsanpoBingo {
         this.createBoard('solo', this.difficulty, '', customTopics);
         this.markCell(12);
         this.checkBingo();
+        this.totalDistance = 0;
+        this.lastPosition = null;
+        this.stopLocationTracking();
+        this.startLocationTracking();
         this.updateStats();
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
@@ -1343,19 +1453,23 @@ class OsanpoBingo {
         }
         this.gameStartTime = Date.now();
         this.battleTopicOwners = {};
-        
+
         this.createBoard(roomCode, difficulty, '', customTopics);
         this.markCell(12);
         this.checkBingo();
+        this.totalDistance = 0;
+        this.lastPosition = null;
+        this.stopLocationTracking();
+        this.startLocationTracking();
         this.updateStats();
         this.syncBattleOwnersFromServer();
         this.startBattleSyncLoop();
-        
+
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
       });
     }
-    
+
     // 参加ボタン（参加モード）
     if (joinGameBtn) {
       joinGameBtn.addEventListener('click', () => {
@@ -1391,6 +1505,10 @@ class OsanpoBingo {
         this.createBoard(roomCode, difficulty, '', customTopics);
         this.markCell(12);
         this.checkBingo();
+        this.totalDistance = 0;
+        this.lastPosition = null;
+        this.stopLocationTracking();
+        this.startLocationTracking();
         this.updateStats();
         this.syncBattleOwnersFromServer();
         this.startBattleSyncLoop();
@@ -1905,7 +2023,8 @@ class OsanpoBingo {
         playMode: this.playMode,
         gameStartTime: this.gameStartTime,
         gameType: this.gameType,
-        battleTopicOwners: this.battleTopicOwners
+        battleTopicOwners: this.battleTopicOwners,
+        totalDistance: this.totalDistance
       };
       localStorage.setItem('osanpoBingo', JSON.stringify(data));
     } catch (error) {
@@ -1974,7 +2093,10 @@ class OsanpoBingo {
       if (data.battleTopicOwners && typeof data.battleTopicOwners === 'object') {
         this.battleTopicOwners = data.battleTopicOwners;
       }
-      
+      if (typeof data.totalDistance === 'number') {
+        this.totalDistance = data.totalDistance;
+      }
+
       return true;
     } catch (error) {
       console.error('❌ 読み込みエラー:', error);
