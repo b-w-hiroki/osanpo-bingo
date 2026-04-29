@@ -761,6 +761,10 @@ class OsanpoBingo {
       clone.id = 'screenshotBoardClone';
       targetBoard.innerHTML = '';
       targetBoard.appendChild(clone);
+      // クローン後にセルサイズが変わるため、テキストを再フィット
+      requestAnimationFrame(() => {
+        clone.querySelectorAll('.bingo-cell').forEach(c => this.fitCellText(c));
+      });
     }
     
     // 統計を表示

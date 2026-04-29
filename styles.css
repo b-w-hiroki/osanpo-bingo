@@ -1171,21 +1171,11 @@ h1 {
   padding: 6px;
 }
 
-/* 結果画面のビンゴマス：ゲーム画面と同サイズを維持（レスポンシブで縮小されない） */
-.result-board-wrap .cell-icon,
-.result-capture-board .cell-icon {
-  font-size: 4.2rem;
-}
-
-.result-board-wrap .cell-icon-img,
-.result-capture-board .cell-icon-img {
-  width: 4.2rem;
-  height: 4.2rem;
-}
-
+/* 結果画面のビンゴマス：%ベースレイアウトを継承（rem 固定指定なし）
+   テキストは cloneNode 後に fitCellText() で再フィット済み */
 .result-board-wrap .cell-text,
 .result-capture-board .cell-text {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .result-stats-row {
@@ -1345,20 +1335,6 @@ h1 {
   .result-board-wrap,
   .result-capture-board {
     padding: var(--spacing-xs);
-  }
-  /* スマホでもビンゴマスは視認性優先で縮小を抑える */
-  .result-board-wrap .cell-icon,
-  .result-capture-board .cell-icon {
-    font-size: 3.6rem;
-  }
-  .result-board-wrap .cell-icon-img,
-  .result-capture-board .cell-icon-img {
-    width: 3.6rem;
-    height: 3.6rem;
-  }
-  .result-board-wrap .cell-text,
-  .result-capture-board .cell-text {
-    font-size: 0.85rem;
   }
   .result-share-buttons {
     flex-direction: column;
