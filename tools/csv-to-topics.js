@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 /**
  * CSV → topics.js 変換スクリプト
- * 
+ *
  * topics_list.csv を読み込んで topics.js を自動生成します。
- * 
+ *
  * 使い方:
  *   node tools/csv-to-topics.js
  *   npm run build-topics
- * 
- * CSV形式:
- *   ID,お題テキスト,絵文字,カテゴリ,難易度,文字数,アイコン画像,備考
+ *
+ * CSV形式 (新フォーマット):
+ *   ID,icon_file_name,display_name,category,difficulty,spawn_permyriad
+ *
+ * difficulty は星表記: ★☆☆☆☆ / ★★☆☆☆ / ★★★☆☆ / ★★★★☆ / ★★★★★
+ *   → ★1-2: easy（かんたん）
+ *   → ★3:   medium（ふつう）
+ *   → ★4-5: hard（むずかしい）
  */
 
 const fs = require('fs');
@@ -18,72 +23,67 @@ const path = require('path');
 const CSV_PATH = path.join(__dirname, '..', 'topics_list.csv');
 const OUTPUT_PATH = path.join(__dirname, '..', 'topics.js');
 
-// 先頭の真のBOM / 誤って文字列化された「\uFEFF」表記を除去
-function trimCsvCell(s) {
+// BOM除去 & トリム
+function trimCell(s) {
   if (!s) return '';
-  return s.replace(/^\uFEFF+/g, '').replace(/^\\uFEFF/i, '').trim();
+  return s.replace(/^﻿+/g, '').replace(/^\\uFEFF/i, '').trim();
 }
 
-// CSV読み込み・パース
+// CSV パース
 function parseCSV(csvText) {
-  const lines = csvText.split('\n').filter(line => line.trim());
-  const firstLine = trimCsvCell(lines[0]);
-  const headers = firstLine.split(',').map(trimCsvCell);
-  
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(trimCsvCell);
+  const lines = csvText.split('\n').filter(l => l.trim());
+  const headers = trimCell(lines[0]).split(',').map(trimCell);
+  return lines.slice(1).map(line => {
+    const values = line.split(',').map(trimCell);
     const row = {};
-    headers.forEach((h, idx) => {
-      row[h] = (values[idx] || '').trim();
-    });
-    rows.push(row);
-  }
-  return rows;
+    headers.forEach((h, i) => { row[h] = values[i] || ''; });
+    return row;
+  });
 }
 
-// 難易度名の変換
-function difficultyKey(jpName) {
-  const map = { 'かんたん': 'easy', 'ふつう': 'medium', 'むずかしい': 'hard' };
-  return map[jpName] || 'easy';
+// 星表記 → 難易度キー
+function starsToDifficulty(stars) {
+  const count = (stars.match(/★/g) || []).length;
+  if (count <= 2) return 'easy';
+  if (count === 3) return 'medium';
+  return 'hard';
 }
 
-// アイコンマッピング生成
+// アイコンマップ生成: {ID: icon_file_name}
 function buildIconMap(rows) {
   const map = {};
   rows.forEach(row => {
-    if (row['アイコン画像']) {
-      map[row['ID']] = row['アイコン画像'];
-    }
+    if (row['icon_file_name']) map[row['ID']] = row['icon_file_name'];
   });
   return map;
 }
 
-// topics.js のソースコードを生成
+// topics.js 生成
 function generateTopicsJS(rows) {
   const iconMap = buildIconMap(rows);
-  
-  // グループ分け
+
+  // 難易度別グループ
   const groups = { easy: [], medium: [], hard: [] };
   rows.forEach(row => {
-    const key = difficultyKey(row['難易度']);
-    groups[key].push({
+    const diff = starsToDifficulty(row['difficulty']);
+    groups[diff].push({
       id: parseInt(row['ID']),
-      text: row['お題テキスト'],
-      icon: row['絵文字'],
-      category: row['カテゴリ']
+      text: row['display_name'],
+      icon: '🔍',
+      category: row['category'],
+      weight: parseInt(row['spawn_permyriad']) || 1000
     });
   });
 
-  // iconMap のJSリテラル
-  const iconMapEntries = Object.entries(iconMap)
+  // iconMap JS リテラル
+  const iconMapStr = Object.entries(iconMap)
     .map(([id, file]) => `  ${id}: '${file}'`)
     .join(',\n');
 
-  // お題配列のJSリテラル
+  // お題配列 JS リテラル
   function topicArrayStr(arr) {
-    return arr.map(t => 
-      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}'}`
+    return arr.map(t =>
+      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', weight: ${t.weight}}`
     ).join(',\n');
   }
 
@@ -92,14 +92,14 @@ function generateTopicsJS(rows) {
     'utf8'
   );
 
-  const code = `// お散歩ビンゴ - お題データベース
+  return `// お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
 // 生成日時: ${new Date().toISOString().slice(0, 19).replace('T', ' ')}
 
-// お題ID → アイコン画像（画像ある場合のみ、なければ絵文字を使用）
+// お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
-${iconMapEntries}
+${iconMapStr}
 };
 
 function getTopicIcon(topic) {
@@ -111,17 +111,17 @@ function getTopicIcon(topic) {
 }
 
 const topicDatabase = {
-  // かんたん（${groups.easy.length}個） - よく見かけるもの
+  // かんたん（${groups.easy.length}個） ★1-2: よく見かけるもの
   easy: [
 ${topicArrayStr(groups.easy)}
   ],
-  
-  // ふつう（${groups.medium.length}個） - 少し探す必要があるもの
+
+  // ふつう（${groups.medium.length}個） ★3: 少し探す必要があるもの
   medium: [
 ${topicArrayStr(groups.medium)}
   ],
-  
-  // むずかしい（${groups.hard.length}個） - レアなもの
+
+  // むずかしい（${groups.hard.length}個） ★4-5: よく観察しないと見つからないもの
   hard: [
 ${topicArrayStr(groups.hard)}
   ]
@@ -134,34 +134,29 @@ function stringToSeed(str) {
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // 32bit整数に変換
+    hash = hash & hash;
   }
   return Math.abs(hash);
 }
 
-// シード付きシャッフル（決定論的）
+// シード付きシャッフル（決定論的・Mulberry32）
 function shuffleWithSeed(array, seed) {
   const arr = [...array];
   let currentSeed = seed;
-  
-  // Mulberry32 アルゴリズム（高速な疑似乱数生成）
   const random = () => {
     currentSeed = (currentSeed + 0x6D2B79F5) | 0;
     let t = Math.imul(currentSeed ^ (currentSeed >>> 15), 1 | currentSeed);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  
-  // Fisher-Yates シャッフル
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  
   return arr;
 }
 
-// 通常のシャッフル（ランダム）
+// 通常シャッフル
 function shuffle(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -181,37 +176,30 @@ function getUserId() {
   return userId;
 }
 `;
-
-  return code;
 }
 
 // メイン処理
 function main() {
-  // CSV読み込み
   if (!fs.existsSync(CSV_PATH)) {
     console.error('❌ CSVファイルが見つかりません:', CSV_PATH);
     process.exit(1);
   }
-  
-  let csvText = fs.readFileSync(CSV_PATH, 'utf-8');
-  // Excelで開いても文字化けしないよう UTF-8 BOM を付与（なければ付ける）
-  if (!csvText.startsWith('\uFEFF')) {
-    fs.writeFileSync(CSV_PATH, '\uFEFF' + csvText, 'utf-8');
-    csvText = '\uFEFF' + csvText;
-  }
-  const rows = parseCSV(csvText);
 
+  let csvText = fs.readFileSync(CSV_PATH, 'utf-8');
+  if (!csvText.startsWith('﻿')) {
+    fs.writeFileSync(CSV_PATH, '﻿' + csvText, 'utf-8');
+    csvText = '﻿' + csvText;
+  }
+
+  const rows = parseCSV(csvText);
   console.log(`📖 ${rows.length} 件のお題を読み込みました`);
-  
-  // 難易度別カウント
-  const counts = { 'かんたん': 0, 'ふつう': 0, 'むずかしい': 0 };
-  rows.forEach(r => { if (counts[r['難易度']] !== undefined) counts[r['難易度']]++; });
-  console.log(`   かんたん: ${counts['かんたん']}個 / ふつう: ${counts['ふつう']}個 / むずかしい: ${counts['むずかしい']}個`);
-  
-  // topics.js 生成
+
+  const counts = { easy: 0, medium: 0, hard: 0 };
+  rows.forEach(r => { counts[starsToDifficulty(r['difficulty'])]++; });
+  console.log(`   かんたん: ${counts.easy}個 / ふつう: ${counts.medium}個 / むずかしい: ${counts.hard}個`);
+
   const code = generateTopicsJS(rows);
   fs.writeFileSync(OUTPUT_PATH, code, 'utf-8');
-  
   console.log(`✅ topics.js を生成しました (${(code.length / 1024).toFixed(1)} KB)`);
 }
 

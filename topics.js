@@ -1,31 +1,362 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-04-25 03:51:21
+// 生成日時: 2026-04-29 09:32:10
 
-// お題ID → アイコン画像（画像ある場合のみ、なければ絵文字を使用）
+// お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
-  1: 'icon-neko.png',
-  2: 'icon-inu.png',
-  3: 'icon-hana.png',
-  4: 'icon-ki.png',
-  5: 'icon-tori.png',
-  6: 'icon-kuruma.png',
-  7: 'icon-jitensha.png',
-  8: 'icon-ie.png',
-  9: 'icon-kumo.png',
-  10: 'icon-kumo.png',
-  11: 'icon-taiyou.png',
-  12: 'icon-koen.png',
-  13: 'icon-bench.png',
-  14: 'icon-shingou.png',
-  15: 'icon-hashi.png',
-  16: 'icon-mizu.png',
-  17: 'icon-ishi.png',
-  18: 'icon-kusa.png',
-  19: 'icon-happa.png',
-  20: 'icon-kodomo.png',
-  40: 'icon-hito.png'
+  1: 'icon001_電柱.png',
+  2: 'icon002_郵便ポスト.png',
+  3: 'icon003_信号機.png',
+  4: 'icon004_横断歩道.png',
+  5: 'icon005_カーブミラー.png',
+  6: 'icon006_道路標識.png',
+  7: 'icon007_マンホール.png',
+  8: 'icon008_ガードレール.png',
+  9: 'icon009_道路の白線.png',
+  10: 'icon010_排水口.png',
+  11: 'icon011_道路反射板.png',
+  12: 'icon012_点字ブロック.png',
+  13: 'icon013_表札プレート.png',
+  14: 'icon014_玄関灯.png',
+  15: 'icon015_郵便受け.png',
+  16: 'icon016_インターホン.png',
+  17: 'icon017_門柱.png',
+  18: 'icon018_玄関マット.png',
+  19: 'icon019_宅配ボックス.png',
+  20: 'icon020_家のフェンス.png',
+  21: 'icon021_窓の格子.png',
+  22: 'icon022_雨どい.png',
+  23: 'icon023_小さな物置.png',
+  24: 'icon024_家の外階段.png',
+  25: 'icon025_すべり台.png',
+  26: 'icon026_ブランコ.png',
+  27: 'icon027_ジャングルジム.png',
+  28: 'icon028_シーソー.png',
+  29: 'icon029_鉄棒.png',
+  30: 'icon030_砂場.png',
+  31: 'icon031_バネの遊具.png',
+  32: 'icon032_公園の水飲み場.png',
+  33: 'icon033_公園の時計.png',
+  34: 'icon034_公園のベンチ.png',
+  35: 'icon035_公園の案内板.png',
+  36: 'icon036_公園のごみ箱.png',
+  37: 'icon037_たんぽぽ.png',
+  38: 'icon038_クローバー.png',
+  39: 'icon039_小さな白い花.png',
+  40: 'icon040_赤い実.png',
+  41: 'icon041_松ぼっくり.png',
+  42: 'icon042_どんぐり.png',
+  43: 'icon043_苔.png',
+  44: 'icon044_木の切り株.png',
+  45: 'icon045_丸い葉っぱ.png',
+  46: 'icon046_細長い葉っぱ.png',
+  47: 'icon047_草むら.png',
+  48: 'icon048_植え込み.png',
+  49: 'icon049_ブロック塀.png',
+  50: 'icon050_屋外の蛇口.png',
+  51: 'icon051_車止め.png',
+  52: 'icon052_街のゴミ箱.png',
+  53: 'icon053_木の案内札.png',
+  54: 'icon054_金網フェンス.png',
+  55: 'icon055_手すり.png',
+  56: 'icon056_駐輪ラック.png',
+  57: 'icon057_低いポール.png',
+  58: 'icon058_自動販売機.png',
+  59: 'icon059_灰皿スタンド.png',
+  60: 'icon060_街灯.png',
+  61: 'icon061_猫.png',
+  62: 'icon062_犬.png',
+  63: 'icon063_すずめ.png',
+  64: 'icon064_ハト.png',
+  65: 'icon065_カラス.png',
+  66: 'icon066_ちょうちょ.png',
+  67: 'icon067_てんとう虫.png',
+  68: 'icon068_アリ.png',
+  69: 'icon069_ダンゴムシ.png',
+  70: 'icon070_カタツムリ.png',
+  71: 'icon071_トカゲ.png',
+  72: 'icon072_メダカ鉢.png',
+  73: 'icon073_のれん.png',
+  74: 'icon074_立て看板.png',
+  75: 'icon075_店先の鉢植え.png',
+  76: 'icon076_食品サンプル.png',
+  77: 'icon077_シャッター.png',
+  78: 'icon078_アーケード.png',
+  79: 'icon079_ガチャガチャ.png',
+  80: 'icon080_店先の箱.png',
+  81: 'icon081_テイクアウト窓口.png',
+  82: 'icon082_商店街の旗.png',
+  83: 'icon083_レジ横の小窓.png',
+  84: 'icon084_店のライト.png',
+  85: 'icon085_ランドセル.png',
+  86: 'icon086_黄色い帽子.png',
+  87: 'icon087_通学路標識.png',
+  88: 'icon088_学校の門.png',
+  89: 'icon089_校庭フェンス.png',
+  90: 'icon090_体育倉庫.png',
+  91: 'icon091_一輪車.png',
+  92: 'icon092_サッカーボール.png',
+  93: 'icon093_竹馬.png',
+  94: 'icon094_チョーク.png',
+  95: 'icon095_黒板消し.png',
+  96: 'icon096_上履き袋.png',
+  97: 'icon097_じょうろ.png',
+  98: 'icon098_ほうき.png',
+  99: 'icon099_傘立て.png',
+  100: 'icon100_洗濯ばさみ.png',
+  101: 'icon101_物干し竿.png',
+  102: 'icon102_室外機.png',
+  103: 'icon103_ガーデンライト.png',
+  104: 'icon104_庭のイス.png',
+  105: 'icon105_園芸鉢.png',
+  106: 'icon106_庭石.png',
+  107: 'icon107_ホースリール.png',
+  108: 'icon108_ウッドデッキ.png',
+  109: 'icon109_おにぎり.png',
+  110: 'icon110_パン.png',
+  111: 'icon111_サンドイッチ.png',
+  112: 'icon112_アイスクリーム.png',
+  113: 'icon113_ドーナツ.png',
+  114: 'icon114_クッキー.png',
+  115: 'icon115_水筒.png',
+  116: 'icon116_紙パック飲料.png',
+  117: 'icon117_コーヒーカップ.png',
+  118: 'icon118_お弁当.png',
+  119: 'icon119_たい焼き.png',
+  120: 'icon120_焼きいも.png',
+  121: 'icon121_パーゴラ.png',
+  122: 'icon122_水飲み場.png',
+  123: 'icon123_自転車ラック.png',
+  124: 'icon124_チェーン柵.png',
+  125: 'icon125_石橋.png',
+  126: 'icon126_階段.png',
+  127: 'icon127_花壇.png',
+  128: 'icon128_手押しポンプ.png',
+  129: 'icon129_掲示板.png',
+  130: 'icon130_案内地図.png',
+  131: 'icon131_トイレマーク.png',
+  132: 'icon132_時計塔.png',
+  133: 'icon133_コンクリート壁.png',
+  134: 'icon134_木製アーチ.png',
+  135: 'icon135_ガーデンランプ.png',
+  136: 'icon136_石段.png',
+  137: 'icon137_グレーチング.png',
+  138: 'icon138_古いポンプ.png',
+  139: 'icon139_低い柵.png',
+  140: 'icon140_防火水槽ふた.png',
+  141: 'icon141_消火栓.png',
+  142: 'icon142_バス停.png',
+  143: 'icon143_タクシー乗り場.png',
+  144: 'icon144_駐車場ゲート.png',
+  145: 'icon145_自転車.png',
+  146: 'icon146_三輪車.png',
+  147: 'icon147_キックボード.png',
+  148: 'icon148_ベビーカー.png',
+  149: 'icon149_バス.png',
+  150: 'icon150_電車.png',
+  151: 'icon151_タクシー.png',
+  152: 'icon152_配達バイク.png',
+  153: 'icon153_台車.png',
+  154: 'icon154_スーツケース.png',
+  155: 'icon155_車のタイヤ.png',
+  156: 'icon156_駐輪場屋根.png',
+  157: 'icon157_桜.png',
+  158: 'icon158_新緑.png',
+  159: 'icon159_紫陽花.png',
+  160: 'icon160_ひまわり.png',
+  161: 'icon161_紅葉.png',
+  162: 'icon162_雪だるま.png',
+  163: 'icon163_長ぐつ.png',
+  164: 'icon164_マフラー.png',
+  165: 'icon165_こいのぼり.png',
+  166: 'icon166_クリスマス飾り.png',
+  167: 'icon167_風鈴.png',
+  168: 'icon168_うちわ.png',
+  169: 'icon169_赤いボール.png',
+  170: 'icon170_段ボール箱.png',
+  171: 'icon171_三角プレート.png',
+  172: 'icon172_木の棒.png',
+  173: 'icon173_小石.png',
+  174: 'icon174_大きな岩.png',
+  175: 'icon175_渦巻きオブジェ.png',
+  176: 'icon176_ジグザグ板.png',
+  177: 'icon177_星プレート.png',
+  178: 'icon178_顔に見える石.png',
+  179: 'icon179_直線の棒.png',
+  180: 'icon180_しましま板.png',
+  181: 'icon181_石2つ並び.png',
+  182: 'icon182_石3つ並び.png',
+  183: 'icon183_小石4つ.png',
+  184: 'icon184_5本線マーク板.png',
+  185: 'icon185_1本の棒.png',
+  186: 'icon186_多数並び小石.png',
+  187: 'icon187_同形葉2枚.png',
+  188: 'icon188_同形葉3枚.png',
+  189: 'icon189_数字1プレート.png',
+  190: 'icon190_数字2プレート.png',
+  191: 'icon191_数字3プレート.png',
+  192: 'icon192_小石10個以上.png',
+  193: 'icon193_羽.png',
+  194: 'icon194_足あと.png',
+  195: 'icon195_小石並び.png',
+  196: 'icon196_タイヤ跡.png',
+  197: 'icon197_手袋.png',
+  198: 'icon198_小枝の束.png',
+  199: 'icon199_ハート葉.png',
+  200: 'icon200_水たまり反射.png',
+  201: 'icon201_長い影.png',
+  202: 'icon202_木漏れ日.png',
+  203: 'icon203_半開き傘.png',
+  204: 'icon204_少し開いた門.png',
+  205: 'icon205_縄跳び.png',
+  206: 'icon206_傾いたカラーコーン.png',
+  207: 'icon207_めくれた紙.png',
+  208: 'icon208_斜め看板.png',
+  209: 'icon209_ずれた植木鉢.png',
+  210: 'icon210_片方サンダル.png',
+  211: 'icon211_開いた虫かご.png',
+  212: 'icon212_落ちかけ木の実.png',
+  213: 'icon213_枝の風船.png',
+  214: 'icon214_しぼんだボール.png',
+  215: 'icon215_ハート石.png',
+  216: 'icon216_虹反射.png',
+  217: 'icon217_ねじれ枝.png',
+  218: 'icon218_つる輪.png',
+  219: 'icon219_鳥の巣.png',
+  220: 'icon220_つぼみ.png',
+  221: 'icon221_開いた実.png',
+  222: 'icon222_抜け殻.png',
+  223: 'icon223_きのこ群.png',
+  224: 'icon224_ベンチ下ボール.png',
+  225: 'icon225_柵のタオル.png',
+  226: 'icon226_石の上どんぐり.png',
+  227: 'icon227_小枝の星.png',
+  228: 'icon228_木のリボン.png',
+  229: 'icon229_スコップ.png',
+  230: 'icon230_根元の木の実.png',
+  231: 'icon231_並べ葉.png',
+  232: 'icon232_とんぼ.png',
+  233: 'icon233_網と帽子.png',
+  234: 'icon234_レジャーシート端.png',
+  235: 'icon235_ピクニックかご.png',
+  236: 'icon236_ハンカチ.png',
+  237: 'icon237_紙コップ.png',
+  238: 'icon238_手紙.png',
+  239: 'icon239_ひっくり葉.png',
+  240: 'icon240_石の輪.png',
+  241: 'icon241_色の違う舗装ブロック.png',
+  242: 'icon242_タイルの補修跡.png',
+  243: 'icon243_アスファルトのひび.png',
+  244: 'icon244_側溝のふたの種類違い.png',
+  245: 'icon245_マンホール周りの円形補修.png',
+  246: 'icon246_点字ブロックの終端.png',
+  247: 'icon247_白線のかすれ.png',
+  248: 'icon248_横断歩道のすり減り.png',
+  249: 'icon249_舗装の切り替わり線.png',
+  250: 'icon250_道路の水たまり跡.png',
+  251: 'icon251_小さな砂だまり.png',
+  252: 'icon252_落ち葉が集まった端.png',
+  253: 'icon253_雑草が出たすき間.png',
+  254: 'icon254_根で盛り上がった舗装.png',
+  255: 'icon255_地面の小さな穴.png',
+  256: 'icon256_石が埋まった舗装.png',
+  257: 'icon257_十字路.png',
+  258: 'icon258_T字路.png',
+  259: 'icon259_行き止まり.png',
+  260: 'icon260_曲がり角.png',
+  261: 'icon261_坂道.png',
+  262: 'icon262_急な坂.png',
+  263: 'icon263_細い路地.png',
+  264: 'icon264_袋小路.png',
+  265: 'icon265_一方通行の道.png',
+  266: 'icon266_車止めのある道.png',
+  267: 'icon267_歩道と車道の段差.png',
+  268: 'icon268_縁石の切れ目.png',
+  269: 'icon269_段差解消スロープ.png',
+  270: 'icon270_カーブした白線.png',
+  271: 'icon271_道路の合流部分.png',
+  272: 'icon272_道の幅が変わる場所.png',
+  273: 'icon273_側溝の格子ふた.png',
+  274: 'icon274_コンクリート側溝.png',
+  275: 'icon275_丸い排水穴.png',
+  276: 'icon276_細長い排水穴.png',
+  277: 'icon277_側溝の落ち葉詰まり.png',
+  278: 'icon278_側溝の水の流れ.png',
+  279: 'icon279_雨水ます.png',
+  280: 'icon280_集水ますのふた.png',
+  281: 'icon281_排水口の金網.png',
+  282: 'icon282_水が流れた跡.png',
+  283: 'icon283_雨だれ跡.png',
+  284: 'icon284_壁際の湿った跡.png',
+  285: 'icon285_苔の生えた排水まわり.png',
+  286: 'icon286_泥の跳ね跡.png',
+  287: 'icon287_側溝の段差.png',
+  288: 'icon288_溝に落ちた葉っぱ.png',
+  289: 'icon289_道路と砂利の境界.png',
+  290: 'icon290_舗装と土の境界.png',
+  291: 'icon291_コンクリートと芝の境界.png',
+  292: 'icon292_舗装とタイルの境界.png',
+  293: 'icon293_道路と側溝の境界線.png',
+  294: 'icon294_歩道と植え込みの境界.png',
+  295: 'icon295_縁石の角.png',
+  296: 'icon296_縁石の丸い角.png',
+  297: 'icon297_縁石の欠け.png',
+  298: 'icon298_塀の終わり位置.png',
+  299: 'icon299_フェンスの終端.png',
+  300: 'icon300_ガードレールの終端.png',
+  301: 'icon301_道路の端の白線.png',
+  302: 'icon302_舗装の切り欠き部分.png',
+  303: 'icon303_舗装の角の補修.png',
+  304: 'icon304_道の端に集まった砂.png',
+  305: 'icon305_白線の途切れ.png',
+  306: 'icon306_白線の重なり.png',
+  307: 'icon307_消えかけた白線.png',
+  308: 'icon308_新しい白線.png',
+  309: 'icon309_古い白線.png',
+  310: 'icon310_白線の端の丸まり.png',
+  311: 'icon311_タイル目地の線.png',
+  312: 'icon312_ブロック塀の目地.png',
+  313: 'icon313_アスファルトの継ぎ目.png',
+  314: 'icon314_コンクリートの継ぎ目.png',
+  315: 'icon315_補修された線状パッチ.png',
+  316: 'icon316_ひび割れが一本だけ.png',
+  317: 'icon317_交差するひび.png',
+  318: 'icon318_曲がったひび.png',
+  319: 'icon319_影が一直線.png',
+  320: 'icon320_フェンスの影の線.png',
+  321: 'icon321_濡れて色が変わった舗装.png',
+  322: 'icon322_乾いて色が違う舗装.png',
+  323: 'icon323_苔が広がった面.png',
+  324: 'icon324_砂が広がった面.png',
+  325: 'icon325_落ち葉が広がった面.png',
+  326: 'icon326_タイルが並ぶ面.png',
+  327: 'icon327_ブロック塀の面.png',
+  328: 'icon328_金属ふたの面.png',
+  329: 'icon329_アスファルトの粗い面.png',
+  330: 'icon330_コンクリートの滑らかな面.png',
+  331: 'icon331_小石が多い面.png',
+  332: 'icon332_影が広がった面.png',
+  333: 'icon333_水が広がった面.png',
+  334: 'icon334_補修された四角い面.png',
+  335: 'icon335_色が違う舗装パッチ面.png',
+  336: 'icon336_草が広がった面.png',
+  337: 'icon337_少し高い縁石.png',
+  338: 'icon338_とても高い縁石.png',
+  339: 'icon339_低い段差.png',
+  340: 'icon340_2段の段差.png',
+  341: 'icon341_3段の段差.png',
+  342: 'icon342_スロープの始まり.png',
+  343: 'icon343_スロープの終わり.png',
+  344: 'icon344_盛り上がった舗装.png',
+  345: 'icon345_沈んだ舗装.png',
+  346: 'icon346_地面より高いマンホール.png',
+  347: 'icon347_地面より低いマンホール.png',
+  348: 'icon348_高さの違うタイル.png',
+  349: 'icon349_高低差のある境界.png',
+  350: 'icon350_影でわかる段差.png',
+  351: 'icon351_壁の基礎の立ち上がり.png',
+  352: 'icon352_土が盛られた端.png'
 };
 
 function getTopicIcon(topic) {
@@ -37,143 +368,375 @@ function getTopicIcon(topic) {
 }
 
 const topicDatabase = {
-  // かんたん（40個） - よく見かけるもの
+  // かんたん（192個） ★1-2: よく見かけるもの
   easy: [
-    {id: 1, text: 'ネコ', icon: '🐱', category: '動物'},
-    {id: 2, text: '犬', icon: '🐶', category: '動物'},
-    {id: 3, text: '花', icon: '🌸', category: '植物'},
-    {id: 4, text: '木', icon: '🌳', category: '植物'},
-    {id: 5, text: '鳥', icon: '🐦', category: '動物'},
-    {id: 6, text: '車', icon: '🚗', category: '乗り物'},
-    {id: 7, text: '自転車', icon: '🚲', category: '乗り物'},
-    {id: 8, text: '家', icon: '🏠', category: '建物'},
-    {id: 9, text: '空', icon: '☁️', category: '自然'},
-    {id: 10, text: '雲', icon: '☁️', category: '自然'},
-    {id: 11, text: '太陽', icon: '☀️', category: '自然'},
-    {id: 12, text: '公園', icon: '🏞️', category: '場所'},
-    {id: 13, text: 'ベンチ', icon: '🪑', category: '物'},
-    {id: 14, text: '信号', icon: '🚦', category: '物'},
-    {id: 15, text: '橋', icon: '🌉', category: '建物'},
-    {id: 16, text: '川', icon: '🏞️', category: '自然'},
-    {id: 17, text: '石', icon: '🪨', category: '自然'},
-    {id: 18, text: '草', icon: '🌿', category: '植物'},
-    {id: 19, text: '葉っぱ', icon: '🍃', category: '植物'},
-    {id: 20, text: '子供', icon: '👶', category: '人'},
-    {id: 21, text: '赤い物', icon: '🔴', category: '色'},
-    {id: 22, text: '青い物', icon: '🔵', category: '色'},
-    {id: 23, text: '黄色い物', icon: '🟡', category: '色'},
-    {id: 24, text: '丸い物', icon: '⚪', category: '形'},
-    {id: 25, text: '三角の物', icon: '🔺', category: '形'},
-    {id: 26, text: '四角の物', icon: '🟦', category: '形'},
-    {id: 27, text: '大きい物', icon: '📏', category: '大きさ'},
-    {id: 28, text: '小さい物', icon: '🔬', category: '大きさ'},
-    {id: 29, text: '水', icon: '💧', category: '自然'},
-    {id: 30, text: '影', icon: '🌑', category: '自然'},
-    {id: 31, text: '光', icon: '💡', category: '自然'},
-    {id: 32, text: '音がする物', icon: '🔊', category: '感覚'},
-    {id: 33, text: 'いい匂い', icon: '👃', category: '感覚'},
-    {id: 34, text: '風', icon: '💨', category: '自然'},
-    {id: 35, text: '暖かい場所', icon: '🌡️', category: '場所'},
-    {id: 36, text: '涼しい場所', icon: '❄️', category: '場所'},
-    {id: 37, text: '道', icon: '🛣️', category: '場所'},
-    {id: 38, text: '門', icon: '🚪', category: '物'},
-    {id: 39, text: '窓', icon: '🪟', category: '物'},
-    {id: 40, text: '人', icon: '👤', category: '人'}
+    {id: 1, text: '電柱', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 3, text: '信号機', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 4, text: '横断歩道', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 5, text: 'カーブミラー', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 6, text: '道路標識', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 7, text: 'マンホール', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 8, text: 'ガードレール', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 9, text: '道路の白線', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 10, text: '排水口', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 11, text: '道路反射板', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 12, text: '点字ブロック', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 13, text: '表札プレート', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 14, text: '玄関灯', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 15, text: '郵便受け', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 16, text: 'インターホン', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 17, text: '門柱', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 18, text: '玄関マット', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 19, text: '宅配ボックス', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 20, text: '家のフェンス', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 21, text: '窓の格子', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 22, text: '雨どい', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 23, text: '小さな物置', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 24, text: '家の外階段', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 25, text: 'すべり台', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 26, text: 'ブランコ', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 27, text: 'ジャングルジム', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 28, text: 'シーソー', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 29, text: '鉄棒', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 30, text: '砂場', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 31, text: 'バネの遊具', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 32, text: '公園の水飲み場', icon: '🔍', category: '街インフラ', weight: 3000},
+    {id: 33, text: '公園の時計', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 34, text: '公園のベンチ', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 35, text: '公園の案内板', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 36, text: '公園のごみ箱', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 37, text: 'たんぽぽ', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 38, text: 'クローバー', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 39, text: '小さな白い花', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 40, text: '赤い実', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 41, text: '松ぼっくり', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 42, text: 'どんぐり', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 43, text: '苔', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 44, text: '木の切り株', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 45, text: '丸い葉っぱ', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 46, text: '細長い葉っぱ', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 47, text: '草むら', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 48, text: '植え込み', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 49, text: 'ブロック塀', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 50, text: '屋外の蛇口', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 51, text: '車止め', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 52, text: '街のゴミ箱', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 53, text: '木の案内札', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 54, text: '金網フェンス', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 55, text: '手すり', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 56, text: '駐輪ラック', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 57, text: '低いポール', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 58, text: '自動販売機', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 59, text: '灰皿スタンド', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 60, text: '街灯', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 61, text: '猫', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 62, text: '犬', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 63, text: 'すずめ', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 64, text: 'ハト', icon: '🔍', category: '自然・生き物', weight: 3000},
+    {id: 65, text: 'カラス', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 66, text: 'ちょうちょ', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 67, text: 'てんとう虫', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 68, text: 'アリ', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 69, text: 'ダンゴムシ', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 70, text: 'カタツムリ', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 71, text: 'トカゲ', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 72, text: 'メダカ鉢', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 73, text: 'のれん', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 74, text: '立て看板', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 75, text: '店先の鉢植え', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 76, text: '食品サンプル', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 77, text: 'シャッター', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 78, text: 'アーケード', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 79, text: 'ガチャガチャ', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 80, text: '店先の箱', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 81, text: 'テイクアウト窓口', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 82, text: '商店街の旗', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 83, text: 'レジ横の小窓', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 84, text: '店のライト', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 85, text: 'ランドセル', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 86, text: '黄色い帽子', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 87, text: '通学路標識', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 88, text: '学校の門', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 89, text: '校庭フェンス', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 90, text: '体育倉庫', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 91, text: '一輪車', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 92, text: 'サッカーボール', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 93, text: '竹馬', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 94, text: 'チョーク', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 95, text: '黒板消し', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 96, text: '上履き袋', icon: '🔍', category: '生活・学校', weight: 3000},
+    {id: 97, text: 'じょうろ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 98, text: 'ほうき', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 99, text: '傘立て', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 100, text: '洗濯ばさみ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 101, text: '物干し竿', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 102, text: '室外機', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 103, text: 'ガーデンライト', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 104, text: '庭のイス', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 105, text: '園芸鉢', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 106, text: '庭石', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 107, text: 'ホースリール', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 108, text: 'ウッドデッキ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 109, text: 'おにぎり', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 110, text: 'パン', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 111, text: 'サンドイッチ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 112, text: 'アイスクリーム', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 113, text: 'ドーナツ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 114, text: 'クッキー', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 115, text: '水筒', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 116, text: '紙パック飲料', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 117, text: 'コーヒーカップ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 118, text: 'お弁当', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 119, text: 'たい焼き', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 120, text: '焼きいも', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 121, text: 'パーゴラ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 122, text: '水飲み場', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 123, text: '自転車ラック', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 124, text: 'チェーン柵', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 125, text: '石橋', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 126, text: '階段', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 127, text: '花壇', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 128, text: '手押しポンプ', icon: '🔍', category: '家庭・食べ物', weight: 2500},
+    {id: 129, text: '掲示板', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 130, text: '案内地図', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 131, text: 'トイレマーク', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 132, text: '時計塔', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 133, text: 'コンクリート壁', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 134, text: '木製アーチ', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 135, text: 'ガーデンランプ', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 136, text: '石段', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 137, text: 'グレーチング', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 138, text: '古いポンプ', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 139, text: '低い柵', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 140, text: '防火水槽ふた', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 141, text: '消火栓', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 142, text: 'バス停', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 143, text: 'タクシー乗り場', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 144, text: '駐車場ゲート', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 145, text: '自転車', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 146, text: '三輪車', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 147, text: 'キックボード', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 148, text: 'ベビーカー', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 149, text: 'バス', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 150, text: '電車', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 151, text: 'タクシー', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 152, text: '配達バイク', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 153, text: '台車', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 154, text: 'スーツケース', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 155, text: '車のタイヤ', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 156, text: '駐輪場屋根', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 157, text: '桜', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 158, text: '新緑', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 159, text: '紫陽花', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 160, text: 'ひまわり', icon: '🔍', category: '街構造・乗り物', weight: 2500},
+    {id: 161, text: '紅葉', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 162, text: '雪だるま', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 163, text: '長ぐつ', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 164, text: 'マフラー', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 165, text: 'こいのぼり', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 166, text: 'クリスマス飾り', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 167, text: '風鈴', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 168, text: 'うちわ', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 169, text: '赤いボール', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 170, text: '段ボール箱', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 171, text: '三角プレート', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 172, text: '木の棒', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 173, text: '小石', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 174, text: '大きな岩', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 175, text: '渦巻きオブジェ', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 176, text: 'ジグザグ板', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 177, text: '星プレート', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 178, text: '顔に見える石', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 179, text: '直線の棒', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 180, text: 'しましま板', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 181, text: '石2つ並び', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 182, text: '石3つ並び', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 183, text: '小石4つ', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 184, text: '5本線マーク板', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 185, text: '1本の棒', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 186, text: '多数並び小石', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 187, text: '同形葉2枚', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 188, text: '同形葉3枚', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 189, text: '数字1プレート', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 190, text: '数字2プレート', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 191, text: '数字3プレート', icon: '🔍', category: '季節・形・数', weight: 2500},
+    {id: 192, text: '小石10個以上', icon: '🔍', category: '季節・形・数', weight: 2500}
   ],
-  
-  // ふつう（40個） - 少し探す必要があるもの
+
+  // ふつう（80個） ★3: 少し探す必要があるもの
   medium: [
-    {id: 41, text: '看板', icon: '🪧', category: '物'},
-    {id: 42, text: '郵便ポスト', icon: '📮', category: '物'},
-    {id: 43, text: '自販機', icon: '🥤', category: '物'},
-    {id: 44, text: 'コンビニ', icon: '🏪', category: '場所'},
-    {id: 45, text: 'バス停', icon: '🚏', category: '場所'},
-    {id: 46, text: '電車', icon: '🚃', category: '乗り物'},
-    {id: 47, text: '踏切', icon: '🚧', category: '場所'},
-    {id: 48, text: '神社', icon: '⛩️', category: '場所'},
-    {id: 49, text: 'お寺', icon: '🛕', category: '場所'},
-    {id: 50, text: '鳥居', icon: '⛩️', category: '物'},
-    {id: 51, text: '像', icon: '🗿', category: '物'},
-    {id: 52, text: '噴水', icon: '⛲', category: '物'},
-    {id: 53, text: '階段', icon: '🪜', category: '物'},
-    {id: 54, text: '坂道', icon: '⛰️', category: '場所'},
-    {id: 55, text: 'トンネル', icon: '🚇', category: '場所'},
-    {id: 56, text: '線路', icon: '🛤️', category: '場所'},
-    {id: 57, text: '工事現場', icon: '🚧', category: '場所'},
-    {id: 58, text: 'マンホール', icon: '⚙️', category: '物'},
-    {id: 59, text: '街灯', icon: '💡', category: '物'},
-    {id: 60, text: '標識', icon: '🚸', category: '物'},
-    {id: 61, text: '歩道橋', icon: '🌉', category: '建物'},
-    {id: 62, text: '駐車場', icon: '🅿️', category: '場所'},
-    {id: 63, text: '駐輪場', icon: '🚲', category: '場所'},
-    {id: 64, text: 'ゴミ箱', icon: '🗑️', category: '物'},
-    {id: 65, text: 'ポスター', icon: '📋', category: '物'},
-    {id: 66, text: '地図', icon: '🗺️', category: '物'},
-    {id: 67, text: '時計', icon: '🕐', category: '物'},
-    {id: 68, text: 'カラス', icon: '🐦‍⬛', category: '動物'},
-    {id: 69, text: '鳩', icon: '🕊️', category: '動物'},
-    {id: 70, text: '蝶', icon: '🦋', category: '動物'},
-    {id: 71, text: '虫', icon: '🐛', category: '動物'},
-    {id: 72, text: 'アリ', icon: '🐜', category: '動物'},
-    {id: 73, text: '桜', icon: '🌸', category: '植物'},
-    {id: 74, text: '紅葉', icon: '🍁', category: '植物'},
-    {id: 75, text: 'どんぐり', icon: '🌰', category: '物'},
-    {id: 76, text: 'つくし', icon: '🌱', category: '植物'},
-    {id: 77, text: '落ち葉', icon: '🍂', category: '物'},
-    {id: 78, text: '水たまり', icon: '💧', category: '自然'},
-    {id: 79, text: '霧', icon: '🌫️', category: '自然'},
-    {id: 80, text: '月', icon: '🌙', category: '自然'}
+    {id: 193, text: '羽', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 194, text: '足あと', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 195, text: '小石並び', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 196, text: 'タイヤ跡', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 197, text: '手袋', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 198, text: '小枝の束', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 199, text: 'ハート葉', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 200, text: '水たまり反射', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 201, text: '長い影', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 202, text: '木漏れ日', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 203, text: '半開き傘', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 204, text: '少し開いた門', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 205, text: '縄跳び', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 206, text: '傾いたカラーコーン', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 207, text: 'めくれた紙', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 208, text: '斜め看板', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 209, text: 'ずれた植木鉢', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 210, text: '片方サンダル', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 211, text: '開いた虫かご', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 212, text: '落ちかけ木の実', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 213, text: '枝の風船', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 214, text: 'しぼんだボール', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 215, text: 'ハート石', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 216, text: '虹反射', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 217, text: 'ねじれ枝', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 218, text: 'つる輪', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 219, text: '鳥の巣', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 220, text: 'つぼみ', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 221, text: '開いた実', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 222, text: '抜け殻', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 223, text: 'きのこ群', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 224, text: 'ベンチ下ボール', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 225, text: '柵のタオル', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 226, text: '石の上どんぐり', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 227, text: '小枝の星', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 228, text: '木のリボン', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 229, text: 'スコップ', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 230, text: '根元の木の実', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 231, text: '並べ葉', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 232, text: 'とんぼ', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 233, text: '網と帽子', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 234, text: 'レジャーシート端', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 235, text: 'ピクニックかご', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 236, text: 'ハンカチ', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 237, text: '紙コップ', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 238, text: '手紙', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 239, text: 'ひっくり葉', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 240, text: '石の輪', icon: '🔍', category: '痕跡・発見', weight: 2000},
+    {id: 241, text: '色の違う舗装ブロック', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 242, text: 'タイルの補修跡', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 243, text: 'アスファルトのひび', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 244, text: '側溝のふたの種類違い', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 245, text: 'マンホール周りの円形補修', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 246, text: '点字ブロックの終端', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 247, text: '白線のかすれ', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 248, text: '横断歩道のすり減り', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 249, text: '舗装の切り替わり線', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 250, text: '道路の水たまり跡', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 251, text: '小さな砂だまり', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 252, text: '落ち葉が集まった端', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 253, text: '雑草が出たすき間', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 254, text: '根で盛り上がった舗装', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 255, text: '地面の小さな穴', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 256, text: '石が埋まった舗装', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 257, text: '十字路', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 258, text: 'T字路', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 259, text: '行き止まり', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 260, text: '曲がり角', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 261, text: '坂道', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 262, text: '急な坂', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 263, text: '細い路地', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 264, text: '袋小路', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 265, text: '一方通行の道', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 266, text: '車止めのある道', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 267, text: '歩道と車道の段差', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 268, text: '縁石の切れ目', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 269, text: '段差解消スロープ', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 270, text: 'カーブした白線', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 271, text: '道路の合流部分', icon: '🔍', category: '線・模様観察', weight: 2000},
+    {id: 272, text: '道の幅が変わる場所', icon: '🔍', category: '線・模様観察', weight: 2000}
   ],
-  
-  // むずかしい（40個） - レアなもの
+
+  // むずかしい（80個） ★4-5: よく観察しないと見つからないもの
   hard: [
-    {id: 81, text: '虹', icon: '🌈', category: '自然'},
-    {id: 82, text: '流れ星', icon: '💫', category: '自然'},
-    {id: 83, text: 'キャンピングカー', icon: '🚐', category: '乗り物'},
-    {id: 84, text: '消防車', icon: '🚒', category: '乗り物'},
-    {id: 85, text: '救急車', icon: '🚑', category: '乗り物'},
-    {id: 86, text: 'パトカー', icon: '🚓', category: '乗り物'},
-    {id: 87, text: 'オートバイ', icon: '🏍️', category: '乗り物'},
-    {id: 88, text: 'トラック', icon: '🚚', category: '乗り物'},
-    {id: 89, text: 'タクシー', icon: '🚕', category: '乗り物'},
-    {id: 90, text: 'バス', icon: '🚌', category: '乗り物'},
-    {id: 91, text: '珍しい鳥', icon: '🦜', category: '動物'},
-    {id: 92, text: 'リス', icon: '🐿️', category: '動物'},
-    {id: 93, text: 'ウサギ', icon: '🐰', category: '動物'},
-    {id: 94, text: 'カメ', icon: '🐢', category: '動物'},
-    {id: 95, text: 'カエル', icon: '🐸', category: '動物'},
-    {id: 96, text: 'トカゲ', icon: '🦎', category: '動物'},
-    {id: 97, text: '魚', icon: '🐟', category: '動物'},
-    {id: 98, text: 'アヒル', icon: '🦆', category: '動物'},
-    {id: 99, text: '白鳥', icon: '🦢', category: '動物'},
-    {id: 100, text: 'フクロウ', icon: '🦉', category: '動物'},
-    {id: 101, text: '城', icon: '🏯', category: '建物'},
-    {id: 102, text: '塔', icon: '🗼', category: '建物'},
-    {id: 103, text: '灯台', icon: '🗼', category: '建物'},
-    {id: 104, text: '風車', icon: '🌬️', category: '建物'},
-    {id: 105, text: '水車', icon: '⚙️', category: '物'},
-    {id: 106, text: '滝', icon: '💦', category: '自然'},
-    {id: 107, text: '洞窟', icon: '🕳️', category: '場所'},
-    {id: 108, text: '池', icon: '💧', category: '自然'},
-    {id: 109, text: '湖', icon: '🏞️', category: '自然'},
-    {id: 110, text: '海', icon: '🌊', category: '自然'},
-    {id: 111, text: '山', icon: '⛰️', category: '自然'},
-    {id: 112, text: '森', icon: '🌲', category: '自然'},
-    {id: 113, text: '竹林', icon: '🎋', category: '場所'},
-    {id: 114, text: '梅', icon: '🌺', category: '植物'},
-    {id: 115, text: '藤', icon: '💜', category: '植物'},
-    {id: 116, text: '紫陽花', icon: '💙', category: '植物'},
-    {id: 117, text: '向日葵', icon: '🌻', category: '植物'},
-    {id: 118, text: 'コスモス', icon: '🌸', category: '植物'},
-    {id: 119, text: '彼岸花', icon: '🌹', category: '植物'},
-    {id: 120, text: '四つ葉のクローバー', icon: '🍀', category: '植物'}
+    {id: 273, text: '側溝の格子ふた', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 274, text: 'コンクリート側溝', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 275, text: '丸い排水穴', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 276, text: '細長い排水穴', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 277, text: '側溝の落ち葉詰まり', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 278, text: '側溝の水の流れ', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 279, text: '雨水ます', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 280, text: '集水ますのふた', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 281, text: '排水口の金網', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 282, text: '水が流れた跡', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 283, text: '雨だれ跡', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 284, text: '壁際の湿った跡', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 285, text: '苔の生えた排水まわり', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 286, text: '泥の跳ね跡', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 287, text: '側溝の段差', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 288, text: '溝に落ちた葉っぱ', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 289, text: '道路と砂利の境界', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 290, text: '舗装と土の境界', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 291, text: 'コンクリートと芝の境界', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 292, text: '舗装とタイルの境界', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 293, text: '道路と側溝の境界線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 294, text: '歩道と植え込みの境界', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 295, text: '縁石の角', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 296, text: '縁石の丸い角', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 297, text: '縁石の欠け', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 298, text: '塀の終わり位置', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 299, text: 'フェンスの終端', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 300, text: 'ガードレールの終端', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 301, text: '道路の端の白線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 302, text: '舗装の切り欠き部分', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 303, text: '舗装の角の補修', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 304, text: '道の端に集まった砂', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 305, text: '白線の途切れ', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 306, text: '白線の重なり', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 307, text: '消えかけた白線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 308, text: '新しい白線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 309, text: '古い白線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 310, text: '白線の端の丸まり', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 311, text: 'タイル目地の線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 312, text: 'ブロック塀の目地', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 313, text: 'アスファルトの継ぎ目', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 314, text: 'コンクリートの継ぎ目', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 315, text: '補修された線状パッチ', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 316, text: 'ひび割れが一本だけ', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 317, text: '交差するひび', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 318, text: '曲がったひび', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 319, text: '影が一直線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 320, text: 'フェンスの影の線', icon: '🔍', category: '線・模様観察', weight: 1500},
+    {id: 321, text: '濡れて色が変わった舗装', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 322, text: '乾いて色が違う舗装', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 323, text: '苔が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 324, text: '砂が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 325, text: '落ち葉が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 326, text: 'タイルが並ぶ面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 327, text: 'ブロック塀の面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 328, text: '金属ふたの面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 329, text: 'アスファルトの粗い面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 330, text: 'コンクリートの滑らかな面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 331, text: '小石が多い面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 332, text: '影が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 333, text: '水が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 334, text: '補修された四角い面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 335, text: '色が違う舗装パッチ面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 336, text: '草が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500},
+    {id: 337, text: '少し高い縁石', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 338, text: 'とても高い縁石', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 339, text: '低い段差', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 340, text: '2段の段差', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 341, text: '3段の段差', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 342, text: 'スロープの始まり', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 343, text: 'スロープの終わり', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 344, text: '盛り上がった舗装', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 345, text: '沈んだ舗装', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 346, text: '地面より高いマンホール', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 347, text: '地面より低いマンホール', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 348, text: '高さの違うタイル', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 349, text: '高低差のある境界', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 350, text: '影でわかる段差', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 351, text: '壁の基礎の立ち上がり', icon: '🔍', category: '面・高さ観察', weight: 1000},
+    {id: 352, text: '土が盛られた端', icon: '🔍', category: '面・高さ観察', weight: 1000}
   ]
 };
 
 
 /**
  * お題セット（将来: 有料・スポンサー拡張用。MVP では free のみ使用）
- * topicIds が空 = 従来どおり難易度プール全件から。非空 = 難易度プール内の当該IDに限定（不足分は従来ロジックで補完）
+ * topicIds が空 = 通常のバランス抽選。非空 = 当該IDに限定（不足分は補完）
  */
 const topicSets = [
   {
@@ -189,7 +752,10 @@ const topicSets = [
     description: '公園で見つけやすいものを集めたお題セットです。',
     monetizationType: 'free',
     topicIds: [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 32, 33, 34, 50, 51, 52, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 80, 90, 91, 92, 93, 95, 98, 99, 100, 102, 104, 105, 106, 108, 110, 111, 112, 113
+      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+      37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+      61, 62, 63, 64, 66, 67, 68, 69, 70, 71, 72,
+      193, 194, 199, 200, 201, 202, 205, 219, 220, 221, 223
     ]
   },
   {
@@ -198,7 +764,10 @@ const topicSets = [
     description: '親子で一緒に探しやすいお題セットです。',
     monetizationType: 'free',
     topicIds: [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 32, 33, 40, 68, 69, 70, 91, 92, 93, 99, 100, 5, 11, 14, 15, 16, 17, 30, 31, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 80
+      1, 2, 3, 4, 5, 6, 7, 25, 26, 27, 28, 29, 30, 31,
+      37, 38, 39, 40, 41, 42, 61, 62, 63, 64, 66, 67, 68,
+      85, 86, 87, 91, 92, 93, 109, 110, 111, 112, 113, 114,
+      142, 145, 146, 147, 148, 149, 150, 165, 167
     ]
   },
   {
@@ -210,7 +779,9 @@ const topicSets = [
     sponsorLogo: null,
     campaignUrl: null,
     topicIds: [
-      6, 7, 8, 12, 14, 15, 18, 25, 26, 27, 28, 29, 30, 31, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 86, 88, 89, 90, 1, 2, 3, 4, 5, 9, 10, 11, 19, 20, 32, 33, 34, 68, 69, 70, 71, 72, 80
+      1, 2, 3, 4, 5, 6, 7, 58, 73, 74, 75, 76, 77, 78,
+      79, 80, 81, 82, 83, 84, 142, 143, 144, 145, 149,
+      150, 151, 152, 153, 154
     ]
   }
 ];
@@ -227,48 +798,85 @@ function getTopicById(id) {
   return null;
 }
 
-// 難易度に対応するプール（未シャッフル）
-function selectTopicsByDifficultyList(difficulty) {
-  let selectedTopics = [];
-  switch (difficulty) {
-    case 'easy':
-      selectedTopics = [...topicDatabase.easy];
-      break;
-    case 'medium':
-      selectedTopics = [
-        ...topicDatabase.easy.slice(0, 12),
-        ...topicDatabase.medium.slice(0, 12)
-      ];
-      break;
-    case 'hard':
-      selectedTopics = [
-        ...topicDatabase.easy.slice(0, 8),
-        ...topicDatabase.medium.slice(0, 8),
-        ...topicDatabase.hard.slice(0, 8)
-      ];
-      break;
-    default:
-      selectedTopics = [...topicDatabase.easy];
-  }
-  return selectedTopics;
-}
+// ========== バランス抽選 ==========
 
-// 難易度に応じてお題を選択する関数
-// shuffleSalt: 作り直し時に毎回異なるシャッフルにするため（省略時は合言葉で固定）
-function selectTopicsByDifficulty(difficulty, roomCode = '', userId = '', shuffleSalt = '') {
-  let selectedTopics = selectTopicsByDifficultyList(difficulty);
-  const seedStr = [roomCode, userId, shuffleSalt].filter(Boolean).join('-');
-  if (seedStr) {
-    const seed = stringToSeed(seedStr);
-    selectedTopics = shuffleWithSeed(selectedTopics, seed);
-  } else {
-    selectedTopics = shuffle(selectedTopics);
+/**
+ * カテゴリ別 24マス枠割り当て
+ * 各カテゴリから均等かつ比率に応じてお題を選ぶ
+ */
+const CATEGORY_QUOTAS = {
+  '街インフラ':     3,
+  '自然・生き物':   3,
+  '生活・学校':     2,
+  '家庭・食べ物':   2,
+  '街構造・乗り物': 2,
+  '季節・形・数':   2,
+  '痕跡・発見':     4,
+  '線・模様観察':   4,
+  '面・高さ観察':   2
+}; // 合計 = 24
+
+/**
+ * 難易度モード別に使用するプール
+ * easy: 見つけやすいものを中心（★1-2 のみ）
+ * medium: 全難易度ミックス
+ * hard: ★3-5 を中心
+ */
+const DIFFICULTY_POOLS = {
+  easy:   ['easy'],
+  medium: ['easy', 'medium', 'hard'],
+  hard:   ['medium', 'hard']
+};
+
+/**
+ * spawn_permyriad を重みとした非復元重み付きサンプリング
+ * rng: 0-1 を返す疑似乱数関数
+ */
+function weightedSample(pool, count, rng) {
+  if (pool.length === 0) return [];
+  if (pool.length <= count) return [...pool];
+
+  const result = [];
+  const remaining = [...pool];
+
+  for (let i = 0; i < count; i++) {
+    if (remaining.length === 0) break;
+    const totalWeight = remaining.reduce((sum, t) => sum + (t.weight || 1000), 0);
+    let r = rng() * totalWeight;
+    let idx = remaining.length - 1;
+    for (let j = 0; j < remaining.length; j++) {
+      r -= (remaining[j].weight || 1000);
+      if (r <= 0) { idx = j; break; }
+    }
+    result.push(remaining[idx]);
+    remaining.splice(idx, 1);
   }
-  return selectedTopics.slice(0, 24);
+
+  return result;
 }
 
 /**
- * 難易度プール＋任意のお題セット制限に基づき24件を返す
+ * Mulberry32 シード付き乱数ジェネレータを生成
+ */
+function createRng(seed) {
+  let s = seed;
+  return () => {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * カテゴリ均等 × spawn_permyriad 重み付きバランス抽選で 24 件を返す
+ *
+ * @param {string} difficulty - 'easy' | 'medium' | 'hard'
+ * @param {string} roomCode
+ * @param {string} userId
+ * @param {string} shuffleSalt
+ * @param {string} topicSetId
+ * @returns {Array} 24件のお題配列
  */
 function selectTopicsForGame(
   difficulty,
@@ -278,61 +886,64 @@ function selectTopicsForGame(
   topicSetId = 'default'
 ) {
   const set = getTopicSetById(topicSetId);
-  const useSetInSeed =
-    set.id !== 'default' || (set.topicIds && set.topicIds.length > 0);
-  const seedStr = (useSetInSeed
-    ? [roomCode, userId, shuffleSalt, set.id]
-    : [roomCode, userId, shuffleSalt]
-  )
-    .filter(Boolean)
-    .join('-');
+  const seedStr = [roomCode, userId, shuffleSalt, topicSetId !== 'default' ? topicSetId : '']
+    .filter(Boolean).join('-');
+  const seed = seedStr ? stringToSeed(seedStr) : (Math.random() * 0xFFFFFFFF | 0);
+  const rng = createRng(seed);
 
-  const baseList = selectTopicsByDifficultyList(difficulty);
+  // 難易度プールを構築
+  const tiers = DIFFICULTY_POOLS[difficulty] || ['easy', 'medium', 'hard'];
+  const fullPool = tiers.flatMap(t => topicDatabase[t] || []);
+
+  // お題セットのフィルタ
   const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
-  let pool = allowed
-    ? baseList.filter((t) => allowed.has(t.id))
-    : [...baseList];
+  const pool = allowed ? fullPool.filter(t => allowed.has(t.id)) : fullPool;
 
-  if (allowed && pool.length < 24) {
-    const filler = selectTopicsByDifficulty(
-      difficulty,
-      roomCode,
-      userId,
-      `${shuffleSalt}-topicset-fill`
-    );
-    for (const t of filler) {
-      if (pool.length >= 24) break;
-      if (!pool.some((p) => p.id === t.id)) pool.push(t);
+  // カテゴリ別グループ化
+  const byCategory = {};
+  for (const topic of pool) {
+    const cat = topic.category || '不明';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(topic);
+  }
+
+  // カテゴリ枠に従って重み付き抽選
+  const selected = [];
+  const usedIds = new Set();
+
+  for (const [cat, quota] of Object.entries(CATEGORY_QUOTAS)) {
+    const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
+    const picked = weightedSample(catPool, quota, rng);
+    for (const t of picked) {
+      selected.push(t);
+      usedIds.add(t.id);
     }
   }
 
-  if (pool.length < 24) {
-    const flat = topicDatabase.easy.concat(
-      topicDatabase.medium,
-      topicDatabase.hard
-    );
-    for (const t of flat) {
-      if (pool.length >= 24) break;
-      if (allowed && !allowed.has(t.id)) continue;
-      if (!pool.some((p) => p.id === t.id)) pool.push(t);
+  // 24件に満たない場合はプールから補完（残り枠を重み付き抽選）
+  if (selected.length < 24) {
+    const filler = pool.filter(t => !usedIds.has(t.id));
+    const extra = weightedSample(filler, 24 - selected.length, rng);
+    for (const t of extra) {
+      selected.push(t);
+      usedIds.add(t.id);
     }
   }
 
-  if (pool.length < 24) {
-    for (const t of topicDatabase.hard) {
-      if (pool.length >= 24) break;
-      if (!pool.some((p) => p.id === t.id)) pool.push(t);
+  // プール自体が足りない場合は全難易度から補完
+  if (selected.length < 24) {
+    const allTopics = ['easy', 'medium', 'hard'].flatMap(t => topicDatabase[t] || []);
+    for (const t of allTopics) {
+      if (selected.length >= 24) break;
+      if (!usedIds.has(t.id)) {
+        selected.push(t);
+        usedIds.add(t.id);
+      }
     }
   }
 
-  let selectedTopics = pool;
-  if (seedStr) {
-    const seed = stringToSeed(seedStr);
-    selectedTopics = shuffleWithSeed([...pool], seed);
-  } else {
-    selectedTopics = shuffle([...pool]);
-  }
-  return selectedTopics.slice(0, 24);
+  // 最終シャッフル（同じシードで再現性を確保）
+  return shuffleWithSeed(selected.slice(0, 24), seed + 1);
 }
 
 // 文字列からシード値を生成
@@ -341,34 +952,29 @@ function stringToSeed(str) {
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // 32bit整数に変換
+    hash = hash & hash;
   }
   return Math.abs(hash);
 }
 
-// シード付きシャッフル（決定論的）
+// シード付きシャッフル（決定論的・Mulberry32）
 function shuffleWithSeed(array, seed) {
   const arr = [...array];
   let currentSeed = seed;
-  
-  // Mulberry32 アルゴリズム（高速な疑似乱数生成）
   const random = () => {
     currentSeed = (currentSeed + 0x6D2B79F5) | 0;
     let t = Math.imul(currentSeed ^ (currentSeed >>> 15), 1 | currentSeed);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  
-  // Fisher-Yates シャッフル
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  
   return arr;
 }
 
-// 通常のシャッフル（ランダム）
+// 通常シャッフル
 function shuffle(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
