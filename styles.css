@@ -294,7 +294,7 @@ h1 {
 /* 画像アイコンのラッパー：セルに対して固定比率の正方形 */
 .cell-icon-img-wrap {
   font-size: 0;
-  width: 66%;
+  width: 72%;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -317,7 +317,7 @@ h1 {
 
 /* セル内のテキスト：JSがfitCellTextで1行に収める */
 .cell-text {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-align: center;
   line-height: 1.25;
@@ -328,7 +328,7 @@ h1 {
 
 /* 短いテキストは少し大きく（JSの計測開始点） */
 .cell-text-s,
-.cell-text-m { font-size: 0.82rem; }
+.cell-text-m { font-size: 0.9rem; }
 
 /* 長テキスト時はgapを詰める（アイコンサイズは全マス統一） */
 .bingo-cell.cell-len-l,
@@ -1514,28 +1514,7 @@ h1 {
   .bingo-cell {
     min-height: 0;
   }
-  
-  .cell-icon {
-    font-size: 3.2rem;
-  }
 
-  .cell-icon-img {
-    width: 3.2rem;
-    height: 3.2rem;
-  }
-  
-  .cell-text { font-size: 0.8rem; }
-  .cell-text-s { font-size: 0.82rem; }
-  .cell-text-m { font-size: 0.75rem; }
-  .cell-text-l { font-size: 0.65rem; }
-  .cell-text-xl { font-size: 0.58rem; }
-
-  /* A案: スマホ向けアイコン適応縮小 */
-  .bingo-cell.cell-len-l .cell-icon { font-size: 2rem; }
-  .bingo-cell.cell-len-l .cell-icon-img { width: 2rem; height: 2rem; }
-  .bingo-cell.cell-len-xl .cell-icon { font-size: 1.4rem; }
-  .bingo-cell.cell-len-xl .cell-icon-img { width: 1.4rem; height: 1.4rem; }
-  
   .stats {
     grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
     gap: 6px;
@@ -1646,27 +1625,6 @@ h1 {
 }
 
 @media (max-width: 360px) {
-  .cell-icon {
-    font-size: 2.8rem;
-  }
-
-  .cell-icon-img {
-    width: 2.8rem;
-    height: 2.8rem;
-  }
-  
-  .cell-text { font-size: 0.72rem; }
-  .cell-text-s { font-size: 0.74rem; }
-  .cell-text-m { font-size: 0.68rem; }
-  .cell-text-l { font-size: 0.58rem; }
-  .cell-text-xl { font-size: 0.52rem; }
-
-  /* A案: 極小画面向けアイコン適応縮小 */
-  .bingo-cell.cell-len-l .cell-icon { font-size: 1.8rem; }
-  .bingo-cell.cell-len-l .cell-icon-img { width: 1.8rem; height: 1.8rem; }
-  .bingo-cell.cell-len-xl .cell-icon { font-size: 1.2rem; }
-  .bingo-cell.cell-len-xl .cell-icon-img { width: 1.2rem; height: 1.2rem; }
-  
   .bingo-board {
     gap: 3px;
     padding: 4px;
