@@ -507,8 +507,37 @@ class OsanpoBingo {
       
       this.boardElement.appendChild(cell);
     });
+
+    // 全セル描画後にテキストを1行に収める（アイコン領域を圧迫しない）
+    this.boardElement.querySelectorAll('.bingo-cell').forEach(c => {
+      this.fitCellText(c);
+    });
   }
-  
+
+  // テキストがセル幅に収まるまでfont-sizeを縮小する
+  // 最小サイズでも収まらない場合のみ2行折り返しを許可
+  fitCellText(cell) {
+    const textEl = cell.querySelector('.cell-text');
+    if (!textEl || !textEl.textContent.trim()) return;
+
+    const MIN_PX = 8;
+
+    // nowrapで計測 → はみ出しがなければそのまま終了
+    if (textEl.scrollWidth <= textEl.offsetWidth) return;
+
+    let pxSize = parseFloat(getComputedStyle(textEl).fontSize);
+    while (textEl.scrollWidth > textEl.offsetWidth + 1 && pxSize > MIN_PX) {
+      pxSize -= 0.5;
+      textEl.style.fontSize = pxSize + 'px';
+    }
+
+    // 最小サイズでも収まらない場合は2行折り返しにフォールバック
+    if (textEl.scrollWidth > textEl.offsetWidth + 1) {
+      textEl.style.whiteSpace = 'normal';
+      textEl.style.lineHeight = '1.2';
+    }
+  }
+
   // セルクリック処理
   handleCellClick(index) {
     if (index === 12) return;

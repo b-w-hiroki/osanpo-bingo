@@ -199,8 +199,8 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
+  justify-content: center;
+  gap: 4px;
   
   background: var(--cell-bg);
   border: 2px solid var(--cell-border);
@@ -279,77 +279,61 @@ h1 {
   color: #fff;
 }
 
-/* セル内のアイコン */
+/* セル内のアイコン：セル幅の%ベースで固定サイズ */
 .cell-icon {
-  font-size: 4.2rem;
+  /* 絵文字フォールバック用 */
+  font-size: clamp(1.4rem, 7vw, 2.4rem);
   line-height: 1;
   transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
+/* 画像アイコンのラッパー：セルに対して固定比率の正方形 */
 .cell-icon-img-wrap {
   font-size: 0;
+  width: 66%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
+/* 画像はラッパーいっぱいに表示 */
 .cell-icon-img {
-  width: 4.2rem;
-  height: 4.2rem;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
+  display: block;
 }
 
 .bingo-cell:hover .cell-icon {
   transform: scale(1.1);
 }
 
-/* セル内のテキスト */
+/* セル内のテキスト：JSがfitCellTextで1行に収める */
 .cell-text {
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-align: center;
-  line-height: 1.2;
-  word-break: keep-all;
-  overflow-wrap: break-word;
+  line-height: 1.25;
+  white-space: nowrap;       /* JSが縮小後にnormalへ戻す */
+  overflow: hidden;
   max-width: 100%;
 }
 
-/* 文字数に応じたサイズ調整 */
-.cell-text-s { font-size: 0.95rem; }  /* 1-2文字 */
-.cell-text-m { font-size: 0.88rem; }  /* 3-4文字 */
-.cell-text-l { font-size: 0.78rem; }  /* 5-6文字 */
-.cell-text-xl {                        /* 7文字以上 */
-  font-size: 0.68rem;
-  line-height: 1.15;
-  word-break: break-all;
-}
+/* 短いテキストは少し大きく（JSの計測開始点） */
+.cell-text-s,
+.cell-text-m { font-size: 0.82rem; }
 
-/* 長テキストセルのアイコン適応縮小（A案） */
-.bingo-cell.cell-len-l {
-  gap: 3px;
-}
-
-.bingo-cell.cell-len-l .cell-icon {
-  font-size: 2.4rem;
-}
-
-.bingo-cell.cell-len-l .cell-icon-img {
-  width: 2.4rem;
-  height: 2.4rem;
-}
-
+/* 長テキスト時はgapを詰める（アイコンサイズは全マス統一） */
+.bingo-cell.cell-len-l,
 .bingo-cell.cell-len-xl {
-  gap: 2px;
-}
-
-.bingo-cell.cell-len-xl .cell-icon {
-  font-size: 1.6rem;
-}
-
-.bingo-cell.cell-len-xl .cell-icon-img {
-  width: 1.6rem;
-  height: 1.6rem;
+  gap: 3px;
 }
 
 /* マーク済みセルのテキスト */
