@@ -888,6 +888,13 @@ class OsanpoBingo {
       requestAnimationFrame(() => {
         clone.querySelectorAll('.bingo-cell').forEach(c => this.fitCellText(c));
       });
+      // 写真ありセルのみタップで拡大表示
+      clone.addEventListener('click', (e) => {
+        const cell = e.target.closest('.bingo-cell.has-photo');
+        if (!cell) return;
+        const img = cell.querySelector('.cell-photo-img');
+        if (img) this.showResultPhotoLightbox(img.src);
+      });
     }
     
     // 統計を表示
@@ -916,6 +923,25 @@ class OsanpoBingo {
     view.style.display = 'flex';
   }
   
+  /** 写真をフルスクリーンで表示するライトボックス */
+  showResultPhotoLightbox(src) {
+    const existing = document.getElementById('resultPhotoLightbox');
+    if (existing) existing.remove();
+
+    const box = document.createElement('div');
+    box.id = 'resultPhotoLightbox';
+    box.className = 'result-photo-lightbox';
+    box.innerHTML = `
+      <img src="${src}" alt="写真">
+      <span class="result-photo-lightbox-hint">タップして閉じる</span>
+    `;
+    box.addEventListener('click', () => box.remove());
+    // Escキーでも閉じる
+    const onKey = (e) => { if (e.key === 'Escape') { box.remove(); document.removeEventListener('keydown', onKey); } };
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(box);
+  }
+
   // 結果画面のセットアップ
   setupResultView() {
     const confirmBtn = document.getElementById('resultConfirmBtn');

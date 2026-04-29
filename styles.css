@@ -1178,6 +1178,70 @@ h1 {
   font-size: 0.8rem;
 }
 
+/* 結果画面: セルは原則タップ無効・ホバーなし */
+.result-board-wrap .bingo-cell {
+  cursor: default;
+  pointer-events: none;
+}
+.result-board-wrap .bingo-cell:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--cell-bg);
+  border-color: var(--cell-border);
+}
+.result-board-wrap .bingo-cell.marked:hover {
+  background: var(--cell-marked);
+  border-color: var(--primary-dark);
+}
+.result-board-wrap .bingo-cell.bingo:hover {
+  background: var(--cell-bingo);
+  border-color: var(--accent);
+}
+
+/* 写真ありセルのみタップ可能・拡大ヒント */
+.result-board-wrap .bingo-cell.has-photo {
+  cursor: zoom-in;
+  pointer-events: auto;
+}
+.result-board-wrap .bingo-cell.has-photo:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  background: var(--cell-bg);
+  border-color: var(--primary-light);
+}
+
+/* 写真ライトボックス */
+.result-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease;
+  padding: 16px;
+}
+
+.result-photo-lightbox img {
+  max-width: 90vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.result-photo-lightbox-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
 .result-stats-row {
   display: flex;
   justify-content: center;
