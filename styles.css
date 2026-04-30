@@ -219,13 +219,13 @@ h1 {
 }
 
 /* ==================== 難易度グラデーション ==================== */
-/* ★4（むずかしい）：薄めラベンダー */
+/* ★4（むずかしい）：薄めローズ */
 .bingo-cell.cell-diff-hard-4 {
-  background: linear-gradient(145deg, #f5f0ff 0%, #e8daff 100%);
+  background: linear-gradient(145deg, #fff5f5 0%, #fde0e0 100%);
 }
-/* ★5（とてもむずかしい）：濃いめパープル */
+/* ★5（とてもむずかしい）：濃いめレッド */
 .bingo-cell.cell-diff-hard-5 {
-  background: linear-gradient(145deg, #ebe0ff 0%, #d4b8ff 100%);
+  background: linear-gradient(145deg, #fde0e0 0%, #f9bfbf 100%);
 }
 
 /* マーク・ビンゴ・FREE 時はグラデーションを上書き */
