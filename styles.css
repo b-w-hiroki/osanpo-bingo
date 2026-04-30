@@ -218,6 +218,35 @@ h1 {
   padding-bottom: 6px;
 }
 
+/* ==================== 難易度グラデーション ==================== */
+/* かんたん：ミントグリーン */
+.bingo-cell.cell-diff-easy {
+  background: linear-gradient(145deg, #f2faf5 0%, #e2f4ea 100%);
+}
+/* ふつう：サンシャインイエロー */
+.bingo-cell.cell-diff-medium {
+  background: linear-gradient(145deg, #fffdf0 0%, #fef5d0 100%);
+}
+/* むずかしい：ラベンダー */
+.bingo-cell.cell-diff-hard {
+  background: linear-gradient(145deg, #f5f0ff 0%, #ebe0ff 100%);
+}
+
+/* マーク・ビンゴ・FREE 時はグラデーションを上書き */
+.bingo-cell.marked,
+.bingo-cell.bingo,
+.bingo-cell.free,
+.bingo-cell.locked,
+.bingo-cell.claimed-self {
+  background: unset;
+}
+.bingo-cell.marked      { background: var(--cell-marked); }
+.bingo-cell.bingo       { background: var(--cell-bingo); }
+.bingo-cell.free        { background: var(--cell-free); }
+.bingo-cell.locked,
+.bingo-cell.locked.marked { background: #cfd8dc; }
+.bingo-cell.claimed-self  { background: #7eb89a; }
+
 /* ホバー効果 */
 .bingo-cell:hover {
   background: var(--cell-hover);

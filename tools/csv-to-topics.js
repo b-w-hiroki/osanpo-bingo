@@ -71,7 +71,8 @@ function generateTopicsJS(rows) {
       text: row['display_name'],
       icon: '🔍',
       category: row['category'],
-      weight: parseInt(row['spawn_permyriad']) || 1000
+      weight: parseInt(row['spawn_permyriad']) || 1000,
+      diff: diff
     });
   });
 
@@ -83,7 +84,7 @@ function generateTopicsJS(rows) {
   // お題配列 JS リテラル
   function topicArrayStr(arr) {
     return arr.map(t =>
-      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', weight: ${t.weight}}`
+      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', weight: ${t.weight}, diff: '${t.diff}'}`
     ).join(',\n');
   }
 

@@ -448,6 +448,11 @@ class OsanpoBingo {
       cell.dataset.index = index;
       const ownerId = this.getCellOwnerId(index);
       
+      // 難易度クラス（グラデーション背景用）
+      if (topic.diff && !topic.isFree) {
+        cell.classList.add(`cell-diff-${topic.diff}`);
+      }
+
       // 写真がある場合（上に写真・下にテキストの構成で描画）
       const hasPhoto = !!this.photos[index];
       if (hasPhoto) {
