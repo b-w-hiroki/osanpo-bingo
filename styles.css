@@ -987,7 +987,7 @@ h1 {
 }
 
 .cell-modal-icon {
-  font-size: 4rem;
+  font-size: 8rem;
   margin-bottom: var(--spacing-sm);
   display: flex;
   align-items: center;
@@ -995,8 +995,9 @@ h1 {
 }
 
 .cell-modal-icon .cell-icon-img {
-  width: 4rem;
-  height: 4rem;
+  width: min(160px, 50vw);
+  height: min(160px, 50vw);
+  object-fit: contain;
 }
 
 .cell-modal-header h2 {
