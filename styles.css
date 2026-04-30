@@ -223,9 +223,9 @@ h1 {
 .bingo-cell.cell-diff-easy {
   background: linear-gradient(145deg, #f2faf5 0%, #e2f4ea 100%);
 }
-/* ふつう：サンシャインイエロー */
+/* ふつう：色なし（デフォルト白） */
 .bingo-cell.cell-diff-medium {
-  background: linear-gradient(145deg, #fffdf0 0%, #fef5d0 100%);
+  background: var(--cell-bg);
 }
 /* むずかしい：ラベンダー */
 .bingo-cell.cell-diff-hard {
