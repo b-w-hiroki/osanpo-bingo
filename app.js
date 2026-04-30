@@ -449,8 +449,16 @@ class OsanpoBingo {
       const ownerId = this.getCellOwnerId(index);
       
       // 難易度クラス（グラデーション背景用）
-      if (topic.diff && !topic.isFree) {
-        cell.classList.add(`cell-diff-${topic.diff}`);
+      // topic.diff がない場合（旧保存データ）は topicDatabase から検索
+      if (!topic.isFree) {
+        const diff = topic.diff || (() => {
+          if (typeof topicDatabase === 'undefined') return null;
+          for (const key of ['easy', 'medium', 'hard']) {
+            if (topicDatabase[key].some(t => t.id === topic.id)) return key;
+          }
+          return null;
+        })();
+        if (diff) cell.classList.add(`cell-diff-${diff}`);
       }
 
       // 写真がある場合（上に写真・下にテキストの構成で描画）
