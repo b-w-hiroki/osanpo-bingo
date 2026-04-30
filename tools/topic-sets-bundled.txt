@@ -162,7 +162,11 @@ function selectTopicsForGame(
 
   // お題セットのフィルタ
   const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
-  const pool = allowed ? fullPool.filter(t => allowed.has(t.id)) : fullPool;
+  const basePool = allowed ? fullPool.filter(t => allowed.has(t.id)) : fullPool;
+
+  // 季節フィルタ（season列が現在の季節または'all'のもののみ）
+  const currentSeason = getCurrentSeason();
+  const pool = basePool.filter(t => !t.season || t.season === 'all' || t.season === currentSeason);
 
   // カテゴリ別グループ化
   const byCategory = {};

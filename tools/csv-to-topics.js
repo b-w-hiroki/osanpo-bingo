@@ -66,13 +66,16 @@ function generateTopicsJS(rows) {
   const groups = { easy: [], medium: [], hard: [] };
   rows.forEach(row => {
     const diff = starsToDifficulty(row['difficulty']);
+    const starCount = (row['difficulty'].match(/★/g) || []).length;
     groups[diff].push({
       id: parseInt(row['ID']),
       text: row['display_name'],
       icon: '🔍',
       category: row['category'],
       weight: parseInt(row['spawn_permyriad']) || 1000,
-      diff: diff
+      diff: diff,
+      stars: starCount,
+      season: row['season'] || 'all'
     });
   });
 
@@ -84,7 +87,7 @@ function generateTopicsJS(rows) {
   // お題配列 JS リテラル
   function topicArrayStr(arr) {
     return arr.map(t =>
-      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', weight: ${t.weight}, diff: '${t.diff}'}`
+      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', weight: ${t.weight}, diff: '${t.diff}', stars: ${t.stars}, season: '${t.season}'}`
     ).join(',\n');
   }
 
@@ -129,6 +132,15 @@ ${topicArrayStr(groups.hard)}
 };
 
 ${topicSetsBundled}
+// 現在の季節を返す（3-5月:spring / 6-8月:summer / 9-11月:autumn / 12-2月:winter）
+function getCurrentSeason() {
+  const m = new Date().getMonth() + 1;
+  if (m >= 3 && m <= 5) return 'spring';
+  if (m >= 6 && m <= 8) return 'summer';
+  if (m >= 9 && m <= 11) return 'autumn';
+  return 'winter';
+}
+
 // 文字列からシード値を生成
 function stringToSeed(str) {
   let hash = 0;
