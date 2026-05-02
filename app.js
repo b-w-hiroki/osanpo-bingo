@@ -448,19 +448,22 @@ class OsanpoBingo {
       cell.dataset.index = index;
       const ownerId = this.getCellOwnerId(index);
       
-      // 難易度クラス（グラデーション背景用）★4と★5で色分け
-      // topic.diff/stars がない場合（旧保存データ）は topicDatabase から検索
+      // ランドマーク / 難易度クラス
       if (!topic.isFree) {
-        let diff = topic.diff || null;
-        let stars = topic.stars || null;
-        if (!diff && typeof topicDatabase !== 'undefined') {
-          for (const key of ['easy', 'medium', 'hard']) {
-            const found = topicDatabase[key].find(t => t.id === topic.id);
-            if (found) { diff = found.diff; stars = found.stars; break; }
+        if (topic.type === 'landmark') {
+          cell.classList.add('cell-landmark');
+        } else {
+          let diff = topic.diff || null;
+          let stars = topic.stars || null;
+          if (!diff && typeof topicDatabase !== 'undefined') {
+            for (const key of ['easy', 'medium', 'hard']) {
+              const found = topicDatabase[key].find(t => t.id === topic.id);
+              if (found) { diff = found.diff; stars = found.stars; break; }
+            }
           }
-        }
-        if (diff === 'hard') {
-          cell.classList.add(stars >= 5 ? 'cell-diff-hard-5' : 'cell-diff-hard-4');
+          if (diff === 'hard') {
+            cell.classList.add(stars >= 5 ? 'cell-diff-hard-5' : 'cell-diff-hard-4');
+          }
         }
       }
 

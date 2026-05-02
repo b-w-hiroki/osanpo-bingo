@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-04-30 06:16:51
+// 生成日時: 2026-05-02 00:36:03
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -484,10 +484,81 @@ const topicIconMap = {
   477: 'icon477_観光案内所キャラ.png',
   478: 'icon478_公民館掲示キャラ.png',
   479: 'icon479_地域イベント掲示キャラ.png',
-  480: 'icon480_地域マスコット立て看板.png'
+  480: 'icon480_地域マスコット立て看板.png',
+  481: 'icon481_室外機.png',
+  482: 'icon482_軒先の植木鉢.png',
+  483: 'icon483_傘立て.png',
+  484: 'icon484_ほうきとちりとり.png',
+  485: 'icon485_分別表示.png',
+  486: 'icon486_ゴミ収集曜日掲示.png',
+  487: 'icon487_ペットボトル回収箱.png',
+  488: 'icon488_電池回収ボックス.png',
+  489: 'icon489_トレー回収箱.png',
+  490: 'icon490_牛乳パック回収箱.png',
+  491: 'icon491_宅配ボックス.png',
+  492: 'icon492_置き配荷物.png',
+  493: 'icon493_玄関マット.png',
+  494: 'icon494_物干し竿.png',
+  495: 'icon495_カラスよけネット.png',
+  496: 'icon496_ゴミステーション.png',
+  497: 'icon497_電柱番号札.png',
+  498: 'icon498_消火栓プレート.png',
+  499: 'icon499_路面反射鋲.png',
+  500: 'icon500_停止線.png',
+  501: 'icon501_側溝コンクリ穴フタ.png',
+  502: 'icon502_電柱黄色巻き.png',
+  503: 'icon503_防犯カメラダミー.png',
+  504: 'icon504_玄関脇ほうき.png',
+  505: 'icon505_壁付けポスト.png',
+  506: 'icon506_立体表札.png',
+  507: 'icon507_軒下すだれ.png',
+  508: 'icon508_屋外水道蛇口.png',
+  509: 'icon509_ブロック塀笠木.png',
+  510: 'icon510_勝手口ドア.png',
+  511: 'icon511_段差プレート.png',
+  512: 'icon512_タイル補修跡.png',
+  513: 'icon513_小さなパン屋.png',
+  514: 'icon514_個人ケーキ屋.png',
+  515: 'icon515_惣菜屋.png',
+  516: 'icon516_八百屋.png',
+  517: 'icon517_町の肉屋.png',
+  518: 'icon518_魚屋.png',
+  519: 'icon519_クリーニング店.png',
+  520: 'icon520_コインランドリー.png',
+  521: 'icon521_理髪店サインポール.png',
+  522: 'icon522_昔ながらの美容室入口.png',
+  523: 'icon523_個人薬局.png',
+  524: 'icon524_文房具屋.png',
+  525: 'icon525_証明写真機.png',
+  526: 'icon526_冷凍餃子自販機.png',
+  527: 'icon527_卵自販機.png',
+  528: 'icon528_おでん缶自販機.png',
+  529: 'icon529_玄関横の傘フック.png',
+  530: 'icon530_門前の植木スタンド.png',
+  531: 'icon531_宅配再配達票.png',
+  532: 'icon532_玄関前の小型踏み台.png',
+  533: 'icon533_ブロック塀の通気穴.png',
+  534: 'icon534_側溝フタ（住宅前）.png',
+  535: 'icon535_砂利敷き駐車スペース.png',
+  536: 'icon536_カーポート柱.png',
+  537: 'icon537_屋外コンセント.png',
+  538: 'icon538_壁付け散水蛇口.png',
+  539: 'icon539_電力量メーター箱.png',
+  540: 'icon540_ガスメーター保護ボックス.png',
+  541: 'icon541_据え置き物干し台.png',
+  542: 'icon542_竿受け金具.png',
+  543: 'icon543_雨戸収納戸袋.png',
+  544: 'icon544_外壁換気フード.png',
+  545: 'icon545_郵便受けの雨よけ屋根.png',
+  546: 'icon546_門灯の透明カバー.png',
+  547: 'icon547_住宅煙突.png',
+  548: 'icon548_銭湯煙突.png'
 };
 
 function getTopicIcon(topic) {
+  if (topic.type === 'landmark') {
+    return `<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/landmark/${topic.iconFile}" alt="" class="cell-icon-img"></span>`;
+  }
   const iconFile = topic.id && topicIconMap[topic.id];
   if (iconFile) {
     return `<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/${iconFile}" alt="" class="cell-icon-img"></span>`;
@@ -495,8 +566,39 @@ function getTopicIcon(topic) {
   return `<span class="cell-icon">${topic.icon}</span>`;
 }
 
+// ランドマークDB（お城・神社など地域の特別スポット）
+const landmarkDatabase = [
+  {id: 'landmark0100', text: '姫路城',       iconFile: 'landmark0100_姫路城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0101', text: '松本城',       iconFile: 'landmark0101_松本城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0102', text: '大阪城',       iconFile: 'landmark0102_大阪城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0103', text: '名古屋城',     iconFile: 'landmark0103_名古屋城.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0104', text: '熊本城',       iconFile: 'landmark0104_熊本城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0105', text: '松江城',       iconFile: 'landmark0105_松江城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0106', text: '犬山城',       iconFile: 'landmark0106_犬山城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0107', text: '彦根城',       iconFile: 'landmark0107_彦根城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0108', text: '二条城',       iconFile: 'landmark0108_二条城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0109', text: '松山城',       iconFile: 'landmark0109_松山城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0110', text: '弘前城',       iconFile: 'landmark0110_弘前城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0111', text: '小田原城',     iconFile: 'landmark0111_小田原城.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0112', text: '岡山城',       iconFile: 'landmark0112_岡山城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0113', text: '高知城',       iconFile: 'landmark0113_高知城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0114', text: '会津若松城',   iconFile: 'landmark0114_会津若松城.png',   type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0115', text: '首里城',       iconFile: 'landmark0115_首里城.png',       type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0200', text: '伏見稲荷大社', iconFile: 'landmark0200_伏見稲荷大社.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0201', text: '厳島神社',     iconFile: 'landmark0201_厳島神社.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0202', text: '出雲大社',     iconFile: 'landmark0202_出雲大社.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0203', text: '明治神宮',     iconFile: 'landmark0203_明治神宮.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0204', text: '日光東照宮',   iconFile: 'landmark0204_日光東照宮.png',   type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0205', text: '宇佐神宮',     iconFile: 'landmark0205_宇佐神宮.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0207', text: '太宰府天満宮', iconFile: 'landmark0207_太宰府天満宮.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0208', text: '氷川神社',     iconFile: 'landmark0208_氷川神社.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0209', text: '鹿島神宮',     iconFile: 'landmark0209_鹿島神宮.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0212', text: '住吉大社',     iconFile: 'landmark0212_住吉大社.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0206', text: '春日大社',     iconFile: 'landmark206_春日大社.png',      type: 'landmark', category: 'ランドマーク'},
+];
+
 const topicDatabase = {
-  // かんたん（224個） ★1-2: よく見かけるもの
+  // かんたん（247個） ★1-2: よく見かけるもの
   easy: [
     {id: 1, text: '電柱', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
     {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
@@ -721,10 +823,33 @@ const topicDatabase = {
     {id: 429, text: '反射材つき表示', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'easy', stars: 2, season: 'all'},
     {id: 430, text: '古いステッカー跡', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'easy', stars: 2, season: 'all'},
     {id: 431, text: '色あせた表示', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'easy', stars: 2, season: 'all'},
-    {id: 432, text: '半分はがれた表示', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'easy', stars: 2, season: 'all'}
+    {id: 432, text: '半分はがれた表示', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 481, text: '室外機', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 482, text: '軒先の植木鉢', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 483, text: '傘立て', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 484, text: 'ほうきとちりとり', icon: '🔍', category: '家庭・食べ物', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 485, text: '分別表示', icon: '🔍', category: '街インフラ', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 486, text: 'ゴミ収集曜日掲示', icon: '🔍', category: '街インフラ', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 487, text: 'ペットボトル回収箱', icon: '🔍', category: '街インフラ', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 489, text: 'トレー回収箱', icon: '🔍', category: '街インフラ', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 490, text: '牛乳パック回収箱', icon: '🔍', category: '街インフラ', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 491, text: '宅配ボックス（新型）', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 493, text: '玄関マット（柄入り）', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 494, text: '物干し竿（使用中）', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 496, text: 'ゴミステーション', icon: '🔍', category: '街インフラ', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 500, text: '停止線', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 504, text: '玄関脇ほうき', icon: '🔍', category: '家庭・食べ物', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 505, text: '壁付けポスト', icon: '🔍', category: '家庭・食べ物', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 508, text: '屋外水道蛇口', icon: '🔍', category: '家庭・食べ物', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 513, text: '小さなパン屋', icon: '🔍', category: '生活・学校', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 515, text: '惣菜屋', icon: '🔍', category: '生活・学校', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 516, text: '八百屋', icon: '🔍', category: '生活・学校', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 519, text: 'クリーニング店', icon: '🔍', category: '生活・学校', weight: 2000, diff: 'easy', stars: 2, season: 'all'},
+    {id: 520, text: 'コインランドリー', icon: '🔍', category: '生活・学校', weight: 2500, diff: 'easy', stars: 2, season: 'all'},
+    {id: 521, text: '理髪店サインポール', icon: '🔍', category: '生活・学校', weight: 2500, diff: 'easy', stars: 2, season: 'all'}
   ],
 
-  // ふつう（128個） ★3: 少し探す必要があるもの
+  // ふつう（163個） ★3: 少し探す必要があるもの
   medium: [
     {id: 193, text: '羽', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'medium', stars: 3, season: 'all'},
     {id: 194, text: '足あと', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'medium', stars: 3, season: 'all'},
@@ -853,10 +978,45 @@ const topicDatabase = {
     {id: 477, text: '観光案内所キャラ', icon: '🔍', category: '街インフラ', weight: 800, diff: 'medium', stars: 3, season: 'all'},
     {id: 478, text: '公民館掲示キャラ', icon: '🔍', category: '街インフラ', weight: 800, diff: 'medium', stars: 3, season: 'all'},
     {id: 479, text: '地域イベント掲示キャラ', icon: '🔍', category: '街インフラ', weight: 800, diff: 'medium', stars: 3, season: 'all'},
-    {id: 480, text: '地域マスコット立て看板', icon: '🔍', category: '街インフラ', weight: 800, diff: 'medium', stars: 3, season: 'all'}
+    {id: 480, text: '地域マスコット立て看板', icon: '🔍', category: '街インフラ', weight: 800, diff: 'medium', stars: 3, season: 'all'},
+    {id: 488, text: '電池回収ボックス', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 492, text: '置き配荷物', icon: '🔍', category: '家庭・食べ物', weight: 2000, diff: 'medium', stars: 3, season: 'all'},
+    {id: 495, text: 'カラスよけネット', icon: '🔍', category: '街インフラ', weight: 2000, diff: 'medium', stars: 3, season: 'all'},
+    {id: 497, text: '電柱番号札', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 498, text: '消火栓プレート', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 499, text: '路面反射鋲', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 501, text: '側溝コンクリ穴フタ', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 502, text: '電柱黄色巻き', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 503, text: '防犯カメラダミー', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 506, text: '立体表札', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 507, text: '軒下すだれ', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'summer'},
+    {id: 509, text: 'ブロック塀笠木', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 510, text: '勝手口ドア', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 511, text: '段差プレート', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 512, text: 'タイル補修跡', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 514, text: '個人ケーキ屋', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 517, text: '町の肉屋', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 518, text: '魚屋', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 522, text: '昔ながらの美容室入口', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 523, text: '個人薬局', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 524, text: '文房具屋', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 525, text: '証明写真機', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 526, text: '冷凍餃子自販機', icon: '🔍', category: '生活・学校', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 529, text: '玄関横の傘フック', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 530, text: '門前の植木スタンド', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 532, text: '玄関前の小型踏み台', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 534, text: '側溝フタ（住宅前）', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 535, text: '砂利敷き駐車スペース', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 536, text: 'カーポート柱', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 538, text: '壁付け散水蛇口', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 539, text: '電力量メーター箱', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 540, text: 'ガスメーター保護ボックス', icon: '🔍', category: '街インフラ', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 541, text: '据え置き物干し台', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 543, text: '雨戸収納戸袋', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'},
+    {id: 545, text: '郵便受けの雨よけ屋根', icon: '🔍', category: '家庭・食べ物', weight: 1500, diff: 'medium', stars: 3, season: 'all'}
   ],
 
-  // むずかしい（128個） ★4-5: よく観察しないと見つからないもの
+  // むずかしい（138個） ★4-5: よく観察しないと見つからないもの
   hard: [
     {id: 273, text: '側溝の格子ふた', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'hard', stars: 4, season: 'all'},
     {id: 274, text: 'コンクリート側溝', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'hard', stars: 4, season: 'all'},
@@ -985,7 +1145,17 @@ const topicDatabase = {
     {id: 461, text: '傾いたポール', icon: '🔍', category: '痕跡・発見', weight: 600, diff: 'hard', stars: 4, season: 'all'},
     {id: 462, text: '傾いた看板', icon: '🔍', category: '痕跡・発見', weight: 600, diff: 'hard', stars: 4, season: 'all'},
     {id: 463, text: '曲がったフェンス', icon: '🔍', category: '痕跡・発見', weight: 600, diff: 'hard', stars: 4, season: 'all'},
-    {id: 464, text: '草が生えているすき間', icon: '🔍', category: '痕跡・発見', weight: 600, diff: 'hard', stars: 4, season: 'all'}
+    {id: 464, text: '草が生えているすき間', icon: '🔍', category: '痕跡・発見', weight: 600, diff: 'hard', stars: 4, season: 'all'},
+    {id: 527, text: '卵自販機', icon: '🔍', category: '生活・学校', weight: 1200, diff: 'hard', stars: 4, season: 'all'},
+    {id: 528, text: 'おでん缶自販機', icon: '🔍', category: '生活・学校', weight: 1200, diff: 'hard', stars: 4, season: 'all'},
+    {id: 531, text: '宅配再配達票', icon: '🔍', category: '家庭・食べ物', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 533, text: 'ブロック塀の通気穴', icon: '🔍', category: '街インフラ', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 537, text: '屋外コンセント', icon: '🔍', category: '家庭・食べ物', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 542, text: '竿受け金具', icon: '🔍', category: '家庭・食べ物', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 544, text: '外壁換気フード', icon: '🔍', category: '家庭・食べ物', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 546, text: '門灯の透明カバー', icon: '🔍', category: '家庭・食べ物', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 547, text: '住宅煙突', icon: '🔍', category: '家庭・食べ物', weight: 1000, diff: 'hard', stars: 4, season: 'all'},
+    {id: 548, text: '銭湯煙突', icon: '🔍', category: '生活・学校', weight: 1000, diff: 'hard', stars: 4, season: 'all'}
   ]
 };
 
