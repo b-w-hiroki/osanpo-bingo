@@ -176,11 +176,13 @@ function selectTopicsForGame(
     byCategory[cat].push(topic);
   }
 
-  // カテゴリ枠に従って重み付き抽選
+  // カテゴリ枠に±1のランダム幅を持たせてゲームごとに変化をつける
   const selected = [];
   const usedIds = new Set();
 
-  for (const [cat, quota] of Object.entries(CATEGORY_QUOTAS)) {
+  for (const [cat, baseQuota] of Object.entries(CATEGORY_QUOTAS)) {
+    const variance = Math.floor(rng() * 3) - 1; // -1, 0, +1
+    const quota = Math.max(1, baseQuota + variance);
     const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
     const picked = weightedSample(catPool, quota, rng);
     for (const t of picked) {

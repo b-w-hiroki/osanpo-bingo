@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-02 00:36:03
+// 生成日時: 2026-05-02 00:41:16
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -1337,11 +1337,13 @@ function selectTopicsForGame(
     byCategory[cat].push(topic);
   }
 
-  // カテゴリ枠に従って重み付き抽選
+  // カテゴリ枠に±1のランダム幅を持たせてゲームごとに変化をつける
   const selected = [];
   const usedIds = new Set();
 
-  for (const [cat, quota] of Object.entries(CATEGORY_QUOTAS)) {
+  for (const [cat, baseQuota] of Object.entries(CATEGORY_QUOTAS)) {
+    const variance = Math.floor(rng() * 3) - 1; // -1, 0, +1
+    const quota = Math.max(1, baseQuota + variance);
     const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
     const picked = weightedSample(catPool, quota, rng);
     for (const t of picked) {

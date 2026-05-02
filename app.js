@@ -538,9 +538,11 @@ class OsanpoBingo {
       this.boardElement.appendChild(cell);
     });
 
-    // 全セル描画後にテキストを1行に収める（アイコン領域を圧迫しない）
-    this.boardElement.querySelectorAll('.bingo-cell').forEach(c => {
-      this.fitCellText(c);
+    // レイアウト確定後にテキストフィット（rAFで計測タイミングを保証）
+    requestAnimationFrame(() => {
+      this.boardElement.querySelectorAll('.bingo-cell').forEach(c => {
+        this.fitCellText(c);
+      });
     });
   }
 
