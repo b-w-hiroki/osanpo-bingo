@@ -56,52 +56,89 @@ function getTopicSetById(id) {
 }
 
 function getTopicById(id) {
-  for (const key of ['easy', 'medium', 'hard']) {
+  for (const key of ['easy', 'normal', 'hard', 'oni']) {
     const t = topicDatabase[key].find((x) => x.id === id);
     if (t) return t;
   }
   return null;
 }
 
-// ========== バランス抽選 ==========
+// ========== 難易度設計 ==========
 
 /**
- * カテゴリ別 24マス枠割り当て
- * 各カテゴリから均等かつ比率に応じてお題を選ぶ
+ * ゲーム難易度ごとのお題難易度出現確率テーブル
+ *
+ * ゲーム難易度: easy（かんたん）/ normal（ふつう）/ hard（むずかしい）/ oni（おに）/ gachi（ガチおに）
+ * お題難易度:   easy / normal / hard / oni
+ *
+ * 各値は確率（合計1.0）。この値がそのまま重み付きサンプリングの基準となる。
+ */
+const GAME_DIFFICULTY_PROBS = {
+  easy:   { easy: 0.70, normal: 0.25, hard: 0.05, oni: 0.00 },
+  normal: { easy: 0.30, normal: 0.50, hard: 0.15, oni: 0.05 },
+  hard:   { easy: 0.10, normal: 0.30, hard: 0.50, oni: 0.10 },
+  oni:    { easy: 0.05, normal: 0.25, hard: 0.30, oni: 0.40 },
+  gachi:  { easy: 0.00, normal: 0.00, hard: 0.00, oni: 1.00 },
+};
+
+/**
+ * カテゴリ別 24マス枠割り当て（合計=24）
+ * ゲームごとに±1の揺らぎを加えてバリエーションを出す
  */
 const CATEGORY_QUOTAS = {
-  '街インフラ':         2,
-  '自然・生き物':       2,
-  '生活・学校':         1,
-  '家庭・食べ物':       1,
-  '街構造・乗り物':     1,
-  '季節・形・数':       2,
-  '痕跡・発見':         3,
   '線・模様観察':       4,
-  '面・高さ観察':       2,
+  '痕跡・発見':         3,
+  '自然・生き物':       2,
+  '街インフラ':         2,
+  '季節・形・数':       2,
+  '面・高さ観察':       1,
+  '生活・学校':         1,
+  '街構造・乗り物':     1,
+  '家庭・食べ物':       1,
   '住宅・外構':         1,
   '商業・店舗':         1,
   '境界・終端・切れ目': 1,
   '接続・固定・留め具': 1,
+  '素材境界・舗装差':   1,
   '道路標示・路面表示': 1,
+  '舗装・縁石・路面状態': 1,
   '劣化・補修・ズレ':   1
 }; // 合計 = 24
 
 /**
- * 難易度モード別に使用するプール
- * easy: 見つけやすいものを中心（★1-2 のみ）
- * medium: 全難易度ミックス
- * hard: ★3-5 を中心
+ * ビンゴボード内の四隅インデックス（5×5: 位置0,4,20,24）
+ * FREEマス(12)挿入前の24要素配列における四隅インデックス
+ *   board[0]  → topics[0]
+ *   board[4]  → topics[4]
+ *   board[20] → topics[19]  (12より後なので-1)
+ *   board[24] → topics[23]
  */
-const DIFFICULTY_POOLS = {
-  easy:   ['easy'],
-  medium: ['easy', 'medium', 'hard'],
-  hard:   ['medium', 'hard']
-};
+const CORNER_INDICES = [0, 4, 19, 23];
 
 /**
- * spawn_permyriad を重みとした非復元重み付きサンプリング
- * rng: 0-1 を返す疑似乱数関数
+ * ガチおに以外のゲーム難易度で「おに」お題が四隅に来ないよう制御する
+ * おに以外（easy/normal/hard）の非コーナー位置と入れ替える
+ */
+function enforceCornerConstraint(topics, gameDifficulty) {
+  if (gameDifficulty === 'gachi') return topics;
+  const result = [...topics];
+  for (const ci of CORNER_INDICES) {
+    if (result[ci] && result[ci].diff === 'oni') {
+      // コーナー以外でおに以外の最初の要素と交換
+      for (let i = 0; i < result.length; i++) {
+        if (!CORNER_INDICES.includes(i) && result[i] && result[i].diff !== 'oni') {
+          [result[ci], result[i]] = [result[i], result[ci]];
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * ティア確率で重み付けした非復元サンプリング
+ * pool の各要素は _tierWeight プロパティを持つ
  */
 function weightedSample(pool, count, rng) {
   if (pool.length === 0) return [];
@@ -112,11 +149,11 @@ function weightedSample(pool, count, rng) {
 
   for (let i = 0; i < count; i++) {
     if (remaining.length === 0) break;
-    const totalWeight = remaining.reduce((sum, t) => sum + (t.weight || 1000), 0);
+    const totalWeight = remaining.reduce((sum, t) => sum + (t._tierWeight || 1), 0);
     let r = rng() * totalWeight;
     let idx = remaining.length - 1;
     for (let j = 0; j < remaining.length; j++) {
-      r -= (remaining[j].weight || 1000);
+      r -= (remaining[j]._tierWeight || 1);
       if (r <= 0) { idx = j; break; }
     }
     result.push(remaining[idx]);
@@ -140,9 +177,15 @@ function createRng(seed) {
 }
 
 /**
- * カテゴリ均等 × spawn_permyriad 重み付きバランス抽選で 24 件を返す
+ * ゲーム難易度確率テーブルに基づき24件のお題を返す
  *
- * @param {string} difficulty - 'easy' | 'medium' | 'hard'
+ * アルゴリズム:
+ *   1. 各ティアの出現確率をアイテム数で正規化して _tierWeight を付与
+ *   2. カテゴリ別クォータでバランス選出
+ *   3. 不足分を残りプールから補完
+ *   4. シャッフル後に四隅制約を適用（ガチおに除く）
+ *
+ * @param {string} gameDifficulty - 'easy'|'normal'|'hard'|'oni'|'gachi'
  * @param {string} roomCode
  * @param {string} userId
  * @param {string} shuffleSalt
@@ -150,44 +193,49 @@ function createRng(seed) {
  * @returns {Array} 24件のお題配列
  */
 function selectTopicsForGame(
-  difficulty,
+  gameDifficulty,
   roomCode = '',
   userId = '',
   shuffleSalt = '',
   topicSetId = 'default'
 ) {
+  const probs = GAME_DIFFICULTY_PROBS[gameDifficulty] || GAME_DIFFICULTY_PROBS.normal;
   const set = getTopicSetById(topicSetId);
+  const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
+  const currentSeason = getCurrentSeason();
+
   const seedStr = [roomCode, userId, shuffleSalt, topicSetId !== 'default' ? topicSetId : '']
     .filter(Boolean).join('-');
   const seed = seedStr ? stringToSeed(seedStr) : (Math.random() * 0xFFFFFFFF | 0);
   const rng = createRng(seed);
 
-  // 難易度プールを構築
-  const tiers = DIFFICULTY_POOLS[difficulty] || ['easy', 'medium', 'hard'];
-  const fullPool = tiers.flatMap(t => topicDatabase[t] || []);
-
-  // お題セットのフィルタ
-  const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
-  const basePool = allowed ? fullPool.filter(t => allowed.has(t.id)) : fullPool;
-
-  // 季節フィルタ（season列が現在の季節または'all'のもののみ）
-  const currentSeason = getCurrentSeason();
-  const pool = basePool.filter(t => !t.season || t.season === 'all' || t.season === currentSeason);
+  // ティアごとにアイテムをフィルタして _tierWeight（確率/件数）を付与
+  const TIERS = ['easy', 'normal', 'hard', 'oni'];
+  const pool = TIERS.flatMap(tier => {
+    const tierProb = probs[tier] || 0;
+    if (tierProb === 0) return [];
+    const tierItems = (topicDatabase[tier] || [])
+      .filter(t => !t.season || t.season === 'all' || t.season === currentSeason)
+      .filter(t => !allowed || allowed.has(t.id));
+    if (tierItems.length === 0) return [];
+    const itemWeight = tierProb / tierItems.length;
+    return tierItems.map(t => ({ ...t, _tierWeight: itemWeight }));
+  });
 
   // カテゴリ別グループ化
   const byCategory = {};
-  for (const topic of pool) {
-    const cat = topic.category || '不明';
+  for (const t of pool) {
+    const cat = t.category || '不明';
     if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(topic);
+    byCategory[cat].push(t);
   }
 
-  // カテゴリ枠に±1のランダム幅を持たせてゲームごとに変化をつける
+  // カテゴリクォータ抽選（±1の揺らぎ付き）
   const selected = [];
   const usedIds = new Set();
 
   for (const [cat, baseQuota] of Object.entries(CATEGORY_QUOTAS)) {
-    const variance = Math.floor(rng() * 3) - 1; // -1, 0, +1
+    const variance = Math.floor(rng() * 3) - 1;
     const quota = Math.max(1, baseQuota + variance);
     const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
     const picked = weightedSample(catPool, quota, rng);
@@ -197,28 +245,33 @@ function selectTopicsForGame(
     }
   }
 
-  // 24件に満たない場合はプールから補完（残り枠を重み付き抽選）
+  // 不足分をプール残りから補完（補完枠は同一カテゴリ最大2件）
   if (selected.length < 24) {
+    const FILLER_CAT_MAX = 2;
+    const fillerCatCounts = {};
     const filler = pool.filter(t => !usedIds.has(t.id));
-    const extra = weightedSample(filler, 24 - selected.length, rng);
-    for (const t of extra) {
-      selected.push(t);
-      usedIds.add(t.id);
+
+    while (selected.length < 24 && filler.length > 0) {
+      // カテゴリ上限未満の候補を優先。全滅なら上限なしで拾う
+      const eligible = filler.filter(t => (fillerCatCounts[t.category] || 0) < FILLER_CAT_MAX);
+      const candidates = eligible.length > 0 ? eligible : filler;
+      const [picked] = weightedSample(candidates, 1, rng);
+      if (!picked) break;
+      selected.push(picked);
+      usedIds.add(picked.id);
+      fillerCatCounts[picked.category] = (fillerCatCounts[picked.category] || 0) + 1;
+      filler.splice(filler.findIndex(t => t.id === picked.id), 1);
     }
   }
 
-  // プール自体が足りない場合は全難易度から補完
+  // プール自体が不足する場合は全ティアから無条件補完
   if (selected.length < 24) {
-    const allTopics = ['easy', 'medium', 'hard'].flatMap(t => topicDatabase[t] || []);
+    const allTopics = TIERS.flatMap(t => topicDatabase[t] || []);
     for (const t of allTopics) {
       if (selected.length >= 24) break;
-      if (!usedIds.has(t.id)) {
-        selected.push(t);
-        usedIds.add(t.id);
-      }
+      if (!usedIds.has(t.id)) { selected.push(t); usedIds.add(t.id); }
     }
   }
 
-  // 最終シャッフル（同じシードで再現性を確保）
   return shuffleWithSeed(selected.slice(0, 24), seed + 1);
 }

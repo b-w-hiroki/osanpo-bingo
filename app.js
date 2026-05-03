@@ -78,10 +78,11 @@ class OsanpoBingo {
     this.board = [];              // 25個のお題オブジェクト {text, icon}
     this.markedCells = new Set(); // マーク済みのインデックス
     this.bingoLines = [];         // 揃ったラインの配列
+    this.reachLines = [];         // リーチ中のラインの配列（4/5マーク済み）
     
     // Phase 2: グループ機能
     this.roomCode = '';           // 合言葉
-    this.difficulty = 'medium';   // 難易度
+    this.difficulty = 'normal';   // 難易度
     this.topicSetId = 'default';    // お題セット（将来の課金・コラボ拡張用ID）
     this.userId = '';             // ユーザーID
     this.playerCount = 1;         // 参加人数
@@ -244,10 +245,10 @@ class OsanpoBingo {
   // ボードを作成（お題を配置）
   // shuffleSalt: 指定すると毎回異なるシャッフル（作り直し用）
   // customTopics: フリー入力マスのお題配列 [{text, icon}]
-  createBoard(roomCode = '', difficulty = 'medium', shuffleSalt = '', customTopics = null) {
+  createBoard(roomCode = '', difficulty = 'normal', shuffleSalt = '', customTopics = null) {
     // 合言葉と難易度を保存
     this.roomCode = roomCode || this.roomCode || '';
-    this.difficulty = difficulty || this.difficulty || 'medium';
+    this.difficulty = difficulty || this.difficulty || 'normal';
     
     // カスタムトピックを保存（渡されなければ既存を維持）
     if (customTopics !== null) {
@@ -272,7 +273,11 @@ class OsanpoBingo {
     const allTopics = [...this.customTopics, ...randomTopics];
     const seedStr = [this.roomCode, boardSeedUserId, shuffleSalt, 'mix', this.topicSetId || 'default'].filter(Boolean).join('-');
     const seed = stringToSeed(seedStr);
-    const shuffledTopics = shuffleWithSeed(allTopics, seed);
+    // シャッフル後に四隅制約を適用（ガチおに以外はおにが四隅に来ないよう保証）
+    const shuffledTopics = enforceCornerConstraint(
+      shuffleWithSeed(allTopics, seed),
+      this.difficulty
+    );
     
     // 25マスのボードを作成（中央はFREE・表示はアイコンのみ）
     this.board = [];
@@ -453,16 +458,11 @@ class OsanpoBingo {
         if (topic.type === 'landmark') {
           cell.classList.add('cell-landmark');
         } else {
-          let diff = topic.diff || null;
-          let stars = topic.stars || null;
-          if (!diff && typeof topicDatabase !== 'undefined') {
-            for (const key of ['easy', 'medium', 'hard']) {
-              const found = topicDatabase[key].find(t => t.id === topic.id);
-              if (found) { diff = found.diff; stars = found.stars; break; }
-            }
-          }
-          if (diff === 'hard') {
-            cell.classList.add(stars >= 5 ? 'cell-diff-hard-5' : 'cell-diff-hard-4');
+          const diff = topic.diff || 'normal';
+          if (diff === 'oni') {
+            cell.classList.add('cell-diff-oni');
+          } else if (diff === 'hard') {
+            cell.classList.add('cell-diff-hard');
           }
         }
       }
@@ -497,6 +497,11 @@ class OsanpoBingo {
       const isInBingoLine = this.bingoLines.some(line => line.includes(index));
       if (isInBingoLine) {
         cell.classList.add('bingo');
+      }
+      // リーチラインに含まれる（ビンゴ済みラインは除外）
+      const isInReachLine = !isInBingoLine && this.reachLines.some(line => line.includes(index));
+      if (isInReachLine) {
+        cell.classList.add('reach');
       }
       if (this.gameType === 'battle' && ownerId) {
         cell.classList.add('claimed');
@@ -616,25 +621,35 @@ class OsanpoBingo {
   checkBingo() {
     const lines = this.getAllLines();
     const newBingoLines = [];
-    
+    const newReachLines = [];
+
     lines.forEach(line => {
-      const allMarked = line.every(index => this.isCellClaimed(index));
-      
-      if (allMarked) {
+      const markedCount = line.filter(idx => this.isCellClaimed(idx)).length;
+      if (markedCount === 5) {
         newBingoLines.push(line);
+      } else if (markedCount === 4) {
+        newReachLines.push(line);
       }
     });
-    
-    // 新しいビンゴがあるかチェック
-    const oldCount = this.bingoLines.length;
+
+    const oldBingoCount = this.bingoLines.length;
+    const oldReachCount = this.reachLines.length;
     this.bingoLines = newBingoLines;
-    const newCount = this.bingoLines.length;
+    this.reachLines = newReachLines;
+    const newBingoCount = this.bingoLines.length;
+    const newReachCount = this.reachLines.length;
 
     this.renderBoard();
-    if (newCount > oldCount) {
-      this.showBingoMessage(newCount);
+    this.updateStats();
+
+    if (newBingoCount > oldBingoCount) {
+      this.showBingoMessage(newBingoCount);
+      this.showBingoCelebration(newBingoLines, oldBingoCount);
+    } else if (newReachCount > oldReachCount && newBingoCount === 0) {
+      // ビンゴが1本もない場合のみリーチ演出を出す
+      this.showReachEffect(newReachCount);
     }
-    
+
     return this.bingoLines;
   }
   
@@ -673,6 +688,84 @@ class OsanpoBingo {
     }, 10);
   }
   
+  // ==================== ビンゴ・リーチ演出 ====================
+
+  showBingoCelebration(allBingoLines, oldCount) {
+    // 新しく揃ったラインのセルを順番に光らせる
+    const newLines = allBingoLines.slice(oldCount);
+    const newCellIndices = [...new Set(newLines.flat())];
+    newCellIndices.forEach((idx, i) => {
+      setTimeout(() => {
+        const cell = this.boardElement?.querySelector(`[data-index="${idx}"]`);
+        if (!cell) return;
+        cell.classList.remove('bingo-flash');
+        void cell.offsetWidth;
+        cell.classList.add('bingo-flash');
+        cell.addEventListener('animationend', () => cell.classList.remove('bingo-flash'), { once: true });
+      }, i * 70);
+    });
+
+    // セル点灯後にコンフェッティ＋中央テキスト
+    const delay = newCellIndices.length * 70 + 100;
+    setTimeout(() => {
+      this._launchConfetti();
+      this._showBingoText(allBingoLines.length);
+    }, delay);
+  }
+
+  _launchConfetti() {
+    const wrap = document.createElement('div');
+    wrap.className = 'confetti-wrap';
+    document.body.appendChild(wrap);
+
+    const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#c77dff', '#ff9a3c', '#ff85a1'];
+    for (let i = 0; i < 70; i++) {
+      const p = document.createElement('div');
+      const size = 6 + Math.random() * 9;
+      const isRect = Math.random() < 0.4;
+      const dur = (1.4 + Math.random() * 1.4).toFixed(2);
+      const delay = (Math.random() * 0.9).toFixed(2);
+      const rot = Math.floor(Math.random() * 720) - 360;
+      p.className = 'confetti-piece';
+      p.style.cssText = [
+        `left:${Math.random() * 100}%`,
+        `width:${isRect ? size * 2.2 : size}px`,
+        `height:${size}px`,
+        `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+        `border-radius:${Math.random() < 0.4 ? '50%' : '2px'}`,
+        `--dur:${dur}s`,
+        `--delay:${delay}s`,
+        `--rot:${rot}deg`,
+        `animation-delay:${delay}s`,
+      ].join(';');
+      wrap.appendChild(p);
+    }
+    setTimeout(() => wrap.remove(), 3800);
+  }
+
+  _showBingoText(count) {
+    const el = document.createElement('div');
+    el.className = 'bingo-celebration-text';
+    el.innerHTML = `<span class="big">🎉 BINGO!</span><span class="sub">${count > 1 ? count + '本ビンゴ達成！' : 'ビンゴ達成！'}</span>`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
+
+  showReachEffect(reachCount) {
+    const existing = document.querySelector('.reach-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'reach-toast';
+    toast.textContent = reachCount > 1 ? `🔥 ${reachCount}本リーチ！` : '🔥 リーチ！';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('out');
+      toast.addEventListener('animationend', () => toast.remove(), { once: true });
+    }, 1800);
+  }
+
   // ==================== 移動距離トラッキング ====================
 
   /**
@@ -799,9 +892,11 @@ class OsanpoBingo {
     
     if (this.difficultyDisplay) {
       const diffText = {
-        'easy': 'かんたん',
-        'medium': 'ふつう',
-        'hard': 'むずかしい'
+        'easy':   'かんたん',
+        'normal': 'ふつう',
+        'hard':   'むずかしい',
+        'oni':    'おに',
+        'gachi':  'ガチおに'
       };
       this.difficultyDisplay.textContent = diffText[this.difficulty] || '-';
     }
@@ -1307,7 +1402,7 @@ class OsanpoBingo {
     if (roomCodeInput) {
       roomCodeInput.value = (this.roomCode && this.roomCode !== 'solo') ? this.roomCode : this.generateRoomCode();
     }
-    if (difficultySelect) difficultySelect.value = this.difficulty || 'medium';
+    if (difficultySelect) difficultySelect.value = this.difficulty || 'normal';
     if (playerCountInput) playerCountInput.value = this.playerCount || 1;
     
     const setPlayModeRadios = (name, value) => {
@@ -1323,11 +1418,11 @@ class OsanpoBingo {
     const difficultySelectSolo = document.getElementById('difficultySelectSolo');
     const customTopicCountSolo = document.getElementById('customTopicCountSolo');
     const customTopicInputsSolo = document.getElementById('customTopicInputsSolo');
-    if (difficultySelectSolo) difficultySelectSolo.value = this.difficulty || 'medium';
+    if (difficultySelectSolo) difficultySelectSolo.value = this.difficulty || 'normal';
     if (gameTypeCreate) gameTypeCreate.value = this.gameType || 'normal';
     if (gameTypeJoin) gameTypeJoin.value = this.gameType || 'normal';
     const joinDifficultySelect = document.getElementById('joinDifficultySelect');
-    if (joinDifficultySelect) joinDifficultySelect.value = this.difficulty || 'medium';
+    if (joinDifficultySelect) joinDifficultySelect.value = this.difficulty || 'normal';
     ['topicSetSelectSolo', 'topicSetSelectCreate', 'topicSetSelectJoin'].forEach((id) => {
       const ts = document.getElementById(id);
       if (ts) {
@@ -1487,7 +1582,7 @@ class OsanpoBingo {
         const modal = document.getElementById('roomCodeModal');
         const playModeRadio = document.querySelector('input[name="playModeSolo"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
-        this.difficulty = difficultySelectSolo?.value || 'medium';
+        this.difficulty = difficultySelectSolo?.value || 'normal';
         this.topicSetId = document.getElementById('topicSetSelectSolo')?.value || 'default';
         this.gameType = 'normal';
         this.battleTopicOwners = {};
@@ -1518,7 +1613,7 @@ class OsanpoBingo {
         const modal = document.getElementById('roomCodeModal');
         
         const roomCode = roomCodeInput?.value.trim() || this.generateRoomCode();
-        const difficulty = difficultySelect?.value || 'medium';
+        const difficulty = difficultySelect?.value || 'normal';
         const playerCount = parseInt(playerCountInput?.value) || 1;
         
         // フリー入力マスのお題を収集
@@ -1571,7 +1666,7 @@ class OsanpoBingo {
           return;
         }
         
-        const difficulty = joinDifficulty?.value || 'medium';
+        const difficulty = joinDifficulty?.value || 'normal';
         this.topicSetId = document.getElementById('topicSetSelectJoin')?.value || 'default';
         const playModeRadio = document.querySelector('input[name="playModeJoin"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';

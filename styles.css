@@ -219,12 +219,12 @@ h1 {
 }
 
 /* ==================== 難易度グラデーション ==================== */
-/* ★4（むずかしい）：薄めローズ */
-.bingo-cell.cell-diff-hard-4 {
+/* むずかしい：薄めローズ */
+.bingo-cell.cell-diff-hard {
   background: linear-gradient(145deg, #fff0f0 0%, #fdd0d0 100%);
 }
-/* ★5（とてもむずかしい）：濃い赤 */
-.bingo-cell.cell-diff-hard-5 {
+/* おに：濃い赤 */
+.bingo-cell.cell-diff-oni {
   background: linear-gradient(145deg, #f9a0a0 0%, #f07070 100%);
 }
 
@@ -404,18 +404,14 @@ h1 {
 
 /* ==================== アニメーション ==================== */
 @keyframes bingoPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
 }
 
 /* マーク時のポップアニメーション */
 @keyframes markPop {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.15); }
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
@@ -424,36 +420,135 @@ h1 {
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to   { opacity: 0; transform: translate(-50%, 20px); }
+}
+
+/* ==================== リーチ演出 ==================== */
+@keyframes reachGlow {
+  0%, 100% { box-shadow: inset 0 0 0 2px rgba(255, 200, 0, 0.5), 0 0 0 0 rgba(255, 200, 0, 0); }
+  50%       { box-shadow: inset 0 0 0 2px rgba(255, 200, 0, 1),   0 0 8px 4px rgba(255, 200, 0, 0.35); }
+}
+
+.bingo-cell.reach {
+  animation: reachGlow 1.2s ease-in-out infinite;
+}
+
+@keyframes reachToastIn {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.7) translateY(-6px); }
+  60%  { opacity: 1; transform: translateX(-50%) scale(1.05) translateY(0); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+@keyframes reachToastOut {
+  from { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(-8px); }
+}
+
+.reach-toast {
+  position: fixed;
+  top: max(env(safe-area-inset-top, 0px), 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #ffe066, #ffb300);
+  color: #5a3800;
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 8px 22px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(255, 180, 0, 0.45);
+  z-index: 1200;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: reachToastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.reach-toast.out {
+  animation: reachToastOut 0.3s ease-in forwards;
+}
+
+/* ==================== ビンゴ演出 ==================== */
+@keyframes cellFlash {
+  0%   { filter: brightness(1); }
+  30%  { filter: brightness(1.6) saturate(1.4); }
+  60%  { filter: brightness(1.3) saturate(1.2); }
+  100% { filter: brightness(1); }
+}
+
+.bingo-cell.bingo-flash {
+  animation: cellFlash 0.55s ease-out;
+}
+
+/* コンフェッティ */
+.confetti-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1500;
+  overflow: hidden;
+}
+
+@keyframes confettiFall {
+  0%   { transform: translateY(-40px) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) rotate(var(--rot)); opacity: 0; }
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  animation: confettiFall var(--dur) var(--delay) ease-in forwards;
+}
+
+/* ビンゴ祝福テキスト */
+@keyframes bingoTextPop {
+  0%   { transform: translate(-50%, -50%) scale(0)    rotate(-8deg); opacity: 0; }
+  25%  { transform: translate(-50%, -50%) scale(1.15) rotate(2deg);  opacity: 1; }
+  40%  { transform: translate(-50%, -50%) scale(0.95) rotate(0deg);  opacity: 1; }
+  55%  { transform: translate(-50%, -50%) scale(1)    rotate(0deg);  opacity: 1; }
+  80%  { transform: translate(-50%, -50%) scale(1)    rotate(0deg);  opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.85) rotate(0deg);  opacity: 0; }
+}
+
+.bingo-celebration-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1600;
+  pointer-events: none;
+  text-align: center;
+  line-height: 1.1;
+  animation: bingoTextPop 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.bingo-celebration-text .big {
+  display: block;
+  font-size: clamp(3rem, 12vw, 5rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 35%, #6bcb77 65%, #4d96ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.25));
+}
+
+.bingo-celebration-text .sub {
+  display: block;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  margin-top: 4px;
 }
 
 /* ==================== ビンゴメッセージ ==================== */
