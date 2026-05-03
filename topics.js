@@ -621,7 +621,7 @@ function getTopicById(id) {
 const GAME_DIFFICULTY_PROBS = {
   easy:   { easy: 0.70, normal: 0.25, hard: 0.05, oni: 0.00 },
   normal: { easy: 0.30, normal: 0.50, hard: 0.15, oni: 0.05 },
-  hard:   { easy: 0.10, normal: 0.30, hard: 0.50, oni: 0.10 },
+  hard:   { easy: 0.10, normal: 0.30, hard: 0.45, oni: 0.15 },
   oni:    { easy: 0.05, normal: 0.25, hard: 0.30, oni: 0.40 },
   gachi:  { easy: 0.00, normal: 0.00, hard: 0.00, oni: 1.00 },
 };
