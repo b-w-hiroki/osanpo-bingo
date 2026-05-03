@@ -1257,9 +1257,6 @@ const CATEGORY_QUOTAS = {
  */
 const CORNER_INDICES = [0, 4, 19, 23];
 
-// 四隅のボードインデックス（5×5ビンゴ）
-const CORNER_INDICES = [0, 4, 20, 24];
-
 /**
  * ガチおに以外のゲーム難易度で「おに」お題が四隅に来ないよう制御する
  * おに以外（easy/normal/hard）の非コーナー位置と入れ替える
