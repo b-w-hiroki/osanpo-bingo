@@ -364,7 +364,6 @@ h1 {
   text-align: center;
   line-height: 1.2;
   white-space: nowrap;       /* JSが縮小後にnormalへ戻す */
-  overflow: hidden;
   max-width: 100%;
 }
 
@@ -372,11 +371,37 @@ h1 {
 .cell-text-s { font-size: 1rem; }
 .cell-text-m { font-size: 0.88rem; }
 
-/* 長テキスト時はgapを詰める（アイコンサイズは全マス統一） */
-.bingo-cell.cell-len-l,
-.bingo-cell.cell-len-xl {
-  gap: 3px;
+/* 5〜6文字：やや小さく */
+.cell-text-l { font-size: 0.72rem; }
+
+/* 7〜9文字：折り返しモードで開始 */
+.cell-text-xl {
+  font-size: 0.68rem;
+  white-space: normal;
+  line-height: 1.25;
+  word-break: break-all;
 }
+
+/* 10文字以上：さらに小さく折り返し */
+.cell-text-xxl {
+  font-size: 0.58rem;
+  white-space: normal;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+/* 長テキスト時はgapを詰める */
+.bingo-cell.cell-len-l,
+.bingo-cell.cell-len-xl,
+.bingo-cell.cell-len-xxl {
+  gap: 1px;
+  padding-bottom: 3px;
+}
+
+/* 長テキスト時にアイコンを縮小してテキストスペース確保 */
+.bingo-cell.cell-len-l .cell-icon-img-wrap    { width: 75%; }
+.bingo-cell.cell-len-xl .cell-icon-img-wrap   { width: 66%; }
+.bingo-cell.cell-len-xxl .cell-icon-img-wrap  { width: 55%; }
 
 /* マーク済みセルのテキスト */
 .bingo-cell.marked .cell-text,

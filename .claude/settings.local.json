@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr create --title 'chore: dev server launch.json を追加' --body ' *)",
+      "Bash(npm run *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'fix: アイコン均一表示・テキスト自動縮小フィットを実装 *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'fix: アイコン・テキストをより大きく表示して視認性向上 *)",
+      "Bash(git commit -m 'fix: 結果画面のアイコン・テキスト表示を修正 *)",
+      "Bash(git commit -m 'feat: 移動距離トラッキング機能を追加 *)",
+      "Bash(git commit -m 'fix: GPS測定なし表示・結果画面テキスト修正 *)",
+      "Bash(Expand-Archive -Path \"C:\\\\Users\\\\kojac\\\\Downloads\\\\osanpo-icon-new.zip\" -DestinationPath \"C:\\\\Users\\\\kojac\\\\Downloads\\\\osanpo-icon-new-extracted\" -Force)",
+      "Bash(Select-Object -First 5)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\kojac\\\\Downloads\\\\osanpo-icon-new-extracted\" -Recurse)",
+      "Bash(Select-Object FullName)",
+      "Bash(git commit *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(git -C \"C:\\\\Users\\\\kojac\\\\Desktop\\\\AITEST\\\\osanpo bingo\" rm -f .claude/launch.json)",
+      "Bash(git -C \"C:\\\\Users\\\\kojac\\\\Desktop\\\\AITEST\\\\osanpo bingo\" merge claude/strange-lalande-2dd5cc --no-edit)",
+      "Bash(Remove-Item -Path \"C:\\\\Users\\\\kojac\\\\Desktop\\\\AITEST\\\\osanpo bingo\\\\.claude\\\\launch.json\" -Force)",
+      "Bash(rm -f \"C:/Users/kojac/Desktop/AITEST/osanpo bingo/.claude/launch.json\")",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" merge claude/strange-lalande-2dd5cc --no-edit)",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" log --oneline origin/main -15)",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" add service-worker.js)",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" commit -m \"fix: SWキャッシュをv12に更新して最新ファイルを強制取得\")",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" push origin main)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node tools/csv-to-topics.js)",
+      "Bash(mkdir -p osanpo-icon-new landmark-icon-new)",
+      "Bash(unzip -o osanpo-icon.zip -d osanpo-icon-new)",
+      "Bash(unzip -o landmark-icon.zip -d landmark-icon-new)",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" checkout --theirs topics.js topics_list.csv)",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" add topics.js topics_list.csv)",
+      "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" commit --no-edit)",
+      "Bash(grep -E \"\\\\.\\(zip\\)$\")",
+      "Bash(grep -v \",all$\" \"/c/Users/kojac/Desktop/AITEST/osanpo bingo/.claude/worktrees/strange-lalande-2dd5cc/topics_list.csv\")"
+    ]
+  }
+}
