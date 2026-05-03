@@ -367,26 +367,13 @@ h1 {
   max-width: 100%;
 }
 
-/* テキスト長に応じた文字サイズ（アイコンは一切変えない） */
+/* テキスト長に応じた文字サイズ（アイコンは一切変えない・すべて1行表示） */
 .cell-text-s   { font-size: 1rem; }
 .cell-text-m   { font-size: 0.88rem; }
 .cell-text-l   { font-size: 0.72rem; }
-
-/* 7〜9文字：折り返し */
-.cell-text-xl {
-  font-size: 0.68rem;
-  white-space: normal;
-  line-height: 1.2;
-  word-break: break-all;
-}
-
-/* 10文字以上：さらに小さく折り返し */
-.cell-text-xxl {
-  font-size: 0.56rem;
-  white-space: normal;
-  line-height: 1.15;
-  word-break: break-all;
-}
+/* 9文字以上：小さめのフォントで開始し、fitCellTextがさらに縮小 */
+.cell-text-xl  { font-size: 0.62rem; }
+.cell-text-xxl { font-size: 0.52rem; }
 
 /* 長テキスト時はgapを詰める（アイコンサイズは変更しない） */
 .bingo-cell.cell-len-l,

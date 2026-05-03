@@ -518,12 +518,11 @@ class OsanpoBingo {
       let sizeClass = '';
       if (textLen <= 2)       sizeClass = 'cell-text-s';
       else if (textLen <= 4)  sizeClass = 'cell-text-m';
-      else if (textLen <= 6)  sizeClass = 'cell-text-l';
-      else if (textLen <= 9)  sizeClass = 'cell-text-xl';
+      else if (textLen <= 8)  sizeClass = 'cell-text-l';
+      else if (textLen <= 12) sizeClass = 'cell-text-xl';
       else                    sizeClass = 'cell-text-xxl';
 
-      if (textLen >= 10)      cell.classList.add('cell-len-xxl');
-      else if (textLen >= 7)  cell.classList.add('cell-len-xl');
+      if (textLen >= 9)       cell.classList.add('cell-len-xxl');
       else if (textLen >= 5)  cell.classList.add('cell-len-l');
       
       if (hasPhoto) {
@@ -564,25 +563,15 @@ class OsanpoBingo {
     textEl.style.whiteSpace = '';
     textEl.style.lineHeight = '';
 
-    const MIN_PX = 8;
+    const MIN_PX = 7;
 
-    // CSS で white-space: normal が設定済みなら折り返し済み → nowrap縮小ループ不要
-    const computedWS = getComputedStyle(textEl).whiteSpace;
-    if (computedWS === 'normal' || computedWS === 'pre-wrap') return;
-
-    // nowrapで計測 → はみ出しがなければそのまま終了
+    // はみ出しがなければそのまま終了
     if (textEl.scrollWidth <= textEl.offsetWidth) return;
 
     let pxSize = parseFloat(getComputedStyle(textEl).fontSize);
     while (textEl.scrollWidth > textEl.offsetWidth + 1 && pxSize > MIN_PX) {
       pxSize -= 0.5;
       textEl.style.fontSize = pxSize + 'px';
-    }
-
-    // 最小サイズでも収まらない場合は折り返しにフォールバック
-    if (textEl.scrollWidth > textEl.offsetWidth + 1) {
-      textEl.style.whiteSpace = 'normal';
-      textEl.style.lineHeight = '1.2';
     }
   }
 
