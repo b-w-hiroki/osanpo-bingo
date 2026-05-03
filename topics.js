@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-04 01:17:25（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-04 01:43:29（walking_bingo_master.xlsx より自動生成）
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -256,6 +256,22 @@ const topicIconMap = {
   533: 'icon533_ブロック塀の通気穴.png',
   547: 'icon547_住宅煙突.png',
   548: 'icon548_銭湯煙突.png',
+  550: 'icon550_水門ハンドル.png',
+  551: 'icon551_銀杏.png',
+  552: 'icon552_ガードレール.png',
+  553: 'icon553_スーパー.png',
+  554: 'icon554_ラーメン屋.png',
+  555: 'icon555_カレー屋さん.png',
+  556: 'icon556_ニワトリ.png',
+  557: 'icon557_バスケットゴール.png',
+  558: 'icon558_ネイルショップ.png',
+  559: 'icon559_軍手.png',
+  560: 'icon560_手袋（冬）.png',
+  561: 'icon561_のぼりの土台.png',
+  562: 'icon562_トマトジュース.png',
+  563: 'icon563_ココア.png',
+  564: 'icon564_マウンテンデュー.png',
+  565: 'icon565_ソーラーパネル.png',
 };
 
 function getTopicIcon(topic) {
@@ -278,7 +294,7 @@ const landmarkDatabase = [
 ];
 
 const topicDatabase = {
-  // かんたん（88個）
+  // かんたん（89個）
   easy: [
     {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
     {id: 3, text: '信号機', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
@@ -368,8 +384,9 @@ const topicDatabase = {
     {id: 526, text: '冷凍餃子自販機', icon: '🔍', category: '商業・店舗', diff: 'easy', season: 'all'},
     {id: 527, text: '卵自販機', icon: '🔍', category: '商業・店舗', diff: 'easy', season: 'all'},
     {id: 528, text: 'おでん缶自販機', icon: '🔍', category: '商業・店舗', diff: 'easy', season: 'all'},
+    {id: 552, text: 'ガードレール', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'easy', season: 'all'},
   ],
-  // ふつう（87個）
+  // ふつう（95個）
   normal: [
     {id: 97, text: 'じょうろ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
     {id: 98, text: 'ほうき', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
@@ -458,8 +475,16 @@ const topicDatabase = {
     {id: 521, text: '理髪店サインポール', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
     {id: 523, text: '個人薬局', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
     {id: 524, text: '文房具屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 553, text: 'スーパー', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 554, text: 'ラーメン屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 555, text: 'カレー屋さん', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 556, text: 'ニワトリ', icon: '🔍', category: 'その他観察', diff: 'normal', season: 'all'},
+    {id: 559, text: '軍手', icon: '🔍', category: '痕跡・発見', diff: 'normal', season: 'all'},
+    {id: 560, text: '手袋（冬）', icon: '🔍', category: '痕跡・発見', diff: 'normal', season: 'winter'},
+    {id: 563, text: 'ココア', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 565, text: 'ソーラーパネル', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
   ],
-  // むずかしい（57個）
+  // むずかしい（62個）
   hard: [
     {id: 202, text: '木漏れ日', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
     {id: 209, text: '屋外喫煙所', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
@@ -518,8 +543,13 @@ const topicDatabase = {
     {id: 525, text: '証明写真機', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
     {id: 533, text: 'ブロック塀の通気穴', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
     {id: 547, text: '住宅煙突', icon: '🔍', category: '住宅・外構', diff: 'hard', season: 'all'},
+    {id: 551, text: '銀杏', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'autumn'},
+    {id: 558, text: 'ネイルショップ', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all'},
+    {id: 561, text: 'のぼりの土台', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all'},
+    {id: 562, text: 'トマトジュース', icon: '🔍', category: '家庭・食べ物', diff: 'hard', season: 'all'},
+    {id: 564, text: 'マウンテンデュー', icon: '🔍', category: '家庭・食べ物', diff: 'hard', season: 'all'},
   ],
-  // おに（19個）
+  // おに（21個）
   oni: [
     {id: 205, text: '縄跳び', icon: '🔍', category: '生活・学校', diff: 'oni', season: 'all'},
     {id: 275, text: '丸い排水穴', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
@@ -540,6 +570,8 @@ const topicDatabase = {
     {id: 477, text: '元ハローマック跡っぽい店', icon: '🔍', category: '観光・地域情報', diff: 'oni', season: 'all'},
     {id: 480, text: '地域マスコット立て看板', icon: '🔍', category: '観光・地域情報', diff: 'oni', season: 'all'},
     {id: 548, text: '銭湯煙突', icon: '🔍', category: '住宅・外構', diff: 'oni', season: 'all'},
+    {id: 550, text: '水門ハンドル', icon: '🔍', category: 'その他観察', diff: 'oni', season: 'all'},
+    {id: 557, text: 'バスケットゴール', icon: '🔍', category: 'その他観察', diff: 'oni', season: 'all'},
   ],
 };
 
