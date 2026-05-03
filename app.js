@@ -549,54 +549,7 @@ class OsanpoBingo {
       this.boardElement.querySelectorAll('.bingo-cell').forEach(c => {
         this.fitCellText(c);
       });
-      this.drawBingoLines();
     });
-  }
-
-  drawBingoLines() {
-    const existing = this.boardElement?.querySelector('.bingo-lines-svg');
-    if (existing) existing.remove();
-    if (!this.boardElement || this.bingoLines.length === 0) return;
-
-    const boardRect = this.boardElement.getBoundingClientRect();
-    const NS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('class', 'bingo-lines-svg');
-    svg.setAttribute('width', boardRect.width);
-    svg.setAttribute('height', boardRect.height);
-
-    this.bingoLines.forEach(line => {
-      const firstCell = this.boardElement.querySelector(`[data-index="${line[0]}"]`);
-      const lastCell  = this.boardElement.querySelector(`[data-index="${line[line.length - 1]}"]`);
-      if (!firstCell || !lastCell) return;
-
-      const fr = firstCell.getBoundingClientRect();
-      const lr = lastCell.getBoundingClientRect();
-      const x1 = fr.left + fr.width  / 2 - boardRect.left;
-      const y1 = fr.top  + fr.height / 2 - boardRect.top;
-      const x2 = lr.left + lr.width  / 2 - boardRect.left;
-      const y2 = lr.top  + lr.height / 2 - boardRect.top;
-
-      // 影線（視認性向上）
-      const shadow = document.createElementNS(NS, 'line');
-      shadow.setAttribute('x1', x1); shadow.setAttribute('y1', y1);
-      shadow.setAttribute('x2', x2); shadow.setAttribute('y2', y2);
-      shadow.setAttribute('stroke', 'rgba(0,0,0,0.35)');
-      shadow.setAttribute('stroke-width', '8');
-      shadow.setAttribute('stroke-linecap', 'round');
-      svg.appendChild(shadow);
-
-      // メイン線（白）
-      const main = document.createElementNS(NS, 'line');
-      main.setAttribute('x1', x1); main.setAttribute('y1', y1);
-      main.setAttribute('x2', x2); main.setAttribute('y2', y2);
-      main.setAttribute('stroke', '#ffffff');
-      main.setAttribute('stroke-width', '5');
-      main.setAttribute('stroke-linecap', 'round');
-      svg.appendChild(main);
-    });
-
-    this.boardElement.appendChild(svg);
   }
 
   // テキストがセル幅に収まるようにfont-sizeを縮小する
