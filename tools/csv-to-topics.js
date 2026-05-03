@@ -117,36 +117,12 @@ function getTopicIcon(topic) {
   return \`<span class="cell-icon">\${topic.icon}</span>\`;
 }
 
-// ランドマークDB（お城・神社など地域の特別スポット）
+// ランドマークDB（地域の特別スポット・準備中）
 const landmarkDatabase = [
-  {id: 'landmark0100', text: '姫路城',       iconFile: 'landmark0100_姫路城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0101', text: '松本城',       iconFile: 'landmark0101_松本城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0102', text: '大阪城',       iconFile: 'landmark0102_大阪城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0103', text: '名古屋城',     iconFile: 'landmark0103_名古屋城.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0104', text: '熊本城',       iconFile: 'landmark0104_熊本城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0105', text: '松江城',       iconFile: 'landmark0105_松江城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0106', text: '犬山城',       iconFile: 'landmark0106_犬山城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0107', text: '彦根城',       iconFile: 'landmark0107_彦根城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0108', text: '二条城',       iconFile: 'landmark0108_二条城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0109', text: '松山城',       iconFile: 'landmark0109_松山城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0110', text: '弘前城',       iconFile: 'landmark0110_弘前城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0111', text: '小田原城',     iconFile: 'landmark0111_小田原城.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0112', text: '岡山城',       iconFile: 'landmark0112_岡山城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0113', text: '高知城',       iconFile: 'landmark0113_高知城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0114', text: '会津若松城',   iconFile: 'landmark0114_会津若松城.png',   type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0115', text: '首里城',       iconFile: 'landmark0115_首里城.png',       type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0200', text: '伏見稲荷大社', iconFile: 'landmark0200_伏見稲荷大社.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0201', text: '厳島神社',     iconFile: 'landmark0201_厳島神社.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0202', text: '出雲大社',     iconFile: 'landmark0202_出雲大社.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0203', text: '明治神宮',     iconFile: 'landmark0203_明治神宮.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0204', text: '日光東照宮',   iconFile: 'landmark0204_日光東照宮.png',   type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0205', text: '宇佐神宮',     iconFile: 'landmark0205_宇佐神宮.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0207', text: '太宰府天満宮', iconFile: 'landmark0207_太宰府天満宮.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0208', text: '氷川神社',     iconFile: 'landmark0208_氷川神社.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0209', text: '鹿島神宮',     iconFile: 'landmark0209_鹿島神宮.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0212', text: '住吉大社',     iconFile: 'landmark0212_住吉大社.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0213', text: '吉野神宮',     iconFile: 'landmark0213_吉野神宮.png',     type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark0206', text: '春日大社',     iconFile: 'landmark206_春日大社.png',      type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark001', text: 'ランドマーク①', iconFile: 'landmark001_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark002', text: 'ランドマーク②', iconFile: 'landmark002_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark003', text: 'ランドマーク③', iconFile: 'landmark003_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark004', text: 'ランドマーク④', iconFile: 'landmark004_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
 ];
 
 const topicDatabase = {
