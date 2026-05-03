@@ -78,6 +78,7 @@ class OsanpoBingo {
     this.board = [];              // 25個のお題オブジェクト {text, icon}
     this.markedCells = new Set(); // マーク済みのインデックス
     this.bingoLines = [];         // 揃ったラインの配列
+    this.reachLines = [];         // リーチ中のラインの配列（4/5マーク済み）
     
     // Phase 2: グループ機能
     this.roomCode = '';           // 合言葉
@@ -221,12 +222,6 @@ class OsanpoBingo {
       if (el) el.addEventListener('change', () => this.updateTopicSetHelpFor(el));
     });
     
-    // 設定ボタン（プレイ中に設定モーダルを開く）
-    const settingsBtn = document.getElementById('settingsBtn');
-    if (settingsBtn) {
-      settingsBtn.addEventListener('click', () => this.showRoomCodeModal(true));
-    }
-    
     // 写真モーダル
     this.setupPhotoModal();
 
@@ -272,7 +267,11 @@ class OsanpoBingo {
     const allTopics = [...this.customTopics, ...randomTopics];
     const seedStr = [this.roomCode, boardSeedUserId, shuffleSalt, 'mix', this.topicSetId || 'default'].filter(Boolean).join('-');
     const seed = stringToSeed(seedStr);
-    const shuffledTopics = shuffleWithSeed(allTopics, seed);
+    // シャッフル後に四隅制約を適用（ガチおに以外はおにが四隅に来ないよう保証）
+    const shuffledTopics = enforceCornerConstraint(
+      shuffleWithSeed(allTopics, seed),
+      this.difficulty
+    );
     
     // 25マスのボードを作成（中央はFREE・表示はアイコンのみ）
     this.board = [];
@@ -453,15 +452,12 @@ class OsanpoBingo {
         if (topic.type === 'landmark') {
           cell.classList.add('cell-landmark');
         } else {
-          let diff = topic.diff || null;
-          if (!diff && typeof topicDatabase !== 'undefined') {
-            for (const key of ['easy', 'normal', 'hard', 'oni']) {
-              const found = topicDatabase[key].find(t => t.id === topic.id);
-              if (found) { diff = found.diff; break; }
-            }
+          const diff = topic.diff || 'normal';
+          if (diff === 'oni') {
+            cell.classList.add('cell-diff-oni');
+          } else if (diff === 'hard') {
+            cell.classList.add('cell-diff-hard');
           }
-          if (diff === 'hard') cell.classList.add('cell-diff-hard');
-          else if (diff === 'oni') cell.classList.add('cell-diff-oni');
         }
       }
 
@@ -496,6 +492,12 @@ class OsanpoBingo {
       if (isInBingoLine) {
         cell.classList.add('bingo');
       }
+      // リーチラインの「残り1マス（未マーク）」のみ点滅
+      const isUnclaimedReach = !isInBingoLine && !this.isCellClaimed(index) &&
+        this.reachLines.some(line => line.includes(index));
+      if (isUnclaimedReach) {
+        cell.classList.add('reach');
+      }
       if (this.gameType === 'battle' && ownerId) {
         cell.classList.add('claimed');
         if (ownerId !== this.battlePlayerId) {
@@ -511,12 +513,11 @@ class OsanpoBingo {
       let sizeClass = '';
       if (textLen <= 2)       sizeClass = 'cell-text-s';
       else if (textLen <= 4)  sizeClass = 'cell-text-m';
-      else if (textLen <= 6)  sizeClass = 'cell-text-l';
-      else if (textLen <= 9)  sizeClass = 'cell-text-xl';
+      else if (textLen <= 8)  sizeClass = 'cell-text-l';
+      else if (textLen <= 12) sizeClass = 'cell-text-xl';
       else                    sizeClass = 'cell-text-xxl';
 
-      if (textLen >= 10)      cell.classList.add('cell-len-xxl');
-      else if (textLen >= 7)  cell.classList.add('cell-len-xl');
+      if (textLen >= 9)       cell.classList.add('cell-len-xxl');
       else if (textLen >= 5)  cell.classList.add('cell-len-l');
       
       if (hasPhoto) {
@@ -557,25 +558,15 @@ class OsanpoBingo {
     textEl.style.whiteSpace = '';
     textEl.style.lineHeight = '';
 
-    const MIN_PX = 8;
+    const MIN_PX = 7;
 
-    // CSS で white-space: normal が設定済みなら折り返し済み → nowrap縮小ループ不要
-    const computedWS = getComputedStyle(textEl).whiteSpace;
-    if (computedWS === 'normal' || computedWS === 'pre-wrap') return;
-
-    // nowrapで計測 → はみ出しがなければそのまま終了
+    // はみ出しがなければそのまま終了
     if (textEl.scrollWidth <= textEl.offsetWidth) return;
 
     let pxSize = parseFloat(getComputedStyle(textEl).fontSize);
     while (textEl.scrollWidth > textEl.offsetWidth + 1 && pxSize > MIN_PX) {
       pxSize -= 0.5;
       textEl.style.fontSize = pxSize + 'px';
-    }
-
-    // 最小サイズでも収まらない場合は折り返しにフォールバック
-    if (textEl.scrollWidth > textEl.offsetWidth + 1) {
-      textEl.style.whiteSpace = 'normal';
-      textEl.style.lineHeight = '1.2';
     }
   }
 
@@ -614,26 +605,40 @@ class OsanpoBingo {
   checkBingo() {
     const lines = this.getAllLines();
     const newBingoLines = [];
-    
+    const newReachLines = [];
+
     lines.forEach(line => {
-      const allMarked = line.every(index => this.isCellClaimed(index));
-      
-      if (allMarked) {
+      const markedCount = line.filter(idx => this.isCellClaimed(idx)).length;
+      if (markedCount === 5) {
         newBingoLines.push(line);
+      } else if (markedCount === 4) {
+        newReachLines.push(line);
       }
     });
-    
-    // 新しいビンゴがあるかチェック
-    const oldCount = this.bingoLines.length;
+
+    const oldBingoCount = this.bingoLines.length;
+    // 既存リーチラインをキーセットに変換（新規ラインを正確に検出するため）
+    const oldReachKeys = new Set(this.reachLines.map(l => l.join(',')));
     this.bingoLines = newBingoLines;
-    const newCount = this.bingoLines.length;
+    this.reachLines = newReachLines;
+    const newBingoCount = this.bingoLines.length;
 
     this.renderBoard();
-    if (newCount > oldCount) {
-      this.showBingoMessage(newCount);
-      if (newCount === 12 && oldCount < 12) {
+    this.updateStats();
+
+    if (newBingoCount > oldBingoCount) {
+      this.showBingoMessage(newBingoCount);
+      if (newBingoCount === 12 && oldBingoCount < 12) {
         this.showFullClearCelebration();
+      } else {
+        this.showBingoCelebration(newBingoLines, oldBingoCount);
       }
+    }
+
+    // ビンゴと独立して：本当に新しいリーチラインが現れた場合は常に表示
+    const trulyNewReaches = newReachLines.filter(l => !oldReachKeys.has(l.join(',')));
+    if (trulyNewReaches.length > 0) {
+      this.showReachEffect(this.reachLines.length);
     }
 
     return this.bingoLines;
@@ -673,8 +678,72 @@ class OsanpoBingo {
       this.messageElement.classList.add('pulse');
     }, 10);
   }
+  
+  // ==================== ビンゴ・リーチ演出 ====================
+
+  showBingoCelebration(allBingoLines, oldCount) {
+    // 新しく揃ったラインのセルを順番に光らせる
+    const newLines = allBingoLines.slice(oldCount);
+    const newCellIndices = [...new Set(newLines.flat())];
+    newCellIndices.forEach((idx, i) => {
+      setTimeout(() => {
+        const cell = this.boardElement?.querySelector(`[data-index="${idx}"]`);
+        if (!cell) return;
+        cell.classList.remove('bingo-flash');
+        void cell.offsetWidth;
+        cell.classList.add('bingo-flash');
+        cell.addEventListener('animationend', () => cell.classList.remove('bingo-flash'), { once: true });
+      }, i * 70);
+    });
+
+    // セル点灯後にコンフェッティ＋中央テキスト
+    const delay = newCellIndices.length * 70 + 100;
+    setTimeout(() => {
+      this._launchConfetti();
+      this._showBingoText(allBingoLines.length);
+    }, delay);
+  }
+
+  _launchConfetti() {
+    const wrap = document.createElement('div');
+    wrap.className = 'confetti-wrap';
+    document.body.appendChild(wrap);
+
+    const colors = ['#d32f2f', '#f9a825', '#2e7d32', '#1565c0', '#6a1b9a', '#e65100', '#c2185b'];
+    for (let i = 0; i < 70; i++) {
+      const p = document.createElement('div');
+      const size = 6 + Math.random() * 9;
+      const isRect = Math.random() < 0.4;
+      const dur = (1.4 + Math.random() * 1.4).toFixed(2);
+      const delay = (Math.random() * 0.9).toFixed(2);
+      const rot = Math.floor(Math.random() * 720) - 360;
+      p.className = 'confetti-piece';
+      p.style.cssText = [
+        `left:${Math.random() * 100}%`,
+        `width:${isRect ? size * 2.2 : size}px`,
+        `height:${size}px`,
+        `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+        `border-radius:${Math.random() < 0.4 ? '50%' : '2px'}`,
+        `--dur:${dur}s`,
+        `--delay:${delay}s`,
+        `--rot:${rot}deg`,
+        `animation-delay:${delay}s`,
+      ].join(';');
+      wrap.appendChild(p);
+    }
+    setTimeout(() => wrap.remove(), 3800);
+  }
+
+  _showBingoText(count) {
+    const el = document.createElement('div');
+    el.className = 'bingo-celebration-text';
+    el.innerHTML = `<span class="big">🎉 BINGO!</span><span class="sub">${count > 1 ? count + '本ビンゴ達成！' : 'ビンゴ達成！'}</span>`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
 
   showFullClearCelebration() {
+    // 全セルを順番にフラッシュ
     for (let i = 0; i < 25; i++) {
       setTimeout(() => {
         const cell = this.boardElement?.querySelector(`[data-index="${i}"]`);
@@ -685,6 +754,7 @@ class OsanpoBingo {
         cell.addEventListener('animationend', () => cell.classList.remove('bingo-flash'), { once: true });
       }, i * 40);
     }
+    // コンフェッティ大量 + 全クリアテキスト
     setTimeout(() => {
       this._launchFullClearConfetti();
       this._showFullClearText();
@@ -727,6 +797,21 @@ class OsanpoBingo {
       '<span class="big">✨ FULL CLEAR!</span><span class="sub">全12ライン制覇！<br>すごすぎる！</span>';
     document.body.appendChild(el);
     el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
+
+  showReachEffect(reachCount) {
+    const existing = document.querySelector('.reach-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'reach-toast';
+    toast.textContent = reachCount > 1 ? `🔥 ${reachCount}本リーチ！` : '🔥 リーチ！';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('out');
+      toast.addEventListener('animationend', () => toast.remove(), { once: true });
+    }, 1800);
   }
 
   // ==================== 移動距離トラッキング ====================
@@ -855,11 +940,11 @@ class OsanpoBingo {
     
     if (this.difficultyDisplay) {
       const diffText = {
-        'easy': 'かんたん',
+        'easy':   'かんたん',
         'normal': 'ふつう',
-        'hard': 'むずかしい',
-        'oni': 'おに',
-        'gacha': 'ガチおに'
+        'hard':   'むずかしい',
+        'oni':    'おに',
+        'gachi':  'ガチおに'
       };
       this.difficultyDisplay.textContent = diffText[this.difficulty] || '-';
     }

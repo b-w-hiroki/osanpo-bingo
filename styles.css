@@ -21,7 +21,7 @@
   --cell-bg: #ffffff;
   --cell-marked: #7eb89a;
   --cell-free: #a8d5ba;
-  --cell-bingo: #ffb347;
+  --cell-bingo: #c05000;
   --cell-border: #e0e0e0;
   --cell-hover: #f0f4f2;
   
@@ -191,6 +191,7 @@ h1 {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   margin-bottom: var(--spacing-lg);
+  position: relative;
 }
 
 /* ビンゴセル（画像・テキストは中央寄せ） */
@@ -215,21 +216,17 @@ h1 {
 
   overflow: hidden;
   padding: 2px;
+  padding-bottom: 2px;
 }
 
 /* ==================== 難易度グラデーション ==================== */
-/* むずかしい（★3）：薄めローズ */
+/* むずかしい：薄めローズ */
 .bingo-cell.cell-diff-hard {
   background: linear-gradient(145deg, #fff0f0 0%, #fdd0d0 100%);
 }
-/* おに（★4-5）：濃いオレンジ〜赤 */
+/* おに：濃い赤 */
 .bingo-cell.cell-diff-oni {
-  background: linear-gradient(145deg, #ffe0b0 0%, #ff7b00 100%);
-  color: #fff;
-}
-.bingo-cell.cell-diff-oni .cell-text {
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  background: linear-gradient(145deg, #f9a0a0 0%, #f07070 100%);
 }
 
 /* ==================== ランドマーク ☆ ==================== */
@@ -268,7 +265,6 @@ h1 {
 .bingo-cell:hover {
   background: var(--cell-hover);
   border-color: var(--primary-light);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -328,24 +324,28 @@ h1 {
 /* セル内のアイコン：セル幅の%ベースで固定サイズ */
 .cell-icon {
   /* 絵文字フォールバック用 */
-  font-size: clamp(1.4rem, 7vw, 2.4rem);
+  font-size: clamp(1.2rem, 6vw, 2rem);
   line-height: 1;
   transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
-/* 画像アイコンのラッパー：セルに対して固定比率の正方形 */
+/* 画像アイコンのラッパー：フレックス残余高さを使い正方形に収める */
 .cell-icon-img-wrap {
   font-size: 0;
-  width: 82%;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: auto;
+  max-width: 82%;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 /* 画像はラッパーいっぱいに表示 */
@@ -371,33 +371,20 @@ h1 {
   max-width: 100%;
 }
 
-/* テキスト長に応じた文字サイズ（アイコンは一切変えない） */
+/* テキスト長に応じた文字サイズ（アイコンは一切変えない・すべて1行表示） */
 .cell-text-s   { font-size: 1rem; }
 .cell-text-m   { font-size: 0.88rem; }
 .cell-text-l   { font-size: 0.72rem; }
-
-/* 7〜9文字：折り返し */
-.cell-text-xl {
-  font-size: 0.68rem;
-  white-space: normal;
-  line-height: 1.2;
-  word-break: break-all;
-}
-
-/* 10文字以上：さらに小さく折り返し */
-.cell-text-xxl {
-  font-size: 0.56rem;
-  white-space: normal;
-  line-height: 1.15;
-  word-break: break-all;
-}
+/* 9文字以上：小さめのフォントで開始し、fitCellTextがさらに縮小 */
+.cell-text-xl  { font-size: 0.62rem; }
+.cell-text-xxl { font-size: 0.52rem; }
 
 /* 長テキスト時はgapを詰める（アイコンサイズは変更しない） */
 .bingo-cell.cell-len-l,
 .bingo-cell.cell-len-xl,
 .bingo-cell.cell-len-xxl {
-  gap: 1px;
-  padding-bottom: 2px;
+  gap: 0px;
+  padding-bottom: 1px;
 }
 
 /* マーク済みセルのテキスト */
@@ -408,18 +395,14 @@ h1 {
 
 /* ==================== アニメーション ==================== */
 @keyframes bingoPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
 }
 
 /* マーク時のポップアニメーション */
 @keyframes markPop {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.15); }
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
@@ -428,58 +411,83 @@ h1 {
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 1;
-    transform: translate(-50%, 0);
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to   { opacity: 0; transform: translate(-50%, 20px); }
+}
+
+/* ==================== リーチ演出 ==================== */
+@keyframes reachGlow {
+  0%, 100% {
+    background: #dbeafe;
+    box-shadow: inset 0 0 0 3px rgba(21, 101, 192, 0.8);
   }
-  to {
-    opacity: 0;
-    transform: translate(-50%, 20px);
+  50% {
+    background: #bfdbfe;
+    box-shadow: inset 0 0 0 3px rgba(21, 101, 192, 1);
   }
 }
 
-/* ==================== フルクリア演出 ==================== */
+.bingo-cell.reach {
+  animation: reachGlow 0.9s ease-in-out infinite;
+  color: #1e3a6e;
+}
+
+@keyframes reachToastIn {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.7) translateY(-6px); }
+  60%  { opacity: 1; transform: translateX(-50%) scale(1.05) translateY(0); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+@keyframes reachToastOut {
+  from { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(-8px); }
+}
+
+.reach-toast {
+  position: fixed;
+  top: max(env(safe-area-inset-top, 0px), 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1565c0;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 8px 22px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(21, 101, 192, 0.55);
+  z-index: 1200;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: reachToastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.reach-toast.out {
+  animation: reachToastOut 0.3s ease-in forwards;
+}
+
+/* ==================== ビンゴ演出 ==================== */
 @keyframes cellFlash {
-  0% {
-    filter: brightness(1);
-  }
-  25% {
-    filter: brightness(0.65) contrast(1.3);
-  }
-  55% {
-    filter: brightness(1.15);
-  }
-  100% {
-    filter: brightness(1);
-  }
+  0%   { filter: brightness(1); }
+  25%  { filter: brightness(0.65) contrast(1.3); }
+  55%  { filter: brightness(1.15); }
+  100% { filter: brightness(1); }
 }
 
 .bingo-cell.bingo-flash {
   animation: cellFlash 0.55s ease-out;
 }
 
+/* コンフェッティ */
 .confetti-wrap {
   position: fixed;
   inset: 0;
@@ -489,14 +497,8 @@ h1 {
 }
 
 @keyframes confettiFall {
-  0% {
-    transform: translateY(-40px) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(110vh) rotate(var(--rot));
-    opacity: 0;
-  }
+  0%   { transform: translateY(-40px) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) rotate(var(--rot)); opacity: 0; }
 }
 
 .confetti-piece {
@@ -506,31 +508,14 @@ h1 {
   animation: confettiFall var(--dur) var(--delay) ease-in forwards;
 }
 
+/* ビンゴ祝福テキスト */
 @keyframes bingoTextPop {
-  0% {
-    transform: translate(-50%, -50%) scale(0) rotate(-8deg);
-    opacity: 0;
-  }
-  25% {
-    transform: translate(-50%, -50%) scale(1.12) rotate(2deg);
-    opacity: 1;
-  }
-  40% {
-    transform: translate(-50%, -50%) scale(0.96) rotate(0deg);
-    opacity: 1;
-  }
-  55% {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-    opacity: 1;
-  }
-  80% {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0.88) rotate(0deg);
-    opacity: 0;
-  }
+  0%   { transform: translate(-50%, -50%) scale(0)    rotate(-8deg); opacity: 0; }
+  25%  { transform: translate(-50%, -50%) scale(1.12) rotate(2deg);  opacity: 1; }
+  40%  { transform: translate(-50%, -50%) scale(0.96) rotate(0deg);  opacity: 1; }
+  55%  { transform: translate(-50%, -50%) scale(1)    rotate(0deg);  opacity: 1; }
+  80%  { transform: translate(-50%, -50%) scale(1)    rotate(0deg);  opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.88) rotate(0deg);  opacity: 0; }
 }
 
 .bingo-celebration-text {
@@ -540,7 +525,7 @@ h1 {
   z-index: 1600;
   pointer-events: none;
   text-align: center;
-  line-height: 1.25;
+  line-height: 1.2;
   background: rgba(18, 18, 40, 0.88);
   padding: 20px 36px 18px;
   border-radius: 20px;
@@ -584,9 +569,9 @@ h1 {
   text-align: center;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--accent);
+  color: #fff;
   padding: var(--spacing-md);
-  background: white;
+  background: #c05000;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   margin-bottom: var(--spacing-lg);

@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-03 10:09:47
+// 生成日時: 2026-05-03 08:31:02
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -575,568 +575,568 @@ const landmarkDatabase = [
 ];
 
 const topicDatabase = {
-  // かんたん（101個） ★1: よく見かけるもの
+  // かんたん（101個）: よく見かけるもの
   easy: [
-    {id: 1, text: '電柱', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 3, text: '信号機', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 4, text: '横断歩道', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 5, text: 'カーブミラー', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 6, text: '飛び出し坊や', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 7, text: 'マンホール', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 8, text: 'ガードレール', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 9, text: '道路の白線', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 10, text: '排水口', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 11, text: '道路反射板', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 12, text: '点字ブロック', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 13, text: '表札プレート', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 14, text: '玄関灯', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 15, text: '郵便受け', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 16, text: 'インターホン', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 17, text: '門柱', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 18, text: '玄関マット', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 19, text: '宅配ボックス', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 20, text: '家のフェンス', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 21, text: '窓の格子', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 22, text: '雨どい', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 23, text: '小さな物置', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 24, text: '家の外階段', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 25, text: 'すべり台', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 26, text: 'ブランコ', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 27, text: 'ジャングルジム', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 28, text: 'シーソー', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 29, text: '鉄棒', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 30, text: '砂場', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 31, text: 'バネの遊具', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 32, text: '公園の水飲み場', icon: '🔍', category: '街インフラ', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 33, text: '通学路ポール', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 34, text: '公園のベンチ', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 35, text: '公園の案内板', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 36, text: '公園のごみ箱', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 37, text: 'たんぽぽ', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'spring'},
-    {id: 38, text: 'クローバー', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 39, text: '小さな白い花', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 40, text: '赤い実', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 41, text: '松ぼっくり', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 42, text: 'どんぐり', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'autumn'},
-    {id: 43, text: '苔', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 44, text: '木の切り株', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 45, text: '丸い葉っぱ', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 46, text: '細長い葉っぱ', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 47, text: '草むら', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 48, text: '植え込み', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 49, text: 'ブロック塀', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 50, text: '屋外の蛇口', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 51, text: '車止め', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 52, text: '街のゴミ箱', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 53, text: '木の案内札', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 54, text: '金網フェンス', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 55, text: '手すり', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 56, text: '駐輪ラック', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 57, text: '低いポール', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 58, text: '自動販売機', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 59, text: '灰皿スタンド', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 60, text: '街灯', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 61, text: '猫', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 62, text: '犬', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 63, text: 'すずめ', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 64, text: 'ハト', icon: '🔍', category: '自然・生き物', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 65, text: 'カラス', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 66, text: 'ちょうちょ', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'summer'},
-    {id: 67, text: 'てんとう虫', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'summer'},
-    {id: 68, text: 'アリ', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 69, text: 'ダンゴムシ', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 70, text: 'カタツムリ', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'summer'},
-    {id: 71, text: 'トカゲ', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 72, text: 'メダカ鉢', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 73, text: 'のれん', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 74, text: '立て看板', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 75, text: '店先の鉢植え', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 76, text: '食品サンプル', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 77, text: 'シャッター', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 78, text: 'アーケード', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 79, text: 'ガチャガチャ', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 80, text: '店先の箱', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 81, text: 'テイクアウト窓口', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 82, text: '商店街の旗', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 83, text: 'レジ横の小窓', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 84, text: '店のライト', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 85, text: 'ランドセル', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 86, text: '黄色い帽子', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 87, text: '通学路標識', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 88, text: '学校の門', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 89, text: '校庭フェンス', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 90, text: '体育倉庫', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 91, text: '一輪車', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 92, text: 'サッカーボール', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 93, text: '竹馬', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 94, text: 'チョーク', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 95, text: '黒板消し', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 96, text: '上履き袋', icon: '🔍', category: '生活・学校', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 497, text: '電柱番号札', icon: '🔍', category: 'その他観察', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 502, text: '電柱黄色巻き', icon: '🔍', category: 'その他観察', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 526, text: '冷凍餃子自販機', icon: '🔍', category: '商業・店舗', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 527, text: '卵自販機', icon: '🔍', category: '商業・店舗', weight: 3000, diff: 'easy', stars: 1, season: 'all'},
-    {id: 528, text: 'おでん缶自販機', icon: '🔍', category: '商業・店舗', weight: 3000, diff: 'easy', stars: 1, season: 'all'}
+    {id: 1, text: '電柱', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 3, text: '信号機', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 4, text: '横断歩道', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 5, text: 'カーブミラー', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 6, text: '飛び出し坊や', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 7, text: 'マンホール', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 8, text: 'ガードレール', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 9, text: '道路の白線', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 10, text: '排水口', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 11, text: '道路反射板', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 12, text: '点字ブロック', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 13, text: '表札プレート', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 14, text: '玄関灯', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 15, text: '郵便受け', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 16, text: 'インターホン', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 17, text: '門柱', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 18, text: '玄関マット', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 19, text: '宅配ボックス', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 20, text: '家のフェンス', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 21, text: '窓の格子', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 22, text: '雨どい', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 23, text: '小さな物置', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 24, text: '家の外階段', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 25, text: 'すべり台', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 26, text: 'ブランコ', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 27, text: 'ジャングルジム', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 28, text: 'シーソー', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 29, text: '鉄棒', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 30, text: '砂場', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 31, text: 'バネの遊具', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 32, text: '公園の水飲み場', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
+    {id: 33, text: '通学路ポール', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 34, text: '公園のベンチ', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 35, text: '公園の案内板', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 36, text: '公園のごみ箱', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 37, text: 'たんぽぽ', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'spring'},
+    {id: 38, text: 'クローバー', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 39, text: '小さな白い花', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 40, text: '赤い実', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 41, text: '松ぼっくり', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 42, text: 'どんぐり', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'autumn'},
+    {id: 43, text: '苔', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 44, text: '木の切り株', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 45, text: '丸い葉っぱ', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 46, text: '細長い葉っぱ', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 47, text: '草むら', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 48, text: '植え込み', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 49, text: 'ブロック塀', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 50, text: '屋外の蛇口', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 51, text: '車止め', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 52, text: '街のゴミ箱', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 53, text: '木の案内札', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 54, text: '金網フェンス', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 55, text: '手すり', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 56, text: '駐輪ラック', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 57, text: '低いポール', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 58, text: '自動販売機', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 59, text: '灰皿スタンド', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 60, text: '街灯', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 61, text: '猫', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 62, text: '犬', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 63, text: 'すずめ', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 64, text: 'ハト', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 65, text: 'カラス', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 66, text: 'ちょうちょ', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'summer'},
+    {id: 67, text: 'てんとう虫', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'summer'},
+    {id: 68, text: 'アリ', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 69, text: 'ダンゴムシ', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 70, text: 'カタツムリ', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'summer'},
+    {id: 71, text: 'トカゲ', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 72, text: 'メダカ鉢', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 73, text: 'のれん', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 74, text: '立て看板', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 75, text: '店先の鉢植え', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 76, text: '食品サンプル', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 77, text: 'シャッター', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 78, text: 'アーケード', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 79, text: 'ガチャガチャ', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 80, text: '店先の箱', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 81, text: 'テイクアウト窓口', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 82, text: '商店街の旗', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 83, text: 'レジ横の小窓', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 84, text: '店のライト', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 85, text: 'ランドセル', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 86, text: '黄色い帽子', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 87, text: '通学路標識', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 88, text: '学校の門', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 89, text: '校庭フェンス', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 90, text: '体育倉庫', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 91, text: '一輪車', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 92, text: 'サッカーボール', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 93, text: '竹馬', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 94, text: 'チョーク', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 95, text: '黒板消し', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 96, text: '上履き袋', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
+    {id: 497, text: '電柱番号札', icon: '🔍', category: 'その他観察', diff: 'easy', season: 'all'},
+    {id: 502, text: '電柱黄色巻き', icon: '🔍', category: 'その他観察', diff: 'easy', season: 'all'},
+    {id: 526, text: '冷凍餃子自販機', icon: '🔍', category: '商業・店舗', diff: 'easy', season: 'all'},
+    {id: 527, text: '卵自販機', icon: '🔍', category: '商業・店舗', diff: 'easy', season: 'all'},
+    {id: 528, text: 'おでん缶自販機', icon: '🔍', category: '商業・店舗', diff: 'easy', season: 'all'}
   ],
 
-  // ふつう（156個） ★2: 少し意識すれば見つかるもの
+  // ふつう（156個）: 少し探す必要があるもの
   normal: [
-    {id: 97, text: 'じょうろ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 98, text: 'ほうき', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 99, text: '傘立て', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 100, text: '洗濯ばさみ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 101, text: '物干し竿', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 102, text: '室外機', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 103, text: 'ガーデンライト', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 104, text: '庭のイス', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 105, text: '園芸鉢', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 106, text: '庭石', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 107, text: 'ホースリール', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 108, text: 'ウッドデッキ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 109, text: 'おにぎり', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 110, text: 'パン屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 111, text: 'サンドイッチ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 112, text: 'アイスクリーム屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 113, text: 'ドーナツ屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 114, text: 'クッキー屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 115, text: '水筒', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 116, text: '紙パック飲料', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 117, text: 'コーヒーカップ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 118, text: 'お弁当屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 119, text: 'たい焼き屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 120, text: '焼きいも屋さん', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'winter'},
-    {id: 121, text: 'パーゴラ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 122, text: '水飲み場', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 123, text: '自転車ラック', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 124, text: 'チェーン柵', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 125, text: '石橋', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 126, text: '階段', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 127, text: '花壇', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 128, text: '手押しポンプ', icon: '🔍', category: '家庭・食べ物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 129, text: '掲示板', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 130, text: '案内地図', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 131, text: 'トイレマーク', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 132, text: '段差プレート', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 133, text: 'コンクリート壁', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 134, text: '木製アーチ', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 135, text: 'ガーデンランプ', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 136, text: '石段', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 137, text: 'グレーチング', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 138, text: '古いポンプ', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 139, text: '低い柵', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 140, text: '防火水槽ふた', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 141, text: '消火栓', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 142, text: 'バス停', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 143, text: 'タクシー乗り場', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 144, text: '駐車場ゲート', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 145, text: '自転車', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 146, text: 'スクーター', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 147, text: '自動車', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 148, text: 'トラック', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 149, text: '新幹線', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 150, text: '飛行機', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 151, text: '気球', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 152, text: '船', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 153, text: '桜', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'spring'},
-    {id: 154, text: 'こいのぼり', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'spring'},
-    {id: 155, text: 'ひまわり', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'summer'},
-    {id: 156, text: 'スイカ', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'summer'},
-    {id: 157, text: '銀杏', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'autumn'},
-    {id: 158, text: '木の葉の山', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'autumn'},
-    {id: 159, text: '雪だるま', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'winter'},
-    {id: 160, text: 'ツリー', icon: '🔍', category: '街構造・乗り物', weight: 2500, diff: 'normal', stars: 2, season: 'winter'},
-    {id: 161, text: '紅葉', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'autumn'},
-    {id: 162, text: 'つらら', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'winter'},
-    {id: 163, text: '止まれ足型マーク', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 164, text: 'マフラー', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'winter'},
-    {id: 165, text: 'こいのぼり', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'spring'},
-    {id: 166, text: 'リース', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'winter'},
-    {id: 167, text: '風鈴', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'summer'},
-    {id: 168, text: 'うちわ', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'summer'},
-    {id: 169, text: '赤いボール', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 170, text: '段ボール箱', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 171, text: 'カーブミラー裏側', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 172, text: 'お地蔵さん', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 173, text: '小石', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 174, text: '大きな岩', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 175, text: '渦巻きオブジェ', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 176, text: 'ジグザグ板', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 177, text: '星', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 178, text: '顔に見える石', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 179, text: '直線の棒', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 180, text: 'カラフル板', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 181, text: '石2つ並び', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 182, text: '石3つ並び', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 183, text: '小石4つ', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 184, text: '5本線マーク板', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 185, text: '1本の棒', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 186, text: '多数並び小石', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 187, text: '同形葉2枚', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 188, text: '同形葉3枚', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 189, text: '段差プレート', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 190, text: 'ブロック塀笠木', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 191, text: '門扉蝶番', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 192, text: '小石10個以上', icon: '🔍', category: '季節・形・数', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 353, text: '舗装の終わり', icon: '🔍', category: '境界・終端・切れ目', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 355, text: '白線の終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 358, text: '側溝の終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 361, text: '縁石の切れ目', icon: '🔍', category: '境界・終端・切れ目', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 363, text: '舗装と草の境界', icon: '🔍', category: '境界・終端・切れ目', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 369, text: 'ボルト留め', icon: '🔍', category: '接続・固定・留め具', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 374, text: '結束バンド', icon: '🔍', category: '接続・固定・留め具', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 380, text: '標識柱の根元', icon: '🔍', category: '接続・固定・留め具', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 385, text: 'アスファルトとコンクリートの境界', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 390, text: '白線とアスファルト', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 391, text: '側溝ふたと舗装の境界', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 392, text: '縁石と車道の境界', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 393, text: '町内会掲示板', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 394, text: '点字ブロックと歩道の境界', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 395, text: 'マンホールと舗装の境界', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 396, text: 'グレーチングと舗装の境界', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 398, text: '補修跡の舗装', icon: '🔍', category: '素材境界・舗装差', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 401, text: '横断歩道ライン', icon: '🔍', category: '道路標示・路面表示', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 405, text: '外側線', icon: '🔍', category: '道路標示・路面表示', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 426, text: 'コンビニ', icon: '🔍', category: '案内・注意表示', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 433, text: 'アスファルトとコンクリート', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 434, text: '段差のある縁石', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 435, text: '点字ブロックの端', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 438, text: '舗装補修パッチ', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 441, text: '並ぶ側溝ふた', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 447, text: '縁石の角', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 465, text: '屋外招き猫', icon: '🔍', category: 'キャラクター掲示物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 466, text: 'シーサー', icon: '🔍', category: 'キャラクター掲示物', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 471, text: '店先ポップスタンドキャラ', icon: '🔍', category: '店舗周辺', weight: 2500, diff: 'normal', stars: 2, season: 'all'},
-    {id: 481, text: '室外機', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 483, text: '傘立て', icon: '🔍', category: 'その他観察', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 484, text: 'ほうきとちりとり', icon: '🔍', category: 'その他観察', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 493, text: '玄関マット', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 494, text: '物干し竿', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 504, text: '玄関脇ほうき', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 505, text: '壁付けポスト', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 506, text: '立体表札', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 508, text: '屋外水道蛇口', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 513, text: '小さなパン屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 514, text: '個人ケーキ屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 515, text: '惣菜屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 516, text: '八百屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 517, text: '町の肉屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 518, text: '魚屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 519, text: 'クリーニング店', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 520, text: 'コインランドリー', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 521, text: '理髪店サインポール', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 523, text: '個人薬局', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 524, text: '文房具屋', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 529, text: '玄関横の傘フック', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 530, text: '門前の植木スタンド', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 532, text: '玄関前の小型踏み台', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 534, text: '側溝フタ（住宅前）', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 536, text: 'カーポート柱', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 537, text: '屋外コンセント', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 541, text: '据え置き物干し台', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 542, text: '竿受け金具', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 544, text: '外壁換気フード', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 545, text: '郵便受けの雨よけ屋根', icon: '🔍', category: '商業・店舗', weight: 2200, diff: 'normal', stars: 2, season: 'all'},
-    {id: 546, text: '門灯の透明カバー', icon: '🔍', category: '住宅・外構', weight: 2200, diff: 'normal', stars: 2, season: 'all'}
+    {id: 97, text: 'じょうろ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 98, text: 'ほうき', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 99, text: '傘立て', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 100, text: '洗濯ばさみ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 101, text: '物干し竿', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 102, text: '室外機', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 103, text: 'ガーデンライト', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 104, text: '庭のイス', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 105, text: '園芸鉢', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 106, text: '庭石', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 107, text: 'ホースリール', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 108, text: 'ウッドデッキ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 109, text: 'おにぎり', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 110, text: 'パン', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 111, text: 'サンドイッチ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 112, text: 'アイスクリーム', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 113, text: 'ドーナツ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 114, text: 'クッキー', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 115, text: '水筒', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 116, text: '紙パック飲料', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 117, text: 'コーヒーカップ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 118, text: 'お弁当', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 119, text: 'たい焼き', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 120, text: '焼きいも', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'winter'},
+    {id: 121, text: 'パーゴラ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 122, text: '水飲み場', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 123, text: '自転車ラック', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 124, text: 'チェーン柵', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 125, text: '石橋', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 126, text: '階段', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 127, text: '花壇', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 128, text: '手押しポンプ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
+    {id: 129, text: '掲示板', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 130, text: '案内地図', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 131, text: 'トイレマーク', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 132, text: '段差プレート', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 133, text: 'コンクリート壁', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 134, text: '木製アーチ', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 135, text: 'ガーデンランプ', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 136, text: '石段', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 137, text: 'グレーチング', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 138, text: '古いポンプ', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 139, text: '低い柵', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 140, text: '防火水槽ふた', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 141, text: '消火栓', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 142, text: 'バス停', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 143, text: 'タクシー乗り場', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 144, text: '駐車場ゲート', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 145, text: '自転車', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 146, text: 'スクーター', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 147, text: '自動車', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 148, text: 'トラック', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 149, text: '新幹線', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 150, text: '飛行機', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 151, text: '気球', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 152, text: '船', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
+    {id: 153, text: '桜', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'spring'},
+    {id: 154, text: 'こいのぼり', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'spring'},
+    {id: 155, text: 'ひまわり', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'summer'},
+    {id: 156, text: 'スイカ', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'summer'},
+    {id: 157, text: '銀杏', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'autumn'},
+    {id: 158, text: '木の葉の山', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'autumn'},
+    {id: 159, text: '雪だるま', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'winter'},
+    {id: 160, text: 'ツリー', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'winter'},
+    {id: 161, text: '紅葉', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'autumn'},
+    {id: 162, text: 'つらら', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'winter'},
+    {id: 163, text: '止まれ足型マーク', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 164, text: 'マフラー', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'winter'},
+    {id: 165, text: 'こいのぼり', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'spring'},
+    {id: 166, text: 'クリスマス飾り', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'winter'},
+    {id: 167, text: '風鈴', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'summer'},
+    {id: 168, text: 'うちわ', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'summer'},
+    {id: 169, text: '赤いボール', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 170, text: '段ボール箱', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 171, text: 'カーブミラー裏側', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 172, text: 'お地蔵さん', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 173, text: '小石', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 174, text: '大きな岩', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 175, text: '渦巻きオブジェ', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 176, text: 'ジグザグ板', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 177, text: '星プレート', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 178, text: '顔に見える石', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 179, text: '直線の棒', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 180, text: 'しましま板', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 181, text: '石2つ並び', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 182, text: '石3つ並び', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 183, text: '小石4つ', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 184, text: '5本線マーク板', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 185, text: '1本の棒', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 186, text: '多数並び小石', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 187, text: '同形葉2枚', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 188, text: '同形葉3枚', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 189, text: '段差プレート', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 190, text: 'ブロック塀笠木', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 191, text: '門扉蝶番', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 192, text: '小石10個以上', icon: '🔍', category: '季節・形・数', diff: 'normal', season: 'all'},
+    {id: 353, text: '舗装の終わり', icon: '🔍', category: '境界・終端・切れ目', diff: 'normal', season: 'all'},
+    {id: 355, text: '白線の終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'normal', season: 'all'},
+    {id: 358, text: '側溝の終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'normal', season: 'all'},
+    {id: 361, text: '縁石の切れ目', icon: '🔍', category: '境界・終端・切れ目', diff: 'normal', season: 'all'},
+    {id: 363, text: '舗装と草の境界', icon: '🔍', category: '境界・終端・切れ目', diff: 'normal', season: 'all'},
+    {id: 369, text: 'ボルト留め', icon: '🔍', category: '接続・固定・留め具', diff: 'normal', season: 'all'},
+    {id: 374, text: '結束バンド', icon: '🔍', category: '接続・固定・留め具', diff: 'normal', season: 'all'},
+    {id: 380, text: '標識柱の根元', icon: '🔍', category: '接続・固定・留め具', diff: 'normal', season: 'all'},
+    {id: 385, text: 'アスファルトとコンクリートの境界', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 390, text: '白線とアスファルト', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 391, text: '側溝ふたと舗装の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 392, text: '縁石と車道の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 393, text: '町内会掲示板', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 394, text: '点字ブロックと歩道の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 395, text: 'マンホールと舗装の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 396, text: 'グレーチングと舗装の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 398, text: '補修跡の舗装', icon: '🔍', category: '素材境界・舗装差', diff: 'normal', season: 'all'},
+    {id: 401, text: '横断歩道ライン', icon: '🔍', category: '道路標示・路面表示', diff: 'normal', season: 'all'},
+    {id: 405, text: '外側線', icon: '🔍', category: '道路標示・路面表示', diff: 'normal', season: 'all'},
+    {id: 426, text: 'コンビニ外観', icon: '🔍', category: '案内・注意表示', diff: 'normal', season: 'all'},
+    {id: 433, text: 'アスファルトとコンクリート', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'normal', season: 'all'},
+    {id: 434, text: '段差のある縁石', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'normal', season: 'all'},
+    {id: 435, text: '点字ブロックの端', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'normal', season: 'all'},
+    {id: 438, text: '舗装補修パッチ', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'normal', season: 'all'},
+    {id: 441, text: '並ぶ側溝ふた', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'normal', season: 'all'},
+    {id: 447, text: '縁石の角', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'normal', season: 'all'},
+    {id: 465, text: '屋外招き猫', icon: '🔍', category: 'キャラクター掲示物', diff: 'normal', season: 'all'},
+    {id: 466, text: 'シーサー', icon: '🔍', category: 'キャラクター掲示物', diff: 'normal', season: 'all'},
+    {id: 471, text: '店先ポップスタンドキャラ', icon: '🔍', category: '店舗周辺', diff: 'normal', season: 'all'},
+    {id: 481, text: '室外機', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 483, text: '傘立て', icon: '🔍', category: 'その他観察', diff: 'normal', season: 'all'},
+    {id: 484, text: 'ほうきとちりとり', icon: '🔍', category: 'その他観察', diff: 'normal', season: 'all'},
+    {id: 493, text: '玄関マット', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 494, text: '物干し竿', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 504, text: '玄関脇ほうき', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 505, text: '壁付けポスト', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 506, text: '立体表札', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 508, text: '屋外水道蛇口', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 513, text: '小さなパン屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 514, text: '個人ケーキ屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 515, text: '惣菜屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 516, text: '八百屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 517, text: '町の肉屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 518, text: '魚屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 519, text: 'クリーニング店', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 520, text: 'コインランドリー', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 521, text: '理髪店サインポール', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 523, text: '個人薬局', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 524, text: '文房具屋', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 529, text: '玄関横の傘フック', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 530, text: '門前の植木スタンド', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 532, text: '玄関前の小型踏み台', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 534, text: '側溝フタ（住宅前）', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 536, text: 'カーポート柱', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 537, text: '屋外コンセント', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 541, text: '据え置き物干し台', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 542, text: '竿受け金具', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 544, text: '外壁換気フード', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'},
+    {id: 545, text: '郵便受けの雨よけ屋根', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 546, text: '門灯の透明カバー', icon: '🔍', category: '住宅・外構', diff: 'normal', season: 'all'}
   ],
 
-  // むずかしい（179個） ★3: よく観察しないと見つからないもの
+  // むずかしい（179個）: よく観察しないと見つからないもの
   hard: [
-    {id: 193, text: 'タイル補修跡', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 194, text: '外壁換気', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 195, text: '雨どい固定金具', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 196, text: 'エアコン配管', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 197, text: '玄関横フック', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'winter'},
-    {id: 198, text: 'ポーチライト', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 199, text: '宅配注意', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 200, text: 'インターホン', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 201, text: '玄関横の砂利', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 202, text: '縁石雑草', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 203, text: 'ブロック塀笠木別角度', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 204, text: '門扉ラッチ金具', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 205, text: '玄関タイル', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 206, text: '傾いたカラーコーン', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 207, text: 'めくれた紙', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 208, text: '斜め看板', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 209, text: '屋外喫煙所', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 210, text: '自販機横のゴミ箱', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 211, text: '壁のイラスト', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 212, text: '銅像', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'autumn'},
-    {id: 213, text: '枝の風船', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 214, text: 'しぼんだボール', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 215, text: 'ハート石', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 216, text: '虹反射', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 217, text: 'ねじれ枝', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 218, text: 'つる輪', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 219, text: '鳥の巣', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 220, text: 'つぼみ', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'spring'},
-    {id: 221, text: '開いた実', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 222, text: '抜け殻', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'summer'},
-    {id: 223, text: 'きのこ', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'autumn'},
-    {id: 224, text: 'ベンチ下ボール', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 225, text: '柵のタオル', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 226, text: 'エアコン室外機', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'autumn'},
-    {id: 227, text: 'ガスメーター', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 228, text: '電力量メーター', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 229, text: '雨どい', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 230, text: '雨どい金具', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 231, text: '外壁の点検口', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 232, text: '四角い換気口', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 233, text: '丸い換気口', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 234, text: 'ブロック塀の壁', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 235, text: 'フェンス支柱', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 236, text: '門柱の表札', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 237, text: '新聞受け口', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 238, text: '手紙', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 239, text: 'ひっくり葉', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 240, text: '石の輪', icon: '🔍', category: '痕跡・発見', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 241, text: '色の違う舗装ブロック', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 242, text: 'タイルの補修跡', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 243, text: 'アスファルトのひび', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 244, text: '側溝のふたの種類違い', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 245, text: '補修されたマンホール', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 246, text: '点字ブロックの終端', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 247, text: '白線のかすれ', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 248, text: '横断歩道のすり減り', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 249, text: '舗装の切り替わり線', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 250, text: '道路の水たまり跡', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 251, text: '小さな砂だまり', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 252, text: '落ち葉が集まった端', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'autumn'},
-    {id: 253, text: '雑草が出たすき間', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 254, text: '根で盛り上がった舗装', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 255, text: '地面の小さな穴', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 256, text: '石が埋まった舗装', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 257, text: '十字路', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 258, text: 'T字路', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 259, text: '行き止まり', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 260, text: '曲がり角', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 261, text: '坂道', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 262, text: '急な坂', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 263, text: '細い路地', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 264, text: '袋小路', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 265, text: '一方通行の道', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 266, text: '車止めのある道', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 267, text: '歩道と車道の段差', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 268, text: '縁石の切れ目', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 269, text: '段差解消スロープ', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 270, text: 'カーブした白線', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 271, text: '道路の合流部分', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 272, text: '道の幅が変わる場所', icon: '🔍', category: '線・模様観察', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 354, text: 'タイルの終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 356, text: 'フェンスの終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 357, text: 'ガードレールの終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 359, text: 'ブロック塀の終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 360, text: '手すりの終端', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 362, text: '舗装と土の境界', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 364, text: '舗装と砂利の境界', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 365, text: '壁と地面の境界', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 368, text: '落ち葉の縁', icon: '🔍', category: '境界・終端・切れ目', weight: 2000, diff: 'hard', stars: 3, season: 'autumn'},
-    {id: 370, text: 'ネジ頭', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 371, text: '金具プレート', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 375, text: 'フック', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 377, text: '鎖の接続部', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 378, text: '手すりの継ぎ目', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 379, text: 'フェンスの接合部', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 381, text: 'ガードレールの接合部', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 383, text: '配管クランプ', icon: '🔍', category: '接続・固定・留め具', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 386, text: 'コンクリートとタイルの境界', icon: '🔍', category: '素材境界・舗装差', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 388, text: '土と草の境界', icon: '🔍', category: '素材境界・舗装差', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 397, text: '舗装の色違いパッチ', icon: '🔍', category: '素材境界・舗装差', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 399, text: '新しい舗装と古い舗装', icon: '🔍', category: '素材境界・舗装差', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 400, text: 'ひび割れ補修ライン', icon: '🔍', category: '素材境界・舗装差', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 403, text: '黄色中央線', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 404, text: '白中央線', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 406, text: 'ひし形マーク', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 407, text: '停止三角', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 408, text: '直進矢印', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 409, text: '左折矢印', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 410, text: '右折矢印', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 415, text: '緑舗装', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 416, text: '赤舗装', icon: '🔍', category: '道路標示・路面表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 418, text: '注意色のしましま', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 419, text: '黄色い注意プレート', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 421, text: '青い案内プレート', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 422, text: '緑の誘導表示', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 423, text: '消火設備マーク', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 424, text: '避難案内マーク', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 425, text: '駐輪禁止マーク', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 427, text: '防犯カメラ表示', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 428, text: '工事中カラー', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 429, text: '反射材つき表示', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 431, text: '色あせた表示', icon: '🔍', category: '案内・注意表示', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 436, text: 'タイルの切り替わり', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 437, text: '色違い舗装', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 439, text: '一本ひび', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 442, text: 'グレーチング端', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 443, text: 'マンホール補修跡', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 444, text: '途切れた白線', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 445, text: '歩道ブロック継ぎ目', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 446, text: 'インターロッキング', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 448, text: '縁石カーブ', icon: '🔍', category: '舗装・縁石・路面状態', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 449, text: '色あせた白線', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 450, text: 'スーパー入口', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 451, text: 'サビの出た金属', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 453, text: 'ヒビの入った縁石', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 454, text: '欠けたコンクリート角', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 455, text: '古い舗装の色差', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 456, text: '重ね塗りされた線', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 458, text: '交換された舗装', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 464, text: '草が生えているすき間', icon: '🔍', category: '劣化・補修・ズレ', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 467, text: 'ふくろう置き物', icon: '🔍', category: 'キャラクター掲示物', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 469, text: '商店街フラッグキャラ', icon: '🔍', category: 'キャラクター掲示物', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 470, text: '商店街バナーキャラ', icon: '🔍', category: 'キャラクター掲示物', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 474, text: '壁キャライラスト', icon: '🔍', category: 'キャラクター掲示物', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 475, text: '公共掲示板キャラ', icon: '🔍', category: '公共施設', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 476, text: '案内板横キャラ', icon: '🔍', category: '公共施設', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 478, text: '公民館掲示キャラ', icon: '🔍', category: '公共施設', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 479, text: '地域イベント掲示キャラ', icon: '🔍', category: '観光・地域情報', weight: 2000, diff: 'hard', stars: 3, season: 'all'},
-    {id: 482, text: '軒先の植木鉢', icon: '🔍', category: '自然・生き物', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 485, text: '分別表示', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 486, text: 'ゴミ収集曜日掲示', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 487, text: 'ペットボトル回収箱', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 488, text: '電池回収ボックス', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 489, text: 'トレー回収箱', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 490, text: '牛乳パック回収箱', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 491, text: '宅配ボックス', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 492, text: '置き配荷物', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 495, text: 'カラスよけネット', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 496, text: 'ゴミステーション', icon: '🔍', category: '生活・地域設備', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 498, text: '消火栓プレート', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 499, text: '路面反射鋲', icon: '🔍', category: '道路・路面', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 500, text: '停止線', icon: '🔍', category: '道路・路面', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 501, text: '側溝コンクリ穴フタ', icon: '🔍', category: '道路・路面', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 503, text: '防犯カメラダミー', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 507, text: '軒下すだれ', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'summer'},
-    {id: 509, text: 'ブロック塀笠木', icon: '🔍', category: '自然・生き物', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 510, text: '勝手口ドア', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 511, text: '段差プレート', icon: '🔍', category: '道路・路面', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 512, text: 'タイル補修跡', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 522, text: '昔ながらの美容室入口', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 525, text: '証明写真機', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 531, text: '宅配再配達票', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 533, text: 'ブロック塀の通気穴', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 535, text: '砂利敷き駐車スペース', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 538, text: '壁付け散水蛇口', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 539, text: '電力量メーター箱', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 540, text: 'ガスメーター保護ボックス', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 543, text: '雨戸収納戸袋', icon: '🔍', category: 'その他観察', weight: 1400, diff: 'hard', stars: 3, season: 'all'},
-    {id: 547, text: '住宅煙突', icon: '🔍', category: '住宅・外構', weight: 1400, diff: 'hard', stars: 3, season: 'all'}
+    {id: 193, text: 'タイル補修跡', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 194, text: '外壁換気', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 195, text: '雨どい固定金具', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 196, text: 'エアコン配管', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 197, text: '玄関横フック', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'winter'},
+    {id: 198, text: 'ポーチライト', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 199, text: '宅配注意', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 200, text: 'インターホン', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 201, text: '玄関横の砂利', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 202, text: '縁石雑草', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 203, text: 'ブロック塀笠木別角度', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 204, text: '門扉ラッチ金具', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 205, text: '玄関タイル', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 206, text: '傾いたカラーコーン', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 207, text: 'めくれた紙', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 208, text: '斜め看板', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 209, text: '屋外喫煙所', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 210, text: '自販機横のゴミ箱', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 211, text: '壁のイラスト', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 212, text: '銅像', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'autumn'},
+    {id: 213, text: '枝の風船', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 214, text: 'しぼんだボール', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 215, text: 'ハート石', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 216, text: '虹反射', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 217, text: 'ねじれ枝', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 218, text: 'つる輪', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 219, text: '鳥の巣', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 220, text: 'つぼみ', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'spring'},
+    {id: 221, text: '開いた実', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 222, text: '抜け殻', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'summer'},
+    {id: 223, text: 'きのこ群', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'autumn'},
+    {id: 224, text: 'ベンチ下ボール', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 225, text: '柵のタオル', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 226, text: 'エアコン室外機', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'autumn'},
+    {id: 227, text: 'ガスメーター', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 228, text: '電力量メーター', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 229, text: '雨どい', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 230, text: '雨どい金具', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 231, text: '外壁の点検口', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 232, text: '四角い換気口', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 233, text: '丸い換気口', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 234, text: 'ブロック塀の壁', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 235, text: 'フェンス支柱', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 236, text: '門柱の表札', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 237, text: '新聞受け口', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 238, text: '手紙', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 239, text: 'ひっくり葉', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 240, text: '石の輪', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
+    {id: 241, text: '色の違う舗装ブロック', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 242, text: 'タイルの補修跡', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 243, text: 'アスファルトのひび', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 244, text: '側溝のふたの種類違い', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 245, text: 'マンホール周りの円形補修', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 246, text: '点字ブロックの終端', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 247, text: '白線のかすれ', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 248, text: '横断歩道のすり減り', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 249, text: '舗装の切り替わり線', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 250, text: '道路の水たまり跡', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 251, text: '小さな砂だまり', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 252, text: '落ち葉が集まった端', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'autumn'},
+    {id: 253, text: '雑草が出たすき間', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 254, text: '根で盛り上がった舗装', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 255, text: '地面の小さな穴', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 256, text: '石が埋まった舗装', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 257, text: '十字路', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 258, text: 'T字路', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 259, text: '行き止まり', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 260, text: '曲がり角', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 261, text: '坂道', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 262, text: '急な坂', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 263, text: '細い路地', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 264, text: '袋小路', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 265, text: '一方通行の道', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 266, text: '車止めのある道', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 267, text: '歩道と車道の段差', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 268, text: '縁石の切れ目', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 269, text: '段差解消スロープ', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 270, text: 'カーブした白線', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 271, text: '道路の合流部分', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 272, text: '道の幅が変わる場所', icon: '🔍', category: '線・模様観察', diff: 'hard', season: 'all'},
+    {id: 354, text: 'タイルの終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 356, text: 'フェンスの終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 357, text: 'ガードレールの終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 359, text: 'ブロック塀の終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 360, text: '手すりの終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 362, text: '舗装と土の境界', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 364, text: '舗装と砂利の境界', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 365, text: '壁と地面の境界', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'all'},
+    {id: 368, text: '落ち葉の縁', icon: '🔍', category: '境界・終端・切れ目', diff: 'hard', season: 'autumn'},
+    {id: 370, text: 'ネジ頭', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 371, text: '金具プレート', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 375, text: 'フック', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 377, text: '鎖の接続部', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 378, text: '手すりの継ぎ目', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 379, text: 'フェンスの接合部', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 381, text: 'ガードレールの接合部', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 383, text: '配管クランプ', icon: '🔍', category: '接続・固定・留め具', diff: 'hard', season: 'all'},
+    {id: 386, text: 'コンクリートとタイルの境界', icon: '🔍', category: '素材境界・舗装差', diff: 'hard', season: 'all'},
+    {id: 388, text: '土と草の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'hard', season: 'all'},
+    {id: 397, text: '舗装の色違いパッチ', icon: '🔍', category: '素材境界・舗装差', diff: 'hard', season: 'all'},
+    {id: 399, text: '新しい舗装と古い舗装', icon: '🔍', category: '素材境界・舗装差', diff: 'hard', season: 'all'},
+    {id: 400, text: 'ひび割れ補修ライン', icon: '🔍', category: '素材境界・舗装差', diff: 'hard', season: 'all'},
+    {id: 403, text: '黄色中央線', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 404, text: '白中央線', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 406, text: 'ひし形マーク', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 407, text: '停止三角', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 408, text: '直進矢印', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 409, text: '左折矢印', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 410, text: '右折矢印', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 415, text: '緑舗装', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 416, text: '赤舗装', icon: '🔍', category: '道路標示・路面表示', diff: 'hard', season: 'all'},
+    {id: 418, text: '注意色のしましま', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 419, text: '黄色い注意プレート', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 421, text: '青い案内プレート', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 422, text: '緑の誘導表示', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 423, text: '消火設備マーク', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 424, text: '避難案内マーク', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 425, text: '駐輪禁止マーク', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 427, text: '防犯カメラ表示', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 428, text: '工事中カラー', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 429, text: '反射材つき表示', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 431, text: '色あせた表示', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
+    {id: 436, text: 'タイルの切り替わり', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 437, text: '色違い舗装', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 439, text: '一本ひび', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 442, text: 'グレーチング端', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 443, text: 'マンホール補修跡', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 444, text: '途切れた白線', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 445, text: '歩道ブロック継ぎ目', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 446, text: 'インターロッキング', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 448, text: '縁石カーブ', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'hard', season: 'all'},
+    {id: 449, text: '色あせた白線', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 450, text: 'スーパー入口', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 451, text: 'サビの出た金属', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 453, text: 'ヒビの入った縁石', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 454, text: '欠けたコンクリート角', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 455, text: '古い舗装の色差', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 456, text: '重ね塗りされた線', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 458, text: '交換された舗装', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 464, text: '草が生えているすき間', icon: '🔍', category: '劣化・補修・ズレ', diff: 'hard', season: 'all'},
+    {id: 467, text: 'ふくろう置き物', icon: '🔍', category: 'キャラクター掲示物', diff: 'hard', season: 'all'},
+    {id: 469, text: '商店街フラッグキャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 'hard', season: 'all'},
+    {id: 470, text: '商店街バナーキャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 'hard', season: 'all'},
+    {id: 474, text: '壁キャライラスト', icon: '🔍', category: 'キャラクター掲示物', diff: 'hard', season: 'all'},
+    {id: 475, text: '公共掲示板キャラ', icon: '🔍', category: '公共施設', diff: 'hard', season: 'all'},
+    {id: 476, text: '案内板横キャラ', icon: '🔍', category: '公共施設', diff: 'hard', season: 'all'},
+    {id: 478, text: '公民館掲示キャラ', icon: '🔍', category: '公共施設', diff: 'hard', season: 'all'},
+    {id: 479, text: '地域イベント掲示キャラ', icon: '🔍', category: '観光・地域情報', diff: 'hard', season: 'all'},
+    {id: 482, text: '軒先の植木鉢', icon: '🔍', category: '自然・生き物', diff: 'hard', season: 'all'},
+    {id: 485, text: '分別表示', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 486, text: 'ゴミ収集曜日掲示', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 487, text: 'ペットボトル回収箱', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 488, text: '電池回収ボックス', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 489, text: 'トレー回収箱', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 490, text: '牛乳パック回収箱', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 491, text: '宅配ボックス', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 492, text: '置き配荷物', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 495, text: 'カラスよけネット', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 496, text: 'ゴミステーション', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 498, text: '消火栓プレート', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 499, text: '路面反射鋲', icon: '🔍', category: '道路・路面', diff: 'hard', season: 'all'},
+    {id: 500, text: '停止線', icon: '🔍', category: '道路・路面', diff: 'hard', season: 'all'},
+    {id: 501, text: '側溝コンクリ穴フタ', icon: '🔍', category: '道路・路面', diff: 'hard', season: 'all'},
+    {id: 503, text: '防犯カメラダミー', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 507, text: '軒下すだれ', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'summer'},
+    {id: 509, text: 'ブロック塀笠木', icon: '🔍', category: '自然・生き物', diff: 'hard', season: 'all'},
+    {id: 510, text: '勝手口ドア', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 511, text: '段差プレート', icon: '🔍', category: '道路・路面', diff: 'hard', season: 'all'},
+    {id: 512, text: 'タイル補修跡', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 522, text: '昔ながらの美容室入口', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 525, text: '証明写真機', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 531, text: '宅配再配達票', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 533, text: 'ブロック塀の通気穴', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 535, text: '砂利敷き駐車スペース', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 538, text: '壁付け散水蛇口', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 539, text: '電力量メーター箱', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 540, text: 'ガスメーター保護ボックス', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 543, text: '雨戸収納戸袋', icon: '🔍', category: 'その他観察', diff: 'hard', season: 'all'},
+    {id: 547, text: '住宅煙突', icon: '🔍', category: '住宅・外構', diff: 'hard', season: 'all'}
   ],
 
-  // おに（112個） ★4-5: なかなか見つからない激レアもの
+  // おに（112個）: 相当注意しないと見つからないもの
   oni: [
-    {id: 273, text: '側溝の格子ふた', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 274, text: 'フタなし側溝', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 275, text: '水抜き穴', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 276, text: '細長い排水穴', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 277, text: '側溝の落ち葉詰まり', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'autumn'},
-    {id: 278, text: '側溝の水の流れ', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 279, text: '雨水ます', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 280, text: '集水ます', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 281, text: '排水口の金網', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 282, text: '水が流れた跡', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 283, text: '雨だれ跡', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 284, text: '壁際の湿った跡', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 285, text: '苔の生えた排水まわり', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 286, text: '泥の跳ね跡', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 287, text: '側溝の段差', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 288, text: '溝に落ちた葉っぱ', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 289, text: '道路と砂利の境界', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 290, text: '舗装と土の境界', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 291, text: 'コンクリートと芝の境界', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 292, text: '舗装とタイルの境界', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 293, text: '道路と側溝の境界線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 294, text: '歩道と植え込みの境界', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 295, text: '縁石の角', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 296, text: '縁石の丸い角', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 297, text: '縁石の欠け', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 298, text: '塀の終わり位置', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 299, text: 'フェンスの終端', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 300, text: 'ガードレールの終端', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 301, text: '道路の端の白線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 302, text: '舗装の切り欠き部分', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 303, text: '舗装の角の補修', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 304, text: '道の端に集まった砂', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 305, text: '白線の途切れ', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 306, text: '白線の重なり', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 307, text: '消えかけた白線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 308, text: '新しい白線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 309, text: '古い白線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 310, text: '白線の端の丸まり', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 311, text: 'タイル目地の線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 312, text: 'ブロック塀の目地', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 313, text: '室外機ドレンホース', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 314, text: 'ベランダ避難ハッチ', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 315, text: '屋外給湯器', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 316, text: '換気口の虫よけ', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 317, text: '交差するひび', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 318, text: '曲がったひび', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 319, text: '影が一直線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 320, text: 'フェンスの影の線', icon: '🔍', category: '線・模様観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 321, text: '濡れて色が変わった舗装', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 322, text: '乾いて色が違う舗装', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 323, text: '苔が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 324, text: '砂が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 325, text: '落ち葉が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'autumn'},
-    {id: 326, text: 'タイルが並ぶ面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 327, text: 'ブロック塀の面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 328, text: '金属ふたの面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 329, text: 'アスファルトの粗い面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 330, text: 'コンクリートの滑らかな面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 331, text: '小石が多い面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 332, text: '影が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 333, text: '水が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 334, text: '補修された四角い面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 335, text: '色が違う舗装パッチ面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 336, text: '草が広がった面', icon: '🔍', category: '面・高さ観察', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 337, text: '少し高い縁石', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 338, text: 'とても高い縁石', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 339, text: '低い段差', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 340, text: '2段の段差', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 341, text: '3段の段差', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 342, text: 'スロープの始まり', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 343, text: 'スロープの終わり', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 344, text: '盛り上がった舗装', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 345, text: '沈んだ舗装', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 346, text: '地面より高いマンホール', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 347, text: '地面より低いマンホール', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 348, text: '高さの違うタイル', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 349, text: '高低差のある境界', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 350, text: '影でわかる段差', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 351, text: '壁の基礎の立ち上がり', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 352, text: '土が盛られた端', icon: '🔍', category: '面・高さ観察', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 366, text: '影の終端', icon: '🔍', category: '境界・終端・切れ目', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 367, text: '水たまりの縁', icon: '🔍', category: '境界・終端・切れ目', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 372, text: 'L字金具', icon: '🔍', category: '接続・固定・留め具', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 373, text: '針金のねじり', icon: '🔍', category: '接続・固定・留め具', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 376, text: 'カラビナ風金具', icon: '🔍', category: '接続・固定・留め具', weight: 1000, diff: 'oni', stars: 5, season: 'all'},
-    {id: 382, text: 'ベンチの固定金具', icon: '🔍', category: '接続・固定・留め具', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 384, text: 'ワイヤー固定具', icon: '🔍', category: '接続・固定・留め具', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 387, text: 'タイルと砂利の境界', icon: '🔍', category: '素材境界・舗装差', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 389, text: '砂と石の境界', icon: '🔍', category: '素材境界・舗装差', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 402, text: '停止線_三角', icon: '🔍', category: '道路標示・路面表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 411, text: '自転車ナビライン', icon: '🔍', category: '道路標示・路面表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 412, text: 'バス停ライン', icon: '🔍', category: '道路標示・路面表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 413, text: '減速マーク', icon: '🔍', category: '道路標示・路面表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 414, text: 'スクールゾーン舗装', icon: '🔍', category: '道路標示・路面表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 417, text: '矢印の一部', icon: '🔍', category: '案内・注意表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 420, text: '赤い注意プレート', icon: '🔍', category: '案内・注意表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 430, text: '古いステッカー跡', icon: '🔍', category: '案内・注意表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 432, text: '半分はがれた表示', icon: '🔍', category: '案内・注意表示', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 440, text: '分岐ひび', icon: '🔍', category: '舗装・縁石・路面状態', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 452, text: 'サビの流れ跡', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 457, text: '消えかけたマーク', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 459, text: '補修された穴の丸跡', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 460, text: 'ずれたブロック', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 461, text: '傾いたポール', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 462, text: '傾いた看板', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 463, text: '曲がったフェンス', icon: '🔍', category: '劣化・補修・ズレ', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 468, text: '黄色い量販店', icon: '🔍', category: 'キャラクター掲示物', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 472, text: 'アーケード装飾キャラ', icon: '🔍', category: 'キャラクター掲示物', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 473, text: 'シャッターキャラ絵', icon: '🔍', category: 'キャラクター掲示物', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 477, text: '元ハローマック跡っぽい店', icon: '🔍', category: '観光・地域情報', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 480, text: '地域マスコット立て看板', icon: '🔍', category: '観光・地域情報', weight: 1500, diff: 'oni', stars: 4, season: 'all'},
-    {id: 548, text: '銭湯煙突', icon: '🔍', category: '住宅・外構', weight: 250, diff: 'oni', stars: 5, season: 'all'}
+    {id: 273, text: '側溝の格子ふた', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 274, text: 'コンクリート側溝', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 275, text: '丸い排水穴', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 276, text: '細長い排水穴', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 277, text: '側溝の落ち葉詰まり', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'autumn'},
+    {id: 278, text: '側溝の水の流れ', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 279, text: '雨水ます', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 280, text: '集水ますのふた', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 281, text: '排水口の金網', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 282, text: '水が流れた跡', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 283, text: '雨だれ跡', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 284, text: '壁際の湿った跡', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 285, text: '苔の生えた排水まわり', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 286, text: '泥の跳ね跡', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 287, text: '側溝の段差', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 288, text: '溝に落ちた葉っぱ', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 289, text: '道路と砂利の境界', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 290, text: '舗装と土の境界', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 291, text: 'コンクリートと芝の境界', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 292, text: '舗装とタイルの境界', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 293, text: '道路と側溝の境界線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 294, text: '歩道と植え込みの境界', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 295, text: '縁石の角', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 296, text: '縁石の丸い角', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 297, text: '縁石の欠け', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 298, text: '塀の終わり位置', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 299, text: 'フェンスの終端', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 300, text: 'ガードレールの終端', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 301, text: '道路の端の白線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 302, text: '舗装の切り欠き部分', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 303, text: '舗装の角の補修', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 304, text: '道の端に集まった砂', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 305, text: '白線の途切れ', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 306, text: '白線の重なり', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 307, text: '消えかけた白線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 308, text: '新しい白線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 309, text: '古い白線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 310, text: '白線の端の丸まり', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 311, text: 'タイル目地の線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 312, text: 'ブロック塀の目地', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 313, text: '室外機ドレンホース', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 314, text: 'ベランダ避難ハッチ', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 315, text: '屋外給湯器', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 316, text: '換気口の虫よけ', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 317, text: '交差するひび', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 318, text: '曲がったひび', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 319, text: '影が一直線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 320, text: 'フェンスの影の線', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
+    {id: 321, text: '濡れて色が変わった舗装', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 322, text: '乾いて色が違う舗装', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 323, text: '苔が広がった面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 324, text: '砂が広がった面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 325, text: '落ち葉が広がった面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'autumn'},
+    {id: 326, text: 'タイルが並ぶ面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 327, text: 'ブロック塀の面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 328, text: '金属ふたの面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 329, text: 'アスファルトの粗い面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 330, text: 'コンクリートの滑らかな面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 331, text: '小石が多い面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 332, text: '影が広がった面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 333, text: '水が広がった面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 334, text: '補修された四角い面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 335, text: '色が違う舗装パッチ面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 336, text: '草が広がった面', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 337, text: '少し高い縁石', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 338, text: 'とても高い縁石', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 339, text: '低い段差', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 340, text: '2段の段差', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 341, text: '3段の段差', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 342, text: 'スロープの始まり', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 343, text: 'スロープの終わり', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 344, text: '盛り上がった舗装', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 345, text: '沈んだ舗装', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 346, text: '地面より高いマンホール', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 347, text: '地面より低いマンホール', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 348, text: '高さの違うタイル', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 349, text: '高低差のある境界', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 350, text: '影でわかる段差', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 351, text: '壁の基礎の立ち上がり', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 352, text: '土が盛られた端', icon: '🔍', category: '面・高さ観察', diff: 'oni', season: 'all'},
+    {id: 366, text: '影の終端', icon: '🔍', category: '境界・終端・切れ目', diff: 'oni', season: 'all'},
+    {id: 367, text: '水たまりの縁', icon: '🔍', category: '境界・終端・切れ目', diff: 'oni', season: 'all'},
+    {id: 372, text: 'L字金具', icon: '🔍', category: '接続・固定・留め具', diff: 'oni', season: 'all'},
+    {id: 373, text: '針金のねじり', icon: '🔍', category: '接続・固定・留め具', diff: 'oni', season: 'all'},
+    {id: 376, text: 'カラビナ風金具', icon: '🔍', category: '接続・固定・留め具', diff: 'oni', season: 'all'},
+    {id: 382, text: 'ベンチの固定金具', icon: '🔍', category: '接続・固定・留め具', diff: 'oni', season: 'all'},
+    {id: 384, text: 'ワイヤー固定具', icon: '🔍', category: '接続・固定・留め具', diff: 'oni', season: 'all'},
+    {id: 387, text: 'タイルと砂利の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'oni', season: 'all'},
+    {id: 389, text: '砂と石の境界', icon: '🔍', category: '素材境界・舗装差', diff: 'oni', season: 'all'},
+    {id: 402, text: '停止線_三角', icon: '🔍', category: '道路標示・路面表示', diff: 'oni', season: 'all'},
+    {id: 411, text: '自転車ナビライン', icon: '🔍', category: '道路標示・路面表示', diff: 'oni', season: 'all'},
+    {id: 412, text: 'バス停ライン', icon: '🔍', category: '道路標示・路面表示', diff: 'oni', season: 'all'},
+    {id: 413, text: '減速マーク', icon: '🔍', category: '道路標示・路面表示', diff: 'oni', season: 'all'},
+    {id: 414, text: 'スクールゾーン舗装', icon: '🔍', category: '道路標示・路面表示', diff: 'oni', season: 'all'},
+    {id: 417, text: '矢印の一部', icon: '🔍', category: '案内・注意表示', diff: 'oni', season: 'all'},
+    {id: 420, text: '赤い注意プレート', icon: '🔍', category: '案内・注意表示', diff: 'oni', season: 'all'},
+    {id: 430, text: '古いステッカー跡', icon: '🔍', category: '案内・注意表示', diff: 'oni', season: 'all'},
+    {id: 432, text: '半分はがれた表示', icon: '🔍', category: '案内・注意表示', diff: 'oni', season: 'all'},
+    {id: 440, text: '分岐ひび', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'oni', season: 'all'},
+    {id: 452, text: 'サビの流れ跡', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 457, text: '消えかけたマーク', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 459, text: '補修された穴の丸跡', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 460, text: 'ずれたブロック', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 461, text: '傾いたポール', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 462, text: '傾いた看板', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 463, text: '曲がったフェンス', icon: '🔍', category: '劣化・補修・ズレ', diff: 'oni', season: 'all'},
+    {id: 468, text: '黄色い量販店', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all'},
+    {id: 472, text: 'アーケード装飾キャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all'},
+    {id: 473, text: 'シャッターキャラ絵', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all'},
+    {id: 477, text: '元ハローマック跡っぽい店', icon: '🔍', category: '観光・地域情報', diff: 'oni', season: 'all'},
+    {id: 480, text: '地域マスコット立て看板', icon: '🔍', category: '観光・地域情報', diff: 'oni', season: 'all'},
+    {id: 548, text: '銭湯煙突', icon: '🔍', category: '住宅・外構', diff: 'oni', season: 'all'}
   ]
 };
 
@@ -1205,48 +1205,85 @@ function getTopicById(id) {
   return null;
 }
 
-// ========== バランス抽選 ==========
+// ========== 難易度設計 ==========
 
 /**
- * カテゴリ別 24マス枠割り当て
- * 各カテゴリから均等かつ比率に応じてお題を選ぶ
+ * ゲーム難易度ごとのお題難易度出現確率テーブル
+ *
+ * ゲーム難易度: easy（かんたん）/ normal（ふつう）/ hard（むずかしい）/ oni（おに）/ gachi（ガチおに）
+ * お題難易度:   easy / normal / hard / oni
+ *
+ * 各値は確率（合計1.0）。この値がそのまま重み付きサンプリングの基準となる。
+ */
+const GAME_DIFFICULTY_PROBS = {
+  easy:   { easy: 0.70, normal: 0.25, hard: 0.05, oni: 0.00 },
+  normal: { easy: 0.30, normal: 0.50, hard: 0.15, oni: 0.05 },
+  hard:   { easy: 0.10, normal: 0.30, hard: 0.50, oni: 0.10 },
+  oni:    { easy: 0.05, normal: 0.25, hard: 0.30, oni: 0.40 },
+  gachi:  { easy: 0.00, normal: 0.00, hard: 0.00, oni: 1.00 },
+};
+
+/**
+ * カテゴリ別 24マス枠割り当て（合計=24）
+ * ゲームごとに±1の揺らぎを加えてバリエーションを出す
  */
 const CATEGORY_QUOTAS = {
-  '街インフラ':         2,
-  '自然・生き物':       2,
-  '生活・学校':         1,
-  '家庭・食べ物':       1,
-  '街構造・乗り物':     1,
-  '季節・形・数':       2,
-  '痕跡・発見':         3,
   '線・模様観察':       4,
-  '面・高さ観察':       2,
+  '痕跡・発見':         3,
+  '自然・生き物':       2,
+  '街インフラ':         2,
+  '季節・形・数':       2,
+  '面・高さ観察':       1,
+  '生活・学校':         1,
+  '街構造・乗り物':     1,
+  '家庭・食べ物':       1,
   '住宅・外構':         1,
   '商業・店舗':         1,
   '境界・終端・切れ目': 1,
   '接続・固定・留め具': 1,
+  '素材境界・舗装差':   1,
   '道路標示・路面表示': 1,
+  '舗装・縁石・路面状態': 1,
   '劣化・補修・ズレ':   1
 }; // 合計 = 24
 
 /**
- * ゲーム難易度別 難易度ティア確率テーブル（単位: %）
- * easy=かんたん / normal=ふつう / hard=むずかしい / oni=おに
+ * ビンゴボード内の四隅インデックス（5×5: 位置0,4,20,24）
+ * FREEマス(12)挿入前の24要素配列における四隅インデックス
+ *   board[0]  → topics[0]
+ *   board[4]  → topics[4]
+ *   board[20] → topics[19]  (12より後なので-1)
+ *   board[24] → topics[23]
  */
-const GAME_DIFFICULTY_WEIGHTS = {
-  easy:   { easy: 70, normal: 25, hard:  5, oni:   0 },
-  normal: { easy: 30, normal: 50, hard: 15, oni:   5 },
-  hard:   { easy: 10, normal: 30, hard: 50, oni:  10 },
-  oni:    { easy:  5, normal: 25, hard: 30, oni:  40 },
-  gacha:  { easy:  0, normal:  0, hard:  0, oni: 100 }
-};
+const CORNER_INDICES = [0, 4, 19, 23];
 
 // 四隅のボードインデックス（5×5ビンゴ）
 const CORNER_INDICES = [0, 4, 20, 24];
 
 /**
- * spawn_permyriad を重みとした非復元重み付きサンプリング
- * rng: 0-1 を返す疑似乱数関数
+ * ガチおに以外のゲーム難易度で「おに」お題が四隅に来ないよう制御する
+ * おに以外（easy/normal/hard）の非コーナー位置と入れ替える
+ */
+function enforceCornerConstraint(topics, gameDifficulty) {
+  if (gameDifficulty === 'gachi') return topics;
+  const result = [...topics];
+  for (const ci of CORNER_INDICES) {
+    if (result[ci] && result[ci].diff === 'oni') {
+      // コーナー以外でおに以外の最初の要素と交換
+      for (let i = 0; i < result.length; i++) {
+        if (!CORNER_INDICES.includes(i) && result[i] && result[i].diff !== 'oni') {
+          [result[ci], result[i]] = [result[i], result[ci]];
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * ティア確率で重み付けした非復元サンプリング
+ * pool の各要素は _tierWeight プロパティを持つ
  */
 function weightedSample(pool, count, rng) {
   if (pool.length === 0) return [];
@@ -1257,11 +1294,11 @@ function weightedSample(pool, count, rng) {
 
   for (let i = 0; i < count; i++) {
     if (remaining.length === 0) break;
-    const totalWeight = remaining.reduce((sum, t) => sum + (t.weight || 1000), 0);
+    const totalWeight = remaining.reduce((sum, t) => sum + (t._tierWeight || 1), 0);
     let r = rng() * totalWeight;
     let idx = remaining.length - 1;
     for (let j = 0; j < remaining.length; j++) {
-      r -= (remaining[j].weight || 1000);
+      r -= (remaining[j]._tierWeight || 1);
       if (r <= 0) { idx = j; break; }
     }
     result.push(remaining[idx]);
@@ -1285,63 +1322,15 @@ function createRng(seed) {
 }
 
 /**
- * ゲーム難易度 × ティア確率に基づく重み付きプールを構築
- * おにを除いたプール（四隅用）も返す
- */
-function buildWeightedPool(gameDifficulty, allowedIds, currentSeason) {
-  const weights = GAME_DIFFICULTY_WEIGHTS[gameDifficulty] || GAME_DIFFICULTY_WEIGHTS.normal;
-  const tiers = ['easy', 'normal', 'hard', 'oni'];
-
-  const allTopics = [];
-  for (const tier of tiers) {
-    const tierWeight = weights[tier];
-    if (tierWeight === 0) continue;
-    const tierTopics = topicDatabase[tier] || [];
-    for (const t of tierTopics) {
-      if (allowedIds && !allowedIds.has(t.id)) continue;
-      if (t.season && t.season !== 'all' && t.season !== currentSeason) continue;
-      // 実効重み = spawn_permyriad × ティア確率
-      allTopics.push({ ...t, _effectiveWeight: (t.weight || 1000) * tierWeight });
-    }
-  }
-
-  // おに以外のみ（四隅用）
-  const nonOniTopics = allTopics.filter(t => t.diff !== 'oni');
-
-  return { allTopics, nonOniTopics };
-}
-
-/**
- * 実効重みを使った非復元重み付きサンプリング
- */
-function weightedSampleEffective(pool, count, rng) {
-  if (pool.length === 0) return [];
-  if (pool.length <= count) return [...pool];
-
-  const result = [];
-  const remaining = [...pool];
-
-  for (let i = 0; i < count; i++) {
-    if (remaining.length === 0) break;
-    const totalWeight = remaining.reduce((sum, t) => sum + t._effectiveWeight, 0);
-    let r = rng() * totalWeight;
-    let idx = remaining.length - 1;
-    for (let j = 0; j < remaining.length; j++) {
-      r -= remaining[j]._effectiveWeight;
-      if (r <= 0) { idx = j; break; }
-    }
-    result.push(remaining[idx]);
-    remaining.splice(idx, 1);
-  }
-
-  return result;
-}
-
-/**
- * カテゴリ均等 × spawn_permyriad × ゲーム難易度確率 で 24 件を返す
- * 四隅（positions 0,4,20,24）はおに以外のお題を配置
+ * ゲーム難易度確率テーブルに基づき24件のお題を返す
  *
- * @param {string} gameDifficulty - 'easy' | 'normal' | 'hard' | 'oni' | 'gacha'
+ * アルゴリズム:
+ *   1. 各ティアの出現確率をアイテム数で正規化して _tierWeight を付与
+ *   2. カテゴリ別クォータでバランス選出
+ *   3. 不足分を残りプールから補完
+ *   4. シャッフル後に四隅制約を適用（ガチおに除く）
+ *
+ * @param {string} gameDifficulty - 'easy'|'normal'|'hard'|'oni'|'gachi'
  * @param {string} roomCode
  * @param {string} userId
  * @param {string} shuffleSalt
@@ -1355,31 +1344,45 @@ function selectTopicsForGame(
   shuffleSalt = '',
   topicSetId = 'default'
 ) {
+  const probs = GAME_DIFFICULTY_PROBS[gameDifficulty] || GAME_DIFFICULTY_PROBS.normal;
   const set = getTopicSetById(topicSetId);
+  const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
+  const currentSeason = getCurrentSeason();
+
   const seedStr = [roomCode, userId, shuffleSalt, topicSetId !== 'default' ? topicSetId : '']
     .filter(Boolean).join('-');
   const seed = seedStr ? stringToSeed(seedStr) : (Math.random() * 0xFFFFFFFF | 0);
   const rng = createRng(seed);
 
-  const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
-  const currentSeason = getCurrentSeason();
+  // ティアごとにアイテムをフィルタして _tierWeight（確率/件数）を付与
+  const TIERS = ['easy', 'normal', 'hard', 'oni'];
+  const pool = TIERS.flatMap(tier => {
+    const tierProb = probs[tier] || 0;
+    if (tierProb === 0) return [];
+    const tierItems = (topicDatabase[tier] || [])
+      .filter(t => !t.season || t.season === 'all' || t.season === currentSeason)
+      .filter(t => !allowed || allowed.has(t.id));
+    if (tierItems.length === 0) return [];
+    const itemWeight = tierProb / tierItems.length;
+    return tierItems.map(t => ({ ...t, _tierWeight: itemWeight }));
+  });
 
   const { allTopics, nonOniTopics } = buildWeightedPool(gameDifficulty, allowed, currentSeason);
 
   // カテゴリ別グループ化（全プール）
   const byCategory = {};
-  for (const topic of allTopics) {
-    const cat = topic.category || '不明';
+  for (const t of pool) {
+    const cat = t.category || '不明';
     if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(topic);
+    byCategory[cat].push(t);
   }
 
-  // カテゴリ枠に±1のランダム幅を持たせてゲームごとに変化をつける
+  // カテゴリクォータ抽選（±1の揺らぎ付き）
   const selected = [];
   const usedIds = new Set();
 
   for (const [cat, baseQuota] of Object.entries(CATEGORY_QUOTAS)) {
-    const variance = Math.floor(rng() * 3) - 1; // -1, 0, +1
+    const variance = Math.floor(rng() * 3) - 1;
     const quota = Math.max(1, baseQuota + variance);
     const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
     const picked = weightedSampleEffective(catPool, quota, rng);
@@ -1389,58 +1392,35 @@ function selectTopicsForGame(
     }
   }
 
-  // 24件に満たない場合は全プールから補完
+  // 不足分をプール残りから補完（補完枠は同一カテゴリ最大2件）
   if (selected.length < 24) {
-    const filler = allTopics.filter(t => !usedIds.has(t.id));
-    const extra = weightedSampleEffective(filler, 24 - selected.length, rng);
-    for (const t of extra) {
-      selected.push(t);
-      usedIds.add(t.id);
+    const FILLER_CAT_MAX = 2;
+    const fillerCatCounts = {};
+    const filler = pool.filter(t => !usedIds.has(t.id));
+
+    while (selected.length < 24 && filler.length > 0) {
+      // カテゴリ上限未満の候補を優先。全滅なら上限なしで拾う
+      const eligible = filler.filter(t => (fillerCatCounts[t.category] || 0) < FILLER_CAT_MAX);
+      const candidates = eligible.length > 0 ? eligible : filler;
+      const [picked] = weightedSample(candidates, 1, rng);
+      if (!picked) break;
+      selected.push(picked);
+      usedIds.add(picked.id);
+      fillerCatCounts[picked.category] = (fillerCatCounts[picked.category] || 0) + 1;
+      filler.splice(filler.findIndex(t => t.id === picked.id), 1);
     }
   }
 
-  // 全ティアでも足りない場合は全カテゴリから補完（フォールバック）
+  // プール自体が不足する場合は全ティアから無条件補完
   if (selected.length < 24) {
-    const allFallback = ['easy', 'normal', 'hard', 'oni'].flatMap(t => topicDatabase[t] || []);
-    for (const t of allFallback) {
+    const allTopics = TIERS.flatMap(t => topicDatabase[t] || []);
+    for (const t of allTopics) {
       if (selected.length >= 24) break;
-      if (!usedIds.has(t.id)) {
-        selected.push(t);
-        usedIds.add(t.id);
-      }
+      if (!usedIds.has(t.id)) { selected.push(t); usedIds.add(t.id); }
     }
   }
 
-  // 最終シャッフル（同じシードで再現性を確保）
-  const shuffled = shuffleWithSeed(selected.slice(0, 24), seed + 1);
-
-  // 四隅ルール: positions 0,4,20,24 がおにの場合は非おにと交換
-  const nonOniInBoard = shuffled
-    .map((t, i) => ({ t, i }))
-    .filter(({ t }) => t.diff !== 'oni');
-
-  // 四隅以外の非おにインデックスをスワップ候補として使う
-  let swapCandidates = nonOniInBoard.filter(({ i }) => !CORNER_INDICES.includes(i));
-
-  for (const cornerIdx of CORNER_INDICES) {
-    if (shuffled[cornerIdx] && shuffled[cornerIdx].diff === 'oni') {
-      if (swapCandidates.length > 0) {
-        // 最初のスワップ候補と交換
-        const { i: swapIdx } = swapCandidates.shift();
-        [shuffled[cornerIdx], shuffled[swapIdx]] = [shuffled[swapIdx], shuffled[cornerIdx]];
-      } else {
-        // スワップ候補が尽きた場合: 非おに補充プールから追加
-        const extra = nonOniTopics.filter(t => !usedIds.has(t.id));
-        if (extra.length > 0) {
-          const replacement = weightedSampleEffective(extra, 1, rng)[0];
-          usedIds.add(replacement.id);
-          shuffled[cornerIdx] = replacement;
-        }
-      }
-    }
-  }
-
-  return shuffled;
+  return shuffleWithSeed(selected.slice(0, 24), seed + 1);
 }
 
 // 現在の季節を返す（3-5月:spring / 6-8月:summer / 9-11月:autumn / 12-2月:winter）

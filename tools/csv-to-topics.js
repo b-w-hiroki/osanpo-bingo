@@ -8,13 +8,10 @@
  *   node tools/csv-to-topics.js
  *   npm run build-topics
  *
- * CSV形式 (新フォーマット):
- *   ID,icon_file_name,display_name,category,difficulty,spawn_permyriad
+ * CSV形式:
+ *   ID,icon_file_name,display_name,category,difficulty,season
  *
- * difficulty は星表記: ★☆☆☆☆ / ★★☆☆☆ / ★★★☆☆ / ★★★★☆ / ★★★★★
- *   → ★1-2: easy（かんたん）
- *   → ★3:   medium（ふつう）
- *   → ★4-5: hard（むずかしい）
+ * difficulty は文字列: easy | normal | hard | oni
  */
 
 const fs = require('fs');
@@ -23,13 +20,11 @@ const path = require('path');
 const CSV_PATH = path.join(__dirname, '..', 'topics_list.csv');
 const OUTPUT_PATH = path.join(__dirname, '..', 'topics.js');
 
-// BOM除去 & トリム
 function trimCell(s) {
   if (!s) return '';
-  return s.replace(/^﻿+/g, '').replace(/^\\uFEFF/i, '').trim();
+  return s.replace(/^﻿+/g, '').trim();
 }
 
-// CSV パース
 function parseCSV(csvText) {
   const lines = csvText.split('\n').filter(l => l.trim());
   const headers = trimCell(lines[0]).split(',').map(trimCell);
@@ -41,16 +36,8 @@ function parseCSV(csvText) {
   });
 }
 
-// 星表記 → 難易度キー（4段階: easy/normal/hard/oni）
-function starsToDifficulty(stars) {
-  const count = (stars.match(/★/g) || []).length;
-  if (count <= 1) return 'easy';
-  if (count === 2) return 'normal';
-  if (count === 3) return 'hard';
-  return 'oni';
-}
+const VALID_DIFFS = new Set(['easy', 'normal', 'hard', 'oni']);
 
-// アイコンマップ生成: {ID: icon_file_name}
 function buildIconMap(rows) {
   const map = {};
   rows.forEach(row => {
@@ -59,36 +46,29 @@ function buildIconMap(rows) {
   return map;
 }
 
-// topics.js 生成
 function generateTopicsJS(rows) {
   const iconMap = buildIconMap(rows);
 
-  // 難易度別グループ
   const groups = { easy: [], normal: [], hard: [], oni: [] };
   rows.forEach(row => {
-    const diff = starsToDifficulty(row['difficulty']);
-    const starCount = (row['difficulty'].match(/★/g) || []).length;
+    const diff = VALID_DIFFS.has(row['difficulty']) ? row['difficulty'] : 'normal';
     groups[diff].push({
       id: parseInt(row['ID']),
       text: row['display_name'],
       icon: '🔍',
       category: row['category'],
-      weight: parseInt(row['spawn_permyriad']) || 1000,
-      diff: diff,
-      stars: starCount,
+      diff,
       season: row['season'] || 'all'
     });
   });
 
-  // iconMap JS リテラル
   const iconMapStr = Object.entries(iconMap)
     .map(([id, file]) => `  ${id}: '${file}'`)
     .join(',\n');
 
-  // お題配列 JS リテラル
   function topicArrayStr(arr) {
     return arr.map(t =>
-      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', weight: ${t.weight}, diff: '${t.diff}', stars: ${t.stars}, season: '${t.season}'}`
+      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', diff: '${t.diff}', season: '${t.season}'}`
     ).join(',\n');
   }
 
@@ -127,22 +107,22 @@ const landmarkDatabase = [
 ];
 
 const topicDatabase = {
-  // かんたん（${groups.easy.length}個） ★1: よく見かけるもの
+  // かんたん（${groups.easy.length}個）: よく見かけるもの
   easy: [
 ${topicArrayStr(groups.easy)}
   ],
 
-  // ふつう（${groups.normal.length}個） ★2: 少し意識すれば見つかるもの
+  // ふつう（${groups.normal.length}個）: 少し探す必要があるもの
   normal: [
 ${topicArrayStr(groups.normal)}
   ],
 
-  // むずかしい（${groups.hard.length}個） ★3: よく観察しないと見つからないもの
+  // むずかしい（${groups.hard.length}個）: よく観察しないと見つからないもの
   hard: [
 ${topicArrayStr(groups.hard)}
   ],
 
-  // おに（${groups.oni.length}個） ★4-5: なかなか見つからない激レアもの
+  // おに（${groups.oni.length}個）: 相当注意しないと見つからないもの
   oni: [
 ${topicArrayStr(groups.oni)}
   ]
@@ -208,24 +188,21 @@ function getUserId() {
 `;
 }
 
-// メイン処理
 function main() {
   if (!fs.existsSync(CSV_PATH)) {
     console.error('❌ CSVファイルが見つかりません:', CSV_PATH);
     process.exit(1);
   }
 
-  let csvText = fs.readFileSync(CSV_PATH, 'utf-8');
-  if (!csvText.startsWith('﻿')) {
-    fs.writeFileSync(CSV_PATH, '﻿' + csvText, 'utf-8');
-    csvText = '﻿' + csvText;
-  }
-
+  const csvText = fs.readFileSync(CSV_PATH, 'utf-8');
   const rows = parseCSV(csvText);
   console.log(`📖 ${rows.length} 件のお題を読み込みました`);
 
   const counts = { easy: 0, normal: 0, hard: 0, oni: 0 };
-  rows.forEach(r => { counts[starsToDifficulty(r['difficulty'])]++; });
+  rows.forEach(r => {
+    const d = VALID_DIFFS.has(r['difficulty']) ? r['difficulty'] : 'normal';
+    counts[d]++;
+  });
   console.log(`   かんたん: ${counts.easy}個 / ふつう: ${counts.normal}個 / むずかしい: ${counts.hard}個 / おに: ${counts.oni}個`);
 
   const code = generateTopicsJS(rows);
