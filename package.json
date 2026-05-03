@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "お散歩ビンゴ - グループで楽しむ散歩ゲーム",
   "devDependencies": {
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "resize-icons": "node tools/resize-icons.js",

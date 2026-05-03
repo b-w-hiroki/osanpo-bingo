@@ -36,7 +36,10 @@
       "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" add topics.js topics_list.csv)",
       "Bash(git -C \"C:/Users/kojac/Desktop/AITEST/osanpo bingo\" commit --no-edit)",
       "Bash(grep -E \"\\\\.\\(zip\\)$\")",
-      "Bash(grep -v \",all$\" \"/c/Users/kojac/Desktop/AITEST/osanpo bingo/.claude/worktrees/strange-lalande-2dd5cc/topics_list.csv\")"
+      "Bash(grep -v \",all$\" \"/c/Users/kojac/Desktop/AITEST/osanpo bingo/.claude/worktrees/strange-lalande-2dd5cc/topics_list.csv\")",
+      "Read(//c/Users/kojac/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/c5702294-3613-4b9e-be81-f378a27bd376/f6b731b0-a5c1-4684-bd88-27ba9ec91087/skills/xlsx/**)",
+      "Bash(python -)",
+      "PowerShell(pip install openpyxl -q)"
     ]
   }
 }

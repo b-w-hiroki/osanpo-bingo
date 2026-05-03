@@ -631,8 +631,11 @@ class OsanpoBingo {
     this.renderBoard();
     if (newCount > oldCount) {
       this.showBingoMessage(newCount);
+      if (newCount === 12 && oldCount < 12) {
+        this.showFullClearCelebration();
+      }
     }
-    
+
     return this.bingoLines;
   }
   
@@ -670,7 +673,62 @@ class OsanpoBingo {
       this.messageElement.classList.add('pulse');
     }, 10);
   }
-  
+
+  showFullClearCelebration() {
+    for (let i = 0; i < 25; i++) {
+      setTimeout(() => {
+        const cell = this.boardElement?.querySelector(`[data-index="${i}"]`);
+        if (!cell) return;
+        cell.classList.remove('bingo-flash');
+        void cell.offsetWidth;
+        cell.classList.add('bingo-flash');
+        cell.addEventListener('animationend', () => cell.classList.remove('bingo-flash'), { once: true });
+      }, i * 40);
+    }
+    setTimeout(() => {
+      this._launchFullClearConfetti();
+      this._showFullClearText();
+    }, 25 * 40 + 80);
+  }
+
+  _launchFullClearConfetti() {
+    const wrap = document.createElement('div');
+    wrap.className = 'confetti-wrap';
+    document.body.appendChild(wrap);
+    const colors = ['#d32f2f', '#f9a825', '#2e7d32', '#1565c0', '#6a1b9a', '#e65100', '#c2185b'];
+    for (let i = 0; i < 130; i++) {
+      const p = document.createElement('div');
+      const size = 7 + Math.random() * 11;
+      const isRect = Math.random() < 0.4;
+      const dur = (1.2 + Math.random() * 1.8).toFixed(2);
+      const delay = (Math.random() * 1.2).toFixed(2);
+      const rot = Math.floor(Math.random() * 720) - 360;
+      p.className = 'confetti-piece';
+      p.style.cssText = [
+        `left:${Math.random() * 100}%`,
+        `width:${isRect ? size * 2.2 : size}px`,
+        `height:${size}px`,
+        `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+        `border-radius:${Math.random() < 0.4 ? '50%' : '2px'}`,
+        `--dur:${dur}s`,
+        `--delay:${delay}s`,
+        `--rot:${rot}deg`,
+        `animation-delay:${delay}s`,
+      ].join(';');
+      wrap.appendChild(p);
+    }
+    setTimeout(() => wrap.remove(), 5000);
+  }
+
+  _showFullClearText() {
+    const el = document.createElement('div');
+    el.className = 'bingo-celebration-text full-clear-text';
+    el.innerHTML =
+      '<span class="big">✨ FULL CLEAR!</span><span class="sub">全12ライン制覇！<br>すごすぎる！</span>';
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
+
   // ==================== 移動距離トラッキング ====================
 
   /**
