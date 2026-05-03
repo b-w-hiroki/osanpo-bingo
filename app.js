@@ -81,7 +81,7 @@ class OsanpoBingo {
     
     // Phase 2: グループ機能
     this.roomCode = '';           // 合言葉
-    this.difficulty = 'medium';   // 難易度
+    this.difficulty = 'normal';   // 難易度
     this.topicSetId = 'default';    // お題セット（将来の課金・コラボ拡張用ID）
     this.userId = '';             // ユーザーID
     this.playerCount = 1;         // 参加人数
@@ -244,10 +244,10 @@ class OsanpoBingo {
   // ボードを作成（お題を配置）
   // shuffleSalt: 指定すると毎回異なるシャッフル（作り直し用）
   // customTopics: フリー入力マスのお題配列 [{text, icon}]
-  createBoard(roomCode = '', difficulty = 'medium', shuffleSalt = '', customTopics = null) {
+  createBoard(roomCode = '', difficulty = 'normal', shuffleSalt = '', customTopics = null) {
     // 合言葉と難易度を保存
     this.roomCode = roomCode || this.roomCode || '';
-    this.difficulty = difficulty || this.difficulty || 'medium';
+    this.difficulty = difficulty || this.difficulty || 'normal';
     
     // カスタムトピックを保存（渡されなければ既存を維持）
     if (customTopics !== null) {
@@ -454,16 +454,14 @@ class OsanpoBingo {
           cell.classList.add('cell-landmark');
         } else {
           let diff = topic.diff || null;
-          let stars = topic.stars || null;
           if (!diff && typeof topicDatabase !== 'undefined') {
-            for (const key of ['easy', 'medium', 'hard']) {
+            for (const key of ['easy', 'normal', 'hard', 'oni']) {
               const found = topicDatabase[key].find(t => t.id === topic.id);
-              if (found) { diff = found.diff; stars = found.stars; break; }
+              if (found) { diff = found.diff; break; }
             }
           }
-          if (diff === 'hard') {
-            cell.classList.add(stars >= 5 ? 'cell-diff-hard-5' : 'cell-diff-hard-4');
-          }
+          if (diff === 'hard') cell.classList.add('cell-diff-hard');
+          else if (diff === 'oni') cell.classList.add('cell-diff-oni');
         }
       }
 
@@ -800,8 +798,10 @@ class OsanpoBingo {
     if (this.difficultyDisplay) {
       const diffText = {
         'easy': 'かんたん',
-        'medium': 'ふつう',
-        'hard': 'むずかしい'
+        'normal': 'ふつう',
+        'hard': 'むずかしい',
+        'oni': 'おに',
+        'gacha': 'ガチおに'
       };
       this.difficultyDisplay.textContent = diffText[this.difficulty] || '-';
     }
@@ -1307,7 +1307,7 @@ class OsanpoBingo {
     if (roomCodeInput) {
       roomCodeInput.value = (this.roomCode && this.roomCode !== 'solo') ? this.roomCode : this.generateRoomCode();
     }
-    if (difficultySelect) difficultySelect.value = this.difficulty || 'medium';
+    if (difficultySelect) difficultySelect.value = this.difficulty || 'normal';
     if (playerCountInput) playerCountInput.value = this.playerCount || 1;
     
     const setPlayModeRadios = (name, value) => {
@@ -1323,11 +1323,11 @@ class OsanpoBingo {
     const difficultySelectSolo = document.getElementById('difficultySelectSolo');
     const customTopicCountSolo = document.getElementById('customTopicCountSolo');
     const customTopicInputsSolo = document.getElementById('customTopicInputsSolo');
-    if (difficultySelectSolo) difficultySelectSolo.value = this.difficulty || 'medium';
+    if (difficultySelectSolo) difficultySelectSolo.value = this.difficulty || 'normal';
     if (gameTypeCreate) gameTypeCreate.value = this.gameType || 'normal';
     if (gameTypeJoin) gameTypeJoin.value = this.gameType || 'normal';
     const joinDifficultySelect = document.getElementById('joinDifficultySelect');
-    if (joinDifficultySelect) joinDifficultySelect.value = this.difficulty || 'medium';
+    if (joinDifficultySelect) joinDifficultySelect.value = this.difficulty || 'normal';
     ['topicSetSelectSolo', 'topicSetSelectCreate', 'topicSetSelectJoin'].forEach((id) => {
       const ts = document.getElementById(id);
       if (ts) {
@@ -1487,7 +1487,7 @@ class OsanpoBingo {
         const modal = document.getElementById('roomCodeModal');
         const playModeRadio = document.querySelector('input[name="playModeSolo"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
-        this.difficulty = difficultySelectSolo?.value || 'medium';
+        this.difficulty = difficultySelectSolo?.value || 'normal';
         this.topicSetId = document.getElementById('topicSetSelectSolo')?.value || 'default';
         this.gameType = 'normal';
         this.battleTopicOwners = {};
@@ -1518,7 +1518,7 @@ class OsanpoBingo {
         const modal = document.getElementById('roomCodeModal');
         
         const roomCode = roomCodeInput?.value.trim() || this.generateRoomCode();
-        const difficulty = difficultySelect?.value || 'medium';
+        const difficulty = difficultySelect?.value || 'normal';
         const playerCount = parseInt(playerCountInput?.value) || 1;
         
         // フリー入力マスのお題を収集
@@ -1571,7 +1571,7 @@ class OsanpoBingo {
           return;
         }
         
-        const difficulty = joinDifficulty?.value || 'medium';
+        const difficulty = joinDifficulty?.value || 'normal';
         this.topicSetId = document.getElementById('topicSetSelectJoin')?.value || 'default';
         const playModeRadio = document.querySelector('input[name="playModeJoin"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';

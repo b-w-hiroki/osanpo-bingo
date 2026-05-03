@@ -41,12 +41,13 @@ function parseCSV(csvText) {
   });
 }
 
-// 星表記 → 難易度キー
+// 星表記 → 難易度キー（4段階: easy/normal/hard/oni）
 function starsToDifficulty(stars) {
   const count = (stars.match(/★/g) || []).length;
-  if (count <= 2) return 'easy';
-  if (count === 3) return 'medium';
-  return 'hard';
+  if (count <= 1) return 'easy';
+  if (count === 2) return 'normal';
+  if (count === 3) return 'hard';
+  return 'oni';
 }
 
 // アイコンマップ生成: {ID: icon_file_name}
@@ -63,7 +64,7 @@ function generateTopicsJS(rows) {
   const iconMap = buildIconMap(rows);
 
   // 難易度別グループ
-  const groups = { easy: [], medium: [], hard: [] };
+  const groups = { easy: [], normal: [], hard: [], oni: [] };
   rows.forEach(row => {
     const diff = starsToDifficulty(row['difficulty']);
     const starCount = (row['difficulty'].match(/★/g) || []).length;
@@ -126,19 +127,24 @@ const landmarkDatabase = [
 ];
 
 const topicDatabase = {
-  // かんたん（${groups.easy.length}個） ★1-2: よく見かけるもの
+  // かんたん（${groups.easy.length}個） ★1: よく見かけるもの
   easy: [
 ${topicArrayStr(groups.easy)}
   ],
 
-  // ふつう（${groups.medium.length}個） ★3: 少し探す必要があるもの
-  medium: [
-${topicArrayStr(groups.medium)}
+  // ふつう（${groups.normal.length}個） ★2: 少し意識すれば見つかるもの
+  normal: [
+${topicArrayStr(groups.normal)}
   ],
 
-  // むずかしい（${groups.hard.length}個） ★4-5: よく観察しないと見つからないもの
+  // むずかしい（${groups.hard.length}個） ★3: よく観察しないと見つからないもの
   hard: [
 ${topicArrayStr(groups.hard)}
+  ],
+
+  // おに（${groups.oni.length}個） ★4-5: なかなか見つからない激レアもの
+  oni: [
+${topicArrayStr(groups.oni)}
   ]
 };
 
@@ -218,9 +224,9 @@ function main() {
   const rows = parseCSV(csvText);
   console.log(`📖 ${rows.length} 件のお題を読み込みました`);
 
-  const counts = { easy: 0, medium: 0, hard: 0 };
+  const counts = { easy: 0, normal: 0, hard: 0, oni: 0 };
   rows.forEach(r => { counts[starsToDifficulty(r['difficulty'])]++; });
-  console.log(`   かんたん: ${counts.easy}個 / ふつう: ${counts.medium}個 / むずかしい: ${counts.hard}個`);
+  console.log(`   かんたん: ${counts.easy}個 / ふつう: ${counts.normal}個 / むずかしい: ${counts.hard}個 / おに: ${counts.oni}個`);
 
   const code = generateTopicsJS(rows);
   fs.writeFileSync(OUTPUT_PATH, code, 'utf-8');
