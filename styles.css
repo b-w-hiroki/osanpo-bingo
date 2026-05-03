@@ -264,7 +264,6 @@ h1 {
 .bingo-cell:hover {
   background: var(--cell-hover);
   border-color: var(--primary-light);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
 
