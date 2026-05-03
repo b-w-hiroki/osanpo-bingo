@@ -1326,7 +1326,51 @@ function createRng(seed) {
  *   2. カテゴリ別クォータでバランス選出
  *   3. 不足分を残りプールから補完
  *   4. シャッフル後に四隅制約を適用（ガチおに除く）
- *
+ */
+function buildWeightedPool(gameDifficulty, allowedIds, currentSeason) {
+  const weights = GAME_DIFFICULTY_WEIGHTS[gameDifficulty] || GAME_DIFFICULTY_WEIGHTS.normal;
+  const tiers = ['easy', 'normal', 'hard', 'oni'];
+
+  const allTopics = [];
+  for (const tier of tiers) {
+    const tierWeight = weights[tier];
+    if (tierWeight === 0) continue;
+    const tierTopics = topicDatabase[tier] || [];
+    for (const t of tierTopics) {
+      if (allowedIds && !allowedIds.has(t.id)) continue;
+      if (t.season && t.season !== 'all' && t.season !== currentSeason) continue;
+      allTopics.push({ ...t, _effectiveWeight: (t.weight || 1000) * tierWeight });
+    }
+  }
+
+  const nonOniTopics = allTopics.filter(t => t.diff !== 'oni');
+  return { allTopics, nonOniTopics };
+}
+
+function weightedSampleEffective(pool, count, rng) {
+  if (pool.length === 0) return [];
+  if (pool.length <= count) return [...pool];
+
+  const result = [];
+  const remaining = [...pool];
+
+  for (let i = 0; i < count; i++) {
+    if (remaining.length === 0) break;
+    const totalWeight = remaining.reduce((sum, t) => sum + t._effectiveWeight, 0);
+    let r = rng() * totalWeight;
+    let idx = remaining.length - 1;
+    for (let j = 0; j < remaining.length; j++) {
+      r -= remaining[j]._effectiveWeight;
+      if (r <= 0) { idx = j; break; }
+    }
+    result.push(remaining[idx]);
+    remaining.splice(idx, 1);
+  }
+
+  return result;
+}
+
+/**
  * @param {string} gameDifficulty - 'easy'|'normal'|'hard'|'oni'|'gachi'
  * @param {string} roomCode
  * @param {string} userId
