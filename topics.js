@@ -1223,6 +1223,14 @@ const GAME_DIFFICULTY_PROBS = {
   gachi:  { easy: 0.00, normal: 0.00, hard: 0.00, oni: 1.00 },
 };
 
+const GAME_DIFFICULTY_WEIGHTS = {
+  easy:   { easy: 70, normal: 25, hard:  5, oni:   0 },
+  normal: { easy: 30, normal: 50, hard: 15, oni:   5 },
+  hard:   { easy: 10, normal: 30, hard: 50, oni:  10 },
+  oni:    { easy:  5, normal: 25, hard: 30, oni:  40 },
+  gacha:  { easy:  0, normal:  0, hard:  0, oni: 100 },
+};
+
 /**
  * カテゴリ別 24マス枠割り当て（合計=24）
  * ゲームごとに±1の揺らぎを加えてバリエーションを出す
