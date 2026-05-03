@@ -222,12 +222,6 @@ class OsanpoBingo {
       if (el) el.addEventListener('change', () => this.updateTopicSetHelpFor(el));
     });
     
-    // 設定ボタン（プレイ中に設定モーダルを開く）
-    const settingsBtn = document.getElementById('settingsBtn');
-    if (settingsBtn) {
-      settingsBtn.addEventListener('click', () => this.showRoomCodeModal(true));
-    }
-    
     // 写真モーダル
     this.setupPhotoModal();
 
@@ -498,9 +492,10 @@ class OsanpoBingo {
       if (isInBingoLine) {
         cell.classList.add('bingo');
       }
-      // リーチラインに含まれる（ビンゴ済みラインは除外）
-      const isInReachLine = !isInBingoLine && this.reachLines.some(line => line.includes(index));
-      if (isInReachLine) {
+      // リーチラインの「残り1マス（未マーク）」のみ点滅
+      const isUnclaimedReach = !isInBingoLine && !this.isCellClaimed(index) &&
+        this.reachLines.some(line => line.includes(index));
+      if (isUnclaimedReach) {
         cell.classList.add('reach');
       }
       if (this.gameType === 'battle' && ownerId) {
@@ -622,21 +617,28 @@ class OsanpoBingo {
     });
 
     const oldBingoCount = this.bingoLines.length;
-    const oldReachCount = this.reachLines.length;
+    // 既存リーチラインをキーセットに変換（新規ラインを正確に検出するため）
+    const oldReachKeys = new Set(this.reachLines.map(l => l.join(',')));
     this.bingoLines = newBingoLines;
     this.reachLines = newReachLines;
     const newBingoCount = this.bingoLines.length;
-    const newReachCount = this.reachLines.length;
 
     this.renderBoard();
     this.updateStats();
 
     if (newBingoCount > oldBingoCount) {
       this.showBingoMessage(newBingoCount);
-      this.showBingoCelebration(newBingoLines, oldBingoCount);
-    } else if (newReachCount > oldReachCount && newBingoCount === 0) {
-      // ビンゴが1本もない場合のみリーチ演出を出す
-      this.showReachEffect(newReachCount);
+      if (newBingoCount === 12 && oldBingoCount < 12) {
+        this.showFullClearCelebration();
+      } else {
+        this.showBingoCelebration(newBingoLines, oldBingoCount);
+      }
+    }
+
+    // ビンゴと独立して：本当に新しいリーチラインが現れた場合は常に表示
+    const trulyNewReaches = newReachLines.filter(l => !oldReachKeys.has(l.join(',')));
+    if (trulyNewReaches.length > 0) {
+      this.showReachEffect(this.reachLines.length);
     }
 
     return this.bingoLines;
@@ -736,6 +738,63 @@ class OsanpoBingo {
     const el = document.createElement('div');
     el.className = 'bingo-celebration-text';
     el.innerHTML = `<span class="big">🎉 BINGO!</span><span class="sub">${count > 1 ? count + '本ビンゴ達成！' : 'ビンゴ達成！'}</span>`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
+
+  showFullClearCelebration() {
+    // 全セルを順番にフラッシュ
+    for (let i = 0; i < 25; i++) {
+      setTimeout(() => {
+        const cell = this.boardElement?.querySelector(`[data-index="${i}"]`);
+        if (!cell) return;
+        cell.classList.remove('bingo-flash');
+        void cell.offsetWidth;
+        cell.classList.add('bingo-flash');
+        cell.addEventListener('animationend', () => cell.classList.remove('bingo-flash'), { once: true });
+      }, i * 40);
+    }
+    // コンフェッティ大量 + 全クリアテキスト
+    setTimeout(() => {
+      this._launchFullClearConfetti();
+      this._showFullClearText();
+    }, 25 * 40 + 80);
+  }
+
+  _launchFullClearConfetti() {
+    const wrap = document.createElement('div');
+    wrap.className = 'confetti-wrap';
+    document.body.appendChild(wrap);
+    const colors = ['#d32f2f', '#f9a825', '#2e7d32', '#1565c0', '#6a1b9a', '#e65100', '#c2185b'];
+    for (let i = 0; i < 130; i++) {
+      const p = document.createElement('div');
+      const size = 7 + Math.random() * 11;
+      const isRect = Math.random() < 0.4;
+      const dur = (1.2 + Math.random() * 1.8).toFixed(2);
+      const delay = (Math.random() * 1.2).toFixed(2);
+      const rot = Math.floor(Math.random() * 720) - 360;
+      p.className = 'confetti-piece';
+      p.style.cssText = [
+        `left:${Math.random() * 100}%`,
+        `width:${isRect ? size * 2.2 : size}px`,
+        `height:${size}px`,
+        `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+        `border-radius:${Math.random() < 0.4 ? '50%' : '2px'}`,
+        `--dur:${dur}s`,
+        `--delay:${delay}s`,
+        `--rot:${rot}deg`,
+        `animation-delay:${delay}s`,
+      ].join(';');
+      wrap.appendChild(p);
+    }
+    setTimeout(() => wrap.remove(), 5000);
+  }
+
+  _showFullClearText() {
+    const el = document.createElement('div');
+    el.className = 'bingo-celebration-text full-clear-text';
+    el.innerHTML =
+      '<span class="big">✨ FULL CLEAR!</span><span class="sub">全12ライン制覇！<br>すごすぎる！</span>';
     document.body.appendChild(el);
     el.addEventListener('animationend', () => el.remove(), { once: true });
   }

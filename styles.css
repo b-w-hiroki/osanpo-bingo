@@ -201,7 +201,7 @@ h1 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
 
   background: var(--cell-bg);
   border: 2px solid var(--cell-border);
@@ -215,8 +215,8 @@ h1 {
   transition: var(--transition);
 
   overflow: hidden;
-  padding: 3px;
-  padding-bottom: 4px;
+  padding: 2px;
+  padding-bottom: 2px;
 }
 
 /* ==================== 難易度グラデーション ==================== */
@@ -324,24 +324,28 @@ h1 {
 /* セル内のアイコン：セル幅の%ベースで固定サイズ */
 .cell-icon {
   /* 絵文字フォールバック用 */
-  font-size: clamp(1.4rem, 7vw, 2.4rem);
+  font-size: clamp(1.2rem, 6vw, 2rem);
   line-height: 1;
   transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
-/* 画像アイコンのラッパー：セルに対して固定比率の正方形 */
+/* 画像アイコンのラッパー：フレックス残余高さを使い正方形に収める */
 .cell-icon-img-wrap {
   font-size: 0;
-  width: 82%;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: auto;
+  max-width: 82%;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 /* 画像はラッパーいっぱいに表示 */
@@ -379,8 +383,8 @@ h1 {
 .bingo-cell.cell-len-l,
 .bingo-cell.cell-len-xl,
 .bingo-cell.cell-len-xxl {
-  gap: 1px;
-  padding-bottom: 2px;
+  gap: 0px;
+  padding-bottom: 1px;
 }
 
 /* マーク済みセルのテキスト */
@@ -423,12 +427,19 @@ h1 {
 
 /* ==================== リーチ演出 ==================== */
 @keyframes reachGlow {
-  0%, 100% { box-shadow: inset 0 0 0 3px rgba(21, 101, 192, 0.75); }
-  50%       { box-shadow: inset 0 0 0 3px rgba(21, 101, 192, 1), 0 0 12px 4px rgba(21, 101, 192, 0.5); }
+  0%, 100% {
+    background: #dbeafe;
+    box-shadow: inset 0 0 0 3px rgba(21, 101, 192, 0.8);
+  }
+  50% {
+    background: #bfdbfe;
+    box-shadow: inset 0 0 0 3px rgba(21, 101, 192, 1);
+  }
 }
 
 .bingo-cell.reach {
-  animation: reachGlow 1.2s ease-in-out infinite;
+  animation: reachGlow 0.9s ease-in-out infinite;
+  color: #1e3a6e;
 }
 
 @keyframes reachToastIn {
@@ -536,6 +547,21 @@ h1 {
   font-weight: 700;
   color: #fff;
   margin-top: 2px;
+}
+
+.full-clear-text {
+  background: rgba(10, 10, 30, 0.92);
+  border: 2px solid rgba(255, 214, 0, 0.4);
+}
+
+.full-clear-text .big {
+  font-size: clamp(2.4rem, 10vw, 4.2rem);
+  background: linear-gradient(135deg, #ffd600, #ff6d00, #ffd600);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 12px rgba(255, 180, 0, 0.7));
 }
 
 /* ==================== ビンゴメッセージ ==================== */
