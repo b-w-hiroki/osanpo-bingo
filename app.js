@@ -511,13 +511,15 @@ class OsanpoBingo {
       const displayText = index === 12 ? '' : topic.text;
       const textLen = displayText.length;
       let sizeClass = '';
-      if (textLen <= 2) sizeClass = 'cell-text-s';
-      else if (textLen <= 4) sizeClass = 'cell-text-m';
-      else if (textLen <= 6) sizeClass = 'cell-text-l';
-      else sizeClass = 'cell-text-xl';
-      
-      if (textLen >= 7) cell.classList.add('cell-len-xl');
-      else if (textLen >= 5) cell.classList.add('cell-len-l');
+      if (textLen <= 2)       sizeClass = 'cell-text-s';
+      else if (textLen <= 4)  sizeClass = 'cell-text-m';
+      else if (textLen <= 6)  sizeClass = 'cell-text-l';
+      else if (textLen <= 9)  sizeClass = 'cell-text-xl';
+      else                    sizeClass = 'cell-text-xxl';
+
+      if (textLen >= 10)      cell.classList.add('cell-len-xxl');
+      else if (textLen >= 7)  cell.classList.add('cell-len-xl');
+      else if (textLen >= 5)  cell.classList.add('cell-len-l');
       
       if (hasPhoto) {
         cell.innerHTML = index === 12
@@ -546,8 +548,8 @@ class OsanpoBingo {
     });
   }
 
-  // テキストがセル幅に収まるまでfont-sizeを縮小する
-  // 最小サイズでも収まらない場合のみ2行折り返しを許可
+  // テキストがセル幅に収まるようにfont-sizeを縮小する
+  // cell-text-xl / cell-text-xxl は CSS 側で折り返しが設定済みのためスキップ
   fitCellText(cell) {
     const textEl = cell.querySelector('.cell-text');
     if (!textEl || !textEl.textContent.trim()) return;
@@ -559,6 +561,10 @@ class OsanpoBingo {
 
     const MIN_PX = 8;
 
+    // CSS で white-space: normal が設定済みなら折り返し済み → nowrap縮小ループ不要
+    const computedWS = getComputedStyle(textEl).whiteSpace;
+    if (computedWS === 'normal' || computedWS === 'pre-wrap') return;
+
     // nowrapで計測 → はみ出しがなければそのまま終了
     if (textEl.scrollWidth <= textEl.offsetWidth) return;
 
@@ -568,7 +574,7 @@ class OsanpoBingo {
       textEl.style.fontSize = pxSize + 'px';
     }
 
-    // 最小サイズでも収まらない場合は2行折り返しにフォールバック
+    // 最小サイズでも収まらない場合は折り返しにフォールバック
     if (textEl.scrollWidth > textEl.offsetWidth + 1) {
       textEl.style.whiteSpace = 'normal';
       textEl.style.lineHeight = '1.2';

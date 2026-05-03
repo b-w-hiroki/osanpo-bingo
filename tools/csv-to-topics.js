@@ -145,6 +145,7 @@ const landmarkDatabase = [
   {id: 'landmark0208', text: '氷川神社',     iconFile: 'landmark0208_氷川神社.png',     type: 'landmark', category: 'ランドマーク'},
   {id: 'landmark0209', text: '鹿島神宮',     iconFile: 'landmark0209_鹿島神宮.png',     type: 'landmark', category: 'ランドマーク'},
   {id: 'landmark0212', text: '住吉大社',     iconFile: 'landmark0212_住吉大社.png',     type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark0213', text: '吉野神宮',     iconFile: 'landmark0213_吉野神宮.png',     type: 'landmark', category: 'ランドマーク'},
   {id: 'landmark0206', text: '春日大社',     iconFile: 'landmark206_春日大社.png',      type: 'landmark', category: 'ランドマーク'},
 ];
 
