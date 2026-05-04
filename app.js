@@ -1682,7 +1682,8 @@ class OsanpoBingo {
         this.gameStartTime = Date.now();
         this.battleTopicOwners = {};
 
-        this.createBoard(roomCode, difficulty, '', customTopics);
+        const initialSalt = this.gameType === 'battle' ? '' : Date.now().toString();
+        this.createBoard(roomCode, difficulty, initialSalt, customTopics);
         this.markCell(12);
         this.checkBingo();
         this.totalDistance = 0;
