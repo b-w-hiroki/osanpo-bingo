@@ -1397,9 +1397,12 @@ class OsanpoBingo {
     });
   }
   
-  // ランドマーク配置数（常に複数）
+  // ランドマーク配置数（難易度別・中央含む）
+  // easy: 1固定、normal: 1〜2抽選、hard以上: 1〜4抽選
   _getLandmarkCount(rng) {
-    return 3 + Math.floor(rng() * 3); // 3〜5個（中央含む）
+    if (this.difficulty === 'easy') return 1;
+    if (this.difficulty === 'normal') return 1 + Math.floor(rng() * 2);      // 1〜2
+    return 1 + Math.floor(rng() * 4);                                        // 1〜4
   }
 
   // セルをマーク（プログラムから）
