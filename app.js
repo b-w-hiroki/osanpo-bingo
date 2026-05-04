@@ -596,7 +596,7 @@ class OsanpoBingo {
 
   // セルクリック処理
   handleCellClick(index) {
-    if (index === 12) return;
+    if (this.board[index]?.isFree) return;
     const ownerId = this.getCellOwnerId(index);
     if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
       showAlert('このマスはすでに他の人が取得しています。');
