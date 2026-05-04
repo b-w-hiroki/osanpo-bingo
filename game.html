@@ -109,6 +109,21 @@
             </select>
             <div id="customTopicInputsSolo" class="custom-topic-inputs" style="display: none;"></div>
           </div>
+          <div class="form-group">
+            <label>🗺️ ランドマーク</label>
+            <div class="play-mode-options">
+              <label class="play-mode-option">
+                <input type="radio" name="landmarkModeSolo" value="off" checked>
+                <span class="play-mode-label">OFF</span>
+                <span class="play-mode-desc">中央は☆（最初からクリア）</span>
+              </label>
+              <label class="play-mode-option">
+                <input type="radio" name="landmarkModeSolo" value="on">
+                <span class="play-mode-label">ON</span>
+                <span class="play-mode-desc">中央がランドマーク（写真でクリア）</span>
+              </label>
+            </div>
+          </div>
           <button id="startSoloGameBtn" class="btn btn-primary btn-large">✨ ゲームを始める</button>
           <p class="modal-step-back">
             <button type="button" id="backToModeSelectFromSolo" class="link-btn">← 戻る</button>
@@ -247,7 +262,23 @@
               <!-- JSで動的に生成 -->
             </div>
           </div>
-          
+
+          <div class="form-group">
+            <label>🗺️ ランドマーク</label>
+            <div class="play-mode-options">
+              <label class="play-mode-option">
+                <input type="radio" name="landmarkModeCreate" value="off" checked>
+                <span class="play-mode-label">OFF</span>
+                <span class="play-mode-desc">中央は☆（最初からクリア）</span>
+              </label>
+              <label class="play-mode-option">
+                <input type="radio" name="landmarkModeCreate" value="on">
+                <span class="play-mode-label">ON</span>
+                <span class="play-mode-desc">中央がランドマーク（写真でクリア）</span>
+              </label>
+            </div>
+          </div>
+
           <button id="startGameBtn" class="btn btn-primary btn-large">
             ✨ ゲームを始める
           </button>
@@ -342,7 +373,24 @@
             </p>
             <div id="customTopicInputsJoin" class="custom-topic-inputs" style="display: none;"></div>
           </div>
-          
+
+          <div class="form-group">
+            <label>🗺️ ランドマーク</label>
+            <div class="play-mode-options">
+              <label class="play-mode-option">
+                <input type="radio" name="landmarkModeJoin" value="off" checked>
+                <span class="play-mode-label">OFF</span>
+                <span class="play-mode-desc">中央は☆（最初からクリア）</span>
+              </label>
+              <label class="play-mode-option">
+                <input type="radio" name="landmarkModeJoin" value="on">
+                <span class="play-mode-label">ON</span>
+                <span class="play-mode-desc">中央がランドマーク（写真でクリア）</span>
+              </label>
+            </div>
+            <p class="form-help">作った人と同じ設定を選んでね</p>
+          </div>
+
           <button id="joinGameBtn" class="btn btn-primary btn-large">
             🤝 参加する
           </button>

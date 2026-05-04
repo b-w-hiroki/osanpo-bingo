@@ -98,6 +98,7 @@ class OsanpoBingo {
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
     this.gameType = 'normal';     // 'normal' | 'battle'
+    this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.battleTopicOwners = {};  // バトル用: {topicKey: userId}
     this.battlePlayerId = getBattlePlayerId();
     this.battleBackend = getBattleBackendConfig();
@@ -273,14 +274,37 @@ class OsanpoBingo {
       this.difficulty
     );
     
-    // 25マスのボードを作成（中央はFREE・表示はアイコンのみ）
+    // 25マスのボードを作成
     this.board = [];
-    for (let i = 0; i < 25; i++) {
-      if (i === 12) {
-        this.board.push({text: '', icon: '⭐', isFree: true});
-      } else {
-        const topicIndex = i < 12 ? i : i - 1;
-        this.board.push(shuffledTopics[topicIndex]);
+    const lmDB = typeof landmarkDatabase !== 'undefined' ? landmarkDatabase : [];
+    if (this.landmarkMode && lmDB.length > 0) {
+      // ランドマークモード: 中央+追加位置にランドマーク配置
+      const lmSeed = stringToSeed([this.roomCode, boardSeedUserId, shuffleSalt, 'lm'].filter(Boolean).join('-'));
+      const lmRng = createRng(lmSeed);
+      const count = this._getLandmarkCount(lmRng);
+      const landmarkPositions = new Set([12]);
+      const extraCandidates = shuffleWithSeed([...Array(25).keys()].filter(p => p !== 12), lmSeed + 1);
+      for (let i = 0; i < count - 1 && i < extraCandidates.length; i++) {
+        landmarkPositions.add(extraCandidates[i]);
+      }
+      let topicIdx = 0;
+      for (let i = 0; i < 25; i++) {
+        if (landmarkPositions.has(i)) {
+          const lm = lmDB[Math.floor(lmRng() * lmDB.length)];
+          this.board.push({...lm, isLandmark: true});
+        } else {
+          this.board.push(shuffledTopics[topicIdx++]);
+        }
+      }
+    } else {
+      // 通常モード: 中央はFREEスター
+      for (let i = 0; i < 25; i++) {
+        if (i === 12) {
+          this.board.push({text: '', icon: '⭐', isFree: true});
+        } else {
+          const topicIndex = i < 12 ? i : i - 1;
+          this.board.push(shuffledTopics[topicIndex]);
+        }
       }
     }
     
@@ -507,8 +531,8 @@ class OsanpoBingo {
         }
       }
       
-      // 中央マスはテキスト非表示（アイコンのみ）
-      const displayText = index === 12 ? '' : topic.text;
+      // 中央マスはテキスト非表示（ランドマークは表示）
+      const displayText = (index === 12 && !topic.isLandmark) ? '' : topic.text;
       const textLen = displayText.length;
       let sizeClass = '';
       if (textLen <= 2)       sizeClass = 'cell-text-s';
@@ -519,15 +543,15 @@ class OsanpoBingo {
 
       if (textLen >= 9)       cell.classList.add('cell-len-xxl');
       else if (textLen >= 5)  cell.classList.add('cell-len-l');
-      
+
       if (hasPhoto) {
-        cell.innerHTML = index === 12
-          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${this.photos[index]}" alt=""></div>`
-          : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${this.photos[index]}" alt=""></div><div class="cell-text ${sizeClass}">${displayText}</div>`;
+        cell.innerHTML = displayText
+          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${this.photos[index]}" alt=""></div><div class="cell-text ${sizeClass}">${displayText}</div>`
+          : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${this.photos[index]}" alt=""></div>`;
       } else {
-        cell.innerHTML = index === 12
-          ? getTopicIcon(topic)
-          : `${getTopicIcon(topic)}<div class="cell-text ${sizeClass}">${displayText}</div>`;
+        cell.innerHTML = displayText
+          ? `${getTopicIcon(topic)}<div class="cell-text ${sizeClass}">${displayText}</div>`
+          : getTopicIcon(topic);
       }
       
       // アクセシビリティ
@@ -1360,7 +1384,7 @@ class OsanpoBingo {
       // 各プレイヤーのマス配置は異なる。競合判定は topic_key ベースで行うため問題なし。
       const shuffleSalt = this.gameType === 'battle' ? '' : Date.now().toString();
       this.createBoard(this.roomCode, this.difficulty, shuffleSalt, null);
-      this.markCell(12);
+      if (this.board[12]?.isFree) this.markCell(12);
       this.checkBingo();
       // 距離リセット＆再トラッキング
       this.totalDistance = 0;
@@ -1377,6 +1401,13 @@ class OsanpoBingo {
     });
   }
   
+  // ランドマーク配置数（難易度別）
+  _getLandmarkCount(rng) {
+    if (this.difficulty === 'hard') return 1 + Math.floor(rng() * 3);       // 1-3
+    if (this.difficulty === 'oni' || this.difficulty === 'gachi') return 2 + Math.floor(rng() * 5); // 2-6
+    return 1;
+  }
+
   // セルをマーク（プログラムから）
   markCell(index) {
     this.markedCells.add(index);
@@ -1634,12 +1665,14 @@ class OsanpoBingo {
         this.topicSetId = document.getElementById('topicSetSelectSolo')?.value || 'default';
         this.gameType = 'normal';
         this.battleTopicOwners = {};
+        this.landmarkMode = document.querySelector('input[name="landmarkModeSolo"]:checked')?.value === 'on';
         const customTopics = this.collectCustomTopics(customTopicInputsSolo);
         this.gameStartTime = Date.now();
         this.roomCode = 'solo';
         this.playerCount = 1;
-        this.createBoard('solo', this.difficulty, '', customTopics);
-        this.markCell(12);
+        const soloSalt = Date.now().toString();
+        this.createBoard('solo', this.difficulty, soloSalt, customTopics);
+        if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
         this.totalDistance = 0;
         this.lastPosition = null;
@@ -1676,6 +1709,7 @@ class OsanpoBingo {
         this.gameType = BATTLE_MODE_ENABLED
           ? (gameTypeCreate?.value || 'normal')
           : 'normal';
+        this.landmarkMode = document.querySelector('input[name="landmarkModeCreate"]:checked')?.value === 'on';
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
@@ -1684,7 +1718,7 @@ class OsanpoBingo {
 
         const initialSalt = this.gameType === 'battle' ? '' : Date.now().toString();
         this.createBoard(roomCode, difficulty, initialSalt, customTopics);
-        this.markCell(12);
+        if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
         this.totalDistance = 0;
         this.lastPosition = null;
@@ -1731,8 +1765,9 @@ class OsanpoBingo {
         this.playerCount = 1;
         // グループ＋自由記載：作った人から教えてもらったお題を入力（同じお題セットで並びだけ各自違うボードになる）
         const customTopics = customTopicInputsJoin ? this.collectCustomTopics(customTopicInputsJoin) : [];
+        this.landmarkMode = document.querySelector('input[name="landmarkModeJoin"]:checked')?.value === 'on';
         this.createBoard(roomCode, difficulty, '', customTopics);
-        this.markCell(12);
+        if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
         this.totalDistance = 0;
         this.lastPosition = null;
@@ -2253,7 +2288,8 @@ class OsanpoBingo {
         gameStartTime: this.gameStartTime,
         gameType: this.gameType,
         battleTopicOwners: this.battleTopicOwners,
-        totalDistance: this.totalDistance
+        totalDistance: this.totalDistance,
+        landmarkMode: this.landmarkMode
       };
       localStorage.setItem('osanpoBingo', JSON.stringify(data));
     } catch (error) {
@@ -2326,6 +2362,9 @@ class OsanpoBingo {
         this.totalDistance = data.totalDistance;
         // 保存時点での距離があればactiveとして扱う
         if (data.totalDistance > 0) this.locationState = 'active';
+      }
+      if (typeof data.landmarkMode === 'boolean') {
+        this.landmarkMode = data.landmarkMode;
       }
 
       return true;
