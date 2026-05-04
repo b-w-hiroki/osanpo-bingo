@@ -287,10 +287,10 @@ function getTopicIcon(topic) {
 
 // ランドマークDB（地域の特別スポット・準備中）
 const landmarkDatabase = [
-  {id: 'landmark001', text: 'ランドマーク①', iconFile: 'landmark001_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark002', text: 'ランドマーク②', iconFile: 'landmark002_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark003', text: 'ランドマーク③', iconFile: 'landmark003_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark004', text: 'ランドマーク④', iconFile: 'landmark004_ランドマーク.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark001', text: '自然', iconFile: 'landmark001_自然.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark002', text: '歴史的施設', iconFile: 'landmark002_歴史的施設.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark003', text: '最新施設', iconFile: 'landmark003_最新施設.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark004', text: '観光地', iconFile: 'landmark004_観光地.png', type: 'landmark', category: 'ランドマーク'},
 ];
 
 const topicDatabase = {
