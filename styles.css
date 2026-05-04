@@ -219,15 +219,6 @@ h1 {
   padding-bottom: 2px;
 }
 
-/* ==================== 難易度グラデーション ==================== */
-/* むずかしい：薄めローズ */
-.bingo-cell.cell-diff-hard {
-  background: linear-gradient(145deg, #fff0f0 0%, #fdd0d0 100%);
-}
-/* おに：濃い赤 */
-.bingo-cell.cell-diff-oni {
-  background: linear-gradient(145deg, #f9a0a0 0%, #f07070 100%);
-}
 
 /* ==================== ランドマーク ☆ ==================== */
 @keyframes landmark-sparkle {

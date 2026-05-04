@@ -361,7 +361,10 @@ function getTopicIcon(topic) {
   return `<span class="cell-icon">${topic.icon}</span>`;
 }
 
-// ランドマークDB（地域の特別スポット・準備中）
+// ランドマークDB
+// landmark000: 中央専用フリー枠（なんでも置ける）
+const landmarkFreeEntry = {id: 'landmark000', text: 'なんでも置ける！', iconFile: 'landmark000_フリー.png', type: 'landmark', category: 'ランドマーク', isFreeSlot: true};
+
 const landmarkDatabase = [
   {id: 'landmark001', text: '自然', iconFile: 'landmark001_自然.png', type: 'landmark', category: 'ランドマーク'},
   {id: 'landmark002', text: '歴史的施設', iconFile: 'landmark002_歴史的施設.png', type: 'landmark', category: 'ランドマーク'},
