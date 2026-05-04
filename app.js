@@ -278,7 +278,7 @@ class OsanpoBingo {
     this.board = [];
     const lmDB = typeof landmarkDatabase !== 'undefined' ? landmarkDatabase : [];
     if (this.landmarkMode && lmDB.length > 0) {
-      // ランドマークモード: 中央+追加位置にランドマーク配置
+      // ランドマークモード: 中央=フリー枠、追加位置にランドマーク配置
       const lmSeed = stringToSeed([this.roomCode, boardSeedUserId, shuffleSalt, 'lm'].filter(Boolean).join('-'));
       const lmRng = createRng(lmSeed);
       const count = this._getLandmarkCount(lmRng);
@@ -287,9 +287,14 @@ class OsanpoBingo {
       for (let i = 0; i < count - 1 && i < extraCandidates.length; i++) {
         landmarkPositions.add(extraCandidates[i]);
       }
+      const freeEntry = typeof landmarkFreeEntry !== 'undefined' ? landmarkFreeEntry : null;
       let topicIdx = 0;
       for (let i = 0; i < 25; i++) {
-        if (landmarkPositions.has(i)) {
+        if (i === 12) {
+          // 中央は「なんでも置ける！」フリー枠（自動マークしない）
+          const centerLm = freeEntry || lmDB[Math.floor(lmRng() * lmDB.length)];
+          this.board.push({...centerLm, isLandmark: true});
+        } else if (landmarkPositions.has(i)) {
           const lm = lmDB[Math.floor(lmRng() * lmDB.length)];
           this.board.push({...lm, isLandmark: true});
         } else {
@@ -471,18 +476,9 @@ class OsanpoBingo {
       cell.dataset.index = index;
       const ownerId = this.getCellOwnerId(index);
       
-      // ランドマーク / 難易度クラス
-      if (!topic.isFree) {
-        if (topic.type === 'landmark') {
-          cell.classList.add('cell-landmark');
-        } else {
-          const diff = topic.diff || 'normal';
-          if (diff === 'oni') {
-            cell.classList.add('cell-diff-oni');
-          } else if (diff === 'hard') {
-            cell.classList.add('cell-diff-hard');
-          }
-        }
+      // ランドマーククラス
+      if (!topic.isFree && topic.type === 'landmark') {
+        cell.classList.add('cell-landmark');
       }
 
       // 写真がある場合（上に写真・下にテキストの構成で描画）
@@ -1401,11 +1397,9 @@ class OsanpoBingo {
     });
   }
   
-  // ランドマーク配置数（難易度別）
+  // ランドマーク配置数（常に複数）
   _getLandmarkCount(rng) {
-    if (this.difficulty === 'hard') return 1 + Math.floor(rng() * 3);       // 1-3
-    if (this.difficulty === 'oni' || this.difficulty === 'gachi') return 2 + Math.floor(rng() * 5); // 2-6
-    return 1;
+    return 3 + Math.floor(rng() * 3); // 3〜5個（中央含む）
   }
 
   // セルをマーク（プログラムから）
