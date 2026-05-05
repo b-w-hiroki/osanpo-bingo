@@ -1126,7 +1126,7 @@ class OsanpoBingo {
     const box = document.createElement('div');
     box.id = 'resultPhotoLightbox';
     box.className = 'modal';
-    box.style.display = 'flex';
+    box.style.cssText = 'display:flex; z-index:1200;';
     box.innerHTML = `
       <div class="modal-content">
         <button class="modal-close" id="resultPhotoClose">✕</button>
