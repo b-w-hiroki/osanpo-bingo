@@ -1078,12 +1078,13 @@ class OsanpoBingo {
       requestAnimationFrame(() => {
         clone.querySelectorAll('.bingo-cell').forEach(c => this.fitCellText(c));
       });
-      // 写真ありセルのみタップで拡大表示
+      // 写真ありセルのみタップで拡大＆保存
       clone.addEventListener('click', (e) => {
         const cell = e.target.closest('.bingo-cell.has-photo');
         if (!cell) return;
         const img = cell.querySelector('.cell-photo-img');
-        if (img) this.showResultPhotoLightbox(img.src);
+        const topicText = cell.querySelector('.cell-text')?.textContent?.trim() || '';
+        if (img) this.showResultPhotoLightbox(img.src, topicText);
       });
     }
     
@@ -1113,8 +1114,8 @@ class OsanpoBingo {
     view.style.display = 'flex';
   }
   
-  /** 写真をフルスクリーンで表示するライトボックス */
-  showResultPhotoLightbox(src) {
+  /** 写真をフルスクリーンで表示するライトボックス（保存ボタン付き） */
+  showResultPhotoLightbox(src, topicText = '') {
     const existing = document.getElementById('resultPhotoLightbox');
     if (existing) existing.remove();
 
@@ -1123,10 +1124,25 @@ class OsanpoBingo {
     box.className = 'result-photo-lightbox';
     box.innerHTML = `
       <img src="${src}" alt="写真">
-      <span class="result-photo-lightbox-hint">タップして閉じる</span>
+      <div class="result-photo-lightbox-actions">
+        <button class="result-photo-save-btn">📥 端末に保存</button>
+        <span class="result-photo-lightbox-hint">背景タップで閉じる</span>
+      </div>
     `;
-    box.addEventListener('click', () => box.remove());
-    // Escキーでも閉じる
+
+    box.addEventListener('click', (e) => {
+      if (!e.target.closest('.result-photo-save-btn')) box.remove();
+    });
+
+    const saveBtn = box.querySelector('.result-photo-save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const filename = `osanpo-bingo-${topicText || Date.now()}.jpg`;
+        this.savePhotoToDevice(src, filename);
+      });
+    }
+
     const onKey = (e) => { if (e.key === 'Escape') { box.remove(); document.removeEventListener('keydown', onKey); } };
     document.addEventListener('keydown', onKey);
     document.body.appendChild(box);
