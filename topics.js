@@ -3,13 +3,13 @@
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
 // 生成日時: 2026-05-04 11:37:40（walking_bingo_master.xlsx より自動生成）
 
-// お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
+// お題ID → アイコン画像ファイル名
 const topicIconMap = {
   2: 'icon002_郵便ポスト.png',
   3: 'icon003_信号機.png',
   4: 'icon004_横断歩道.png',
   5: 'icon005_カーブミラー.png',
-  6: 'icon006_飛び出し坊や.png',
+  6: 'icon006_飛び出し坊や.png',
   7: 'icon007_マンホール.png',
   8: 'icon008_ガードレール.png',
   11: 'icon011_道路反射板.png',
@@ -33,7 +33,7 @@ const topicIconMap = {
   30: 'icon030_砂場.png',
   31: 'icon031_バネの遊具.png',
   32: 'icon032_公園の水飲み場.png',
-  33: 'icon033_通学路ポール.png',
+  33: 'icon033_通学路ポール.png',
   34: 'icon034_公園のベンチ.png',
   35: 'icon035_公園の案内板.png',
   36: 'icon036_公園のごみ箱.png',
@@ -118,7 +118,7 @@ const topicIconMap = {
   129: 'icon129_掲示板.png',
   130: 'icon130_案内地図.png',
   131: 'icon131_トイレマーク.png',
-  132: 'icon132_段差プレート.png',
+  132: 'icon132_段差プレート.png',
   133: 'icon133_コンクリート壁.png',
   134: 'icon134_木製アーチ.png',
   135: 'icon135_ガーデンランプ.png',
@@ -373,7 +373,7 @@ const landmarkDatabase = [
 ];
 
 const topicDatabase = {
-  // かんたん（93個）
+  // easy (93)
   easy: [
     {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
     {id: 3, text: '信号機', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
@@ -469,7 +469,7 @@ const topicDatabase = {
     {id: 611, text: 'カラス', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
     {id: 619, text: '広葉樹', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
   ],
-  // ふつう（130個）
+  // normal (130)
   normal: [
     {id: 97, text: 'じょうろ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
     {id: 98, text: 'ほうき', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
@@ -602,7 +602,7 @@ const topicDatabase = {
     {id: 640, text: '高さ制限', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
     {id: 641, text: '歩行者専用', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
   ],
-  // むずかしい（86個）
+  // hard (86)
   hard: [
     {id: 202, text: '木漏れ日', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
     {id: 209, text: '屋外喫煙所', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
@@ -691,7 +691,7 @@ const topicDatabase = {
     {id: 633, text: '可愛い置物', icon: '🔍', category: 'キャラクター掲示物', diff: 'hard', season: 'all'},
     {id: 634, text: '車両進入禁止', icon: '🔍', category: '街インフラ', diff: 'hard', season: 'all'},
   ],
-  // おに（34個）
+  // oni (34)
   oni: [
     {id: 205, text: '縄跳び', icon: '🔍', category: '生活・学校', diff: 'oni', season: 'all'},
     {id: 275, text: '丸い排水穴', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
@@ -729,6 +729,8 @@ const topicDatabase = {
     {id: 615, text: '公衆電話', icon: '🔍', category: '生活・地域設備', diff: 'oni', season: 'all'},
   ],
 };
+
+
 
 
 /**
@@ -966,12 +968,15 @@ function weightedSampleEffective(pool, count, rng) {
 }
 
 /**
+ * 難易度重み付き非復元サンプリング。カテゴリ上限MAX_PER_CATで多様性を確保。
+ * カテゴリクォータを廃止し、毎回異なる組み合わせが出やすいシンプルな設計。
+ *
  * @param {string} gameDifficulty - 'easy'|'normal'|'hard'|'oni'|'gachi'
  * @param {string} roomCode
  * @param {string} userId
- * @param {string} shuffleSalt
+ * @param {string} shuffleSalt  - Date.now()等の可変値で毎回変化する
  * @param {string} topicSetId
- * @returns {Array} 25件（インデックス12=フリーマス含む）のお題配列
+ * @returns {Array} 24件のお題配列
  */
 function selectTopicsForGame(
   gameDifficulty,
@@ -980,7 +985,6 @@ function selectTopicsForGame(
   shuffleSalt = '',
   topicSetId = 'default'
 ) {
-  const probs = GAME_DIFFICULTY_PROBS[gameDifficulty] || GAME_DIFFICULTY_PROBS.normal;
   const set = getTopicSetById(topicSetId);
   const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
   const currentSeason = getCurrentSeason();
@@ -990,67 +994,34 @@ function selectTopicsForGame(
   const seed = seedStr ? stringToSeed(seedStr) : (Math.random() * 0xFFFFFFFF | 0);
   const rng = createRng(seed);
 
-  // ティアごとにアイテムをフィルタして _tierWeight（確率/件数）を付与
-  const TIERS = ['easy', 'normal', 'hard', 'oni'];
-  const pool = TIERS.flatMap(tier => {
-    const tierProb = probs[tier] || 0;
-    if (tierProb === 0) return [];
-    const tierItems = (topicDatabase[tier] || [])
-      .filter(t => !t.season || t.season === 'all' || t.season === currentSeason)
-      .filter(t => !allowed || allowed.has(t.id));
-    if (tierItems.length === 0) return [];
-    const itemWeight = tierProb / tierItems.length;
-    return tierItems.map(t => ({ ...t, _tierWeight: itemWeight }));
-  });
+  // 難易度重み付きプールを構築
+  const { allTopics } = buildWeightedPool(gameDifficulty, allowed, currentSeason);
 
-  const { allTopics, nonOniTopics } = buildWeightedPool(gameDifficulty, allowed, currentSeason);
-
-  // カテゴリ別グループ化（全プール）
-  const byCategory = {};
-  for (const t of pool) {
-    const cat = t.category || '不明';
-    if (!byCategory[cat]) byCategory[cat] = [];
-    byCategory[cat].push(t);
-  }
-
-  // カテゴリクォータ抽選（±1の揺らぎ付き）
+  // カテゴリ上限（1カテゴリから最大4件まで）
+  const MAX_PER_CAT = 4;
   const selected = [];
   const usedIds = new Set();
+  const catCounts = {};
+  const remaining = [...allTopics];
 
-  for (const [cat, baseQuota] of Object.entries(CATEGORY_QUOTAS)) {
-    const variance = Math.floor(rng() * 3) - 1;
-    const quota = Math.max(1, baseQuota + variance);
-    const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
-    const picked = weightedSampleEffective(catPool, quota, rng);
-    for (const t of picked) {
-      selected.push(t);
-      usedIds.add(t.id);
-    }
+  while (selected.length < 24 && remaining.length > 0) {
+    // カテゴリ上限未満の候補を優先。全滅なら上限を無視
+    const eligible = remaining.filter(t => (catCounts[t.category || ''] || 0) < MAX_PER_CAT);
+    const candidates = eligible.length > 0 ? eligible : remaining;
+    const [picked] = weightedSampleEffective(candidates, 1, rng);
+    if (!picked) break;
+    selected.push(picked);
+    usedIds.add(picked.id);
+    catCounts[picked.category || ''] = (catCounts[picked.category || ''] || 0) + 1;
+    const idx = remaining.findIndex(t => t.id === picked.id);
+    if (idx >= 0) remaining.splice(idx, 1);
   }
 
-  // 不足分をプール残りから補完（補完枠は同一カテゴリ最大2件）
+  // プール不足時の無条件補完
   if (selected.length < 24) {
-    const FILLER_CAT_MAX = 2;
-    const fillerCatCounts = {};
-    const filler = pool.filter(t => !usedIds.has(t.id));
-
-    while (selected.length < 24 && filler.length > 0) {
-      // カテゴリ上限未満の候補を優先。全滅なら上限なしで拾う
-      const eligible = filler.filter(t => (fillerCatCounts[t.category] || 0) < FILLER_CAT_MAX);
-      const candidates = eligible.length > 0 ? eligible : filler;
-      const [picked] = weightedSample(candidates, 1, rng);
-      if (!picked) break;
-      selected.push(picked);
-      usedIds.add(picked.id);
-      fillerCatCounts[picked.category] = (fillerCatCounts[picked.category] || 0) + 1;
-      filler.splice(filler.findIndex(t => t.id === picked.id), 1);
-    }
-  }
-
-  // プール自体が不足する場合は全ティアから無条件補完
-  if (selected.length < 24) {
-    const allTopics = TIERS.flatMap(t => topicDatabase[t] || []);
-    for (const t of allTopics) {
+    const TIERS = ['easy', 'normal', 'hard', 'oni'];
+    const fallback = TIERS.flatMap(t => topicDatabase[t] || []);
+    for (const t of fallback) {
       if (selected.length >= 24) break;
       if (!usedIds.has(t.id)) { selected.push(t); usedIds.add(t.id); }
     }

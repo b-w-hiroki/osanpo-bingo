@@ -1401,8 +1401,8 @@ class OsanpoBingo {
   // easy: 1固定、normal: 1〜2抽選、hard以上: 1〜4抽選
   _getLandmarkCount(rng) {
     if (this.difficulty === 'easy') return 1;
-    if (this.difficulty === 'normal') return 1 + Math.floor(rng() * 2);      // 1〜2
-    return 1 + Math.floor(rng() * 4);                                        // 1〜4
+    if (this.difficulty === 'normal') return 1 + Math.floor(rng() * 2);  // 1〜2
+    return 1 + Math.floor(rng() * 4);                                    // 1〜4
   }
 
   // セルをマーク（プログラムから）
@@ -2188,11 +2188,11 @@ class OsanpoBingo {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // リサイズ（最大800px）
+        // リサイズ（最大400px）
         let width = img.width;
         let height = img.height;
-        const maxSize = 800;
-        
+        const maxSize = 400;
+
         if (width > height && width > maxSize) {
           height = (height * maxSize) / width;
           width = maxSize;
@@ -2200,14 +2200,14 @@ class OsanpoBingo {
           width = (width * maxSize) / height;
           height = maxSize;
         }
-        
+
         canvas.width = width;
         canvas.height = height;
-        
+
         ctx.drawImage(img, 0, 0, width, height);
-        
-        // JPEG形式で圧縮（品質0.8）
-        const compressedData = canvas.toDataURL('image/jpeg', 0.8);
+
+        // JPEG形式で圧縮（品質0.5 / 25枚でも容量超過しないよう調整）
+        const compressedData = canvas.toDataURL('image/jpeg', 0.5);
         callback(compressedData);
       };
       
