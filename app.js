@@ -2048,20 +2048,25 @@ class OsanpoBingo {
         photoPreview.style.display = 'none';
         this.tempPhotoData = null;
         const idx = this.currentPhotoIndex;
+        const header = document.getElementById('cellModalHeader');
         if (idx !== null && this.photos[idx]) {
+          // State A に戻る（ヘッダー不要）
           const photoDisplay = document.getElementById('cellPhotoDisplay');
           const photoImg = document.getElementById('cellPhotoImg');
           if (photoDisplay && photoImg) {
             photoImg.src = this.photos[idx];
             photoDisplay.style.display = 'block';
           }
+          if (header) header.style.display = 'none';
           const noPhoto = document.getElementById('cellModalNoPhoto');
           if (noPhoto) noPhoto.style.display = 'none';
         } else {
+          // State C に戻る（ヘッダー復元）
           const noPhoto = document.getElementById('cellModalNoPhoto');
           if (noPhoto) noPhoto.style.display = 'flex';
           const photoDisplay = document.getElementById('cellPhotoDisplay');
           if (photoDisplay) photoDisplay.style.display = 'none';
+          if (header) header.style.display = '';
         }
       });
     }
@@ -2111,19 +2116,24 @@ class OsanpoBingo {
     const preview = document.getElementById('cellPhotoPreview');
     const previewImg = document.getElementById('cellPhotoPreviewImg');
     const photoDisplay = document.getElementById('cellPhotoDisplay');
-    
+
     if (!preview || !previewImg) return;
-    
-    // 既存の写真表示を非表示
-    if (photoDisplay) {
-      photoDisplay.style.display = 'none';
-    }
-    
+
+    if (photoDisplay) photoDisplay.style.display = 'none';
+
     this.compressImage(file, (compressedData) => {
       previewImg.src = compressedData;
       preview.style.display = 'block';
       this.tempPhotoData = compressedData;
-      // State C と State A を非表示にして State B を表示
+
+      // ヘッダー非表示、プレビュータイトルを設定
+      const header = document.getElementById('cellModalHeader');
+      if (header) header.style.display = 'none';
+      const previewTitle = document.getElementById('cellModalPreviewTitle');
+      if (previewTitle && this.currentPhotoIndex !== null) {
+        previewTitle.textContent = this.board[this.currentPhotoIndex]?.text ?? '';
+      }
+
       const noPhoto = document.getElementById('cellModalNoPhoto');
       if (noPhoto) noPhoto.style.display = 'none';
     });

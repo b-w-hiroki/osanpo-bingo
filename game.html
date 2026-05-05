@@ -431,14 +431,14 @@
 
         <!-- State B: プレビュー（新規アップロード時） -->
         <div id="cellPhotoPreview" class="photo-preview" style="display: none;">
+          <div class="cell-photo-header">
+            <span class="cell-photo-title" id="cellModalPreviewTitle"></span>
+            <span class="cell-preview-badge">📷 確認中</span>
+          </div>
           <img id="cellPhotoPreviewImg" alt="プレビュー">
           <div class="photo-preview-actions">
-            <button id="saveCellPhotoBtn" class="btn btn-primary btn-large">
-              この写真でマーク
-            </button>
-            <button id="retakeCellPhotoBtn" class="btn btn-secondary">
-              🔄 撮り直し
-            </button>
+            <button id="retakeCellPhotoBtn" class="btn btn-secondary">🔄 撮り直し</button>
+            <button id="saveCellPhotoBtn" class="btn btn-primary">✓ この写真でマーク</button>
           </div>
         </div>
 

@@ -1119,7 +1119,7 @@ h1 {
 /* マス詳細モーダル */
 .cell-modal-header {
   text-align: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
 }
 
 .cell-modal-icon {
@@ -1195,6 +1195,18 @@ h1 {
   flex-shrink: 0;
 }
 
+.cell-preview-badge {
+  display: inline-block;
+  background: #fff3e0;
+  color: #b45309;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .cell-photo-actions {
   display: flex;
   gap: var(--spacing-xs);
@@ -1241,11 +1253,13 @@ h1 {
 
 .photo-preview-actions {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+  flex-wrap: nowrap;
 }
 
 .photo-preview-actions .btn {
   flex: 1;
+  white-space: nowrap;
 }
 
 .btn-small {
