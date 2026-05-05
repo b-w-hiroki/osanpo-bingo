@@ -1962,6 +1962,8 @@ class OsanpoBingo {
     }
 
     const topic = this.board[index];
+    const header = document.getElementById('cellModalHeader');
+    const photoTitle = document.getElementById('cellModalPhotoTitle');
 
     // アイコンとタイトルを設定
     if (icon) icon.innerHTML = getTopicIcon(topic);
@@ -1971,11 +1973,14 @@ class OsanpoBingo {
     if (photoPreview) photoPreview.style.display = 'none';
 
     if (this.photos[index] && photoDisplay && photoImg) {
-      // State A: 写真あり
+      // State A: 写真あり — ヘッダー（大アイコン）は非表示、タイトルは写真上に表示
       photoImg.src = this.photos[index];
       photoDisplay.style.display = 'block';
+      if (header) header.style.display = 'none';
+      if (photoTitle) photoTitle.textContent = topic.text;
       if (noPhoto) noPhoto.style.display = 'none';
     } else {
+      if (header) header.style.display = '';
       // State C: 写真なし
       if (photoDisplay) photoDisplay.style.display = 'none';
       if (noPhoto) {

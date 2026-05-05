@@ -407,7 +407,7 @@
       <div class="modal-content">
         <button class="modal-close" id="closeCellModal">✕</button>
 
-        <div class="cell-modal-header">
+        <div class="cell-modal-header" id="cellModalHeader">
           <div class="cell-modal-icon" id="cellModalIcon">🐱</div>
           <h2 id="cellModalTitle">ネコ</h2>
           <p class="cell-modal-description">
@@ -417,11 +417,14 @@
 
         <!-- State A: 写真あり（マーク済み） -->
         <div id="cellPhotoDisplay" class="cell-photo-display" style="display: none;">
-          <div class="cell-marked-badge">✅ マーク済み</div>
+          <div class="cell-photo-header">
+            <span class="cell-photo-title" id="cellModalPhotoTitle"></span>
+            <span class="cell-marked-badge">✅ マーク済み</span>
+          </div>
           <img id="cellPhotoImg" alt="写真">
           <div class="cell-photo-actions">
-            <button id="savePhotoToDeviceBtn" class="btn btn-secondary btn-small">📥 端末に保存</button>
-            <label for="cellPhotoInput" class="btn btn-secondary btn-small">🔄 写真を変更</label>
+            <button id="savePhotoToDeviceBtn" class="btn btn-secondary btn-small">📥 保存</button>
+            <label for="cellPhotoInput" class="btn btn-secondary btn-small">🔄 変更</label>
             <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">🗑️ 削除</button>
           </div>
         </div>

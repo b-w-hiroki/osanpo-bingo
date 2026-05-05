@@ -1163,26 +1163,50 @@ h1 {
   margin-bottom: var(--spacing-md);
 }
 
+.cell-photo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.cell-photo-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cell-marked-badge {
   display: inline-block;
   background: #e6f7ee;
   color: #2d7a4f;
   border-radius: 999px;
-  padding: 4px 14px;
-  font-size: 0.85rem;
+  padding: 3px 10px;
+  font-size: 0.78rem;
   font-weight: 700;
-  margin-bottom: var(--spacing-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .cell-photo-actions {
   display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  flex-wrap: nowrap;
 }
 
 .cell-photo-actions .btn {
   flex: 1;
-  min-width: 80px;
+  min-width: 0;
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  white-space: nowrap;
 }
 
 .cell-modal-no-photo {
