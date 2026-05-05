@@ -1235,12 +1235,22 @@ class OsanpoBingo {
       captureBoard.innerHTML = '';
       captureBoard.appendChild(clone);
 
-      // html2canvasはaspect-ratioを正しくレンダリングできないため、
-      // セル幅から高さを明示的に計算してpxで設定する
+      // html2canvasはaspect-ratio / object-fit:coverをサポートしないため
+      // ① 高さを明示的にpx設定 ② 写真をbackground-imageに変換する
       requestAnimationFrame(() => {
         clone.querySelectorAll('.bingo-cell').forEach(cell => {
           const w = cell.offsetWidth;
           if (w > 0) cell.style.height = `${Math.round(w * 6 / 5)}px`;
+        });
+        clone.querySelectorAll('.bingo-cell.has-photo').forEach(cell => {
+          const img = cell.querySelector('.cell-photo-img');
+          const wrap = cell.querySelector('.cell-photo-wrap');
+          if (img && wrap && img.src) {
+            wrap.style.backgroundImage = `url('${img.src}')`;
+            wrap.style.backgroundSize = 'cover';
+            wrap.style.backgroundPosition = 'center';
+            img.style.display = 'none';
+          }
         });
       });
 
