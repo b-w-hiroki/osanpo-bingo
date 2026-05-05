@@ -192,11 +192,13 @@ h1 {
   box-shadow: var(--shadow-md);
   margin-bottom: var(--spacing-lg);
   position: relative;
+  width: 105%;
+  margin-left: -2.5%;
 }
 
 /* ビンゴセル（画像・テキストは中央寄せ） */
 .bingo-cell {
-  aspect-ratio: 1;
+  aspect-ratio: 5/6;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1159,6 +1161,34 @@ h1 {
   width: 100%;
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-md);
+}
+
+.cell-marked-badge {
+  display: inline-block;
+  background: #e6f7ee;
+  color: #2d7a4f;
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.cell-photo-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.cell-photo-actions .btn {
+  flex: 1;
+  min-width: 80px;
+}
+
+.cell-modal-no-photo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .cell-modal-actions {

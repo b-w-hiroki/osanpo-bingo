@@ -406,27 +406,27 @@
     <div class="modal" id="cellModal" style="display: none;">
       <div class="modal-content">
         <button class="modal-close" id="closeCellModal">✕</button>
-        
+
         <div class="cell-modal-header">
           <div class="cell-modal-icon" id="cellModalIcon">🐱</div>
           <h2 id="cellModalTitle">ネコ</h2>
           <p class="cell-modal-description">
             見つけたら写真を撮ってマークしよう！
           </p>
-          <p class="cell-modal-notice" aria-hidden="true">
-            撮影・アップロード時は、ナンバープレートや顔など個人が特定できる写り込みにご注意ください。
-          </p>
         </div>
-        
-        <!-- 既存の写真がある場合 -->
+
+        <!-- State A: 写真あり（マーク済み） -->
         <div id="cellPhotoDisplay" class="cell-photo-display" style="display: none;">
+          <div class="cell-marked-badge">✅ マーク済み</div>
           <img id="cellPhotoImg" alt="写真">
-          <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">
-            🗑️ この写真を削除
-          </button>
+          <div class="cell-photo-actions">
+            <button id="savePhotoToDeviceBtn" class="btn btn-secondary btn-small">📥 端末に保存</button>
+            <label for="cellPhotoInput" class="btn btn-secondary btn-small">🔄 写真を変更</label>
+            <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">🗑️ 削除</button>
+          </div>
         </div>
-        
-        <!-- 写真プレビュー（新規アップロード時） -->
+
+        <!-- State B: プレビュー（新規アップロード時） -->
         <div id="cellPhotoPreview" class="photo-preview" style="display: none;">
           <img id="cellPhotoPreviewImg" alt="プレビュー">
           <div class="photo-preview-actions">
@@ -438,26 +438,27 @@
             </button>
           </div>
         </div>
-        
-        <!-- アクションボタン -->
-        <div class="cell-modal-actions">
-          <!-- 写真アップロード（プレビューなし時はメインCTA） -->
+
+        <!-- State C: 写真なし -->
+        <div id="cellModalNoPhoto" class="cell-modal-no-photo" style="display: none;">
+          <p class="cell-modal-notice" aria-hidden="true">
+            撮影・アップロード時は、ナンバープレートや顔など個人が特定できる写り込みにご注意ください。
+          </p>
           <label for="cellPhotoInput" class="btn btn-primary btn-large" id="uploadPhotoLabel">
             📷 写真を撮る・選ぶ
           </label>
-          <input 
-            type="file" 
-            id="cellPhotoInput" 
-            accept="image/*" 
-            capture="environment"
-            style="display: none;"
-          >
-          
-          <!-- マーク切り替えボタン -->
           <button type="button" id="toggleMarkBtn" class="btn btn-secondary btn-large">
             ✓ マークする
           </button>
         </div>
+
+        <input
+          type="file"
+          id="cellPhotoInput"
+          accept="image/*"
+          capture="environment"
+          style="display: none;"
+        >
       </div>
     </div>
     

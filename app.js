@@ -1953,59 +1953,50 @@ class OsanpoBingo {
     const photoDisplay = document.getElementById('cellPhotoDisplay');
     const photoImg = document.getElementById('cellPhotoImg');
     const photoPreview = document.getElementById('cellPhotoPreview');
+    const noPhoto = document.getElementById('cellModalNoPhoto');
     const toggleMarkBtn = document.getElementById('toggleMarkBtn');
-    const uploadLabel = document.getElementById('uploadPhotoLabel');
-    
+
     if (!modal) {
       console.error('❌ cellModal が見つかりません');
       return;
     }
-    
+
     const topic = this.board[index];
-    
-    // アイコンとタイトルを設定（画像優先）
+
+    // アイコンとタイトルを設定
     if (icon) icon.innerHTML = getTopicIcon(topic);
     if (title) title.textContent = topic.text;
-    
-    // 既存の写真を表示
+
+    // プレビューは常に非表示（handleCellPhotoSelectで表示）
+    if (photoPreview) photoPreview.style.display = 'none';
+
     if (this.photos[index] && photoDisplay && photoImg) {
+      // State A: 写真あり
       photoImg.src = this.photos[index];
       photoDisplay.style.display = 'block';
-    } else if (photoDisplay) {
-      photoDisplay.style.display = 'none';
-    }
-    
-    // プレビューを非表示
-    if (photoPreview) {
-      photoPreview.style.display = 'none';
-    }
-    
-    if (toggleMarkBtn) {
-      if (this.gameType === 'battle') {
-        toggleMarkBtn.style.display = 'none';
-      } else if (this.photos[index]) {
-        toggleMarkBtn.style.display = 'none';
-      } else {
-        toggleMarkBtn.style.display = '';
-        if (this.markedCells.has(index)) {
-          toggleMarkBtn.textContent = '✓ マーク済み';
-          toggleMarkBtn.classList.add('marked');
-        } else {
-          toggleMarkBtn.textContent = '✓ マークする';
-          toggleMarkBtn.classList.remove('marked');
+      if (noPhoto) noPhoto.style.display = 'none';
+    } else {
+      // State C: 写真なし
+      if (photoDisplay) photoDisplay.style.display = 'none';
+      if (noPhoto) {
+        noPhoto.style.display = 'flex';
+        if (toggleMarkBtn) {
+          if (this.gameType === 'battle') {
+            toggleMarkBtn.style.display = 'none';
+          } else {
+            toggleMarkBtn.style.display = '';
+            if (this.markedCells.has(index)) {
+              toggleMarkBtn.textContent = '✓ マーク済み（解除）';
+              toggleMarkBtn.classList.add('marked');
+            } else {
+              toggleMarkBtn.textContent = '✓ マークする';
+              toggleMarkBtn.classList.remove('marked');
+            }
+          }
         }
       }
     }
-    
-    if (uploadLabel) {
-      uploadLabel.style.display = '';
-      if (this.photos[index]) {
-        uploadLabel.innerHTML = '📷 写真を変更';
-      } else {
-        uploadLabel.innerHTML = '📷 写真を撮る・選ぶ';
-      }
-    }
-    
+
     modal.style.display = 'flex';
   }
   
@@ -2045,16 +2036,39 @@ class OsanpoBingo {
       });
     }
     
-    // 撮り直しボタン（プレビューを消して「写真を撮る・選ぶ」「マークする」を再表示）
+    // 撮り直しボタン（プレビューを消して適切な状態に戻す）
     if (retakeCellPhotoBtn && photoInput && photoPreview) {
       retakeCellPhotoBtn.addEventListener('click', () => {
         photoInput.value = '';
         photoPreview.style.display = 'none';
         this.tempPhotoData = null;
-        const uploadLabel = document.getElementById('uploadPhotoLabel');
-        const toggleMarkBtn = document.getElementById('toggleMarkBtn');
-        if (uploadLabel) uploadLabel.style.display = '';
-        if (toggleMarkBtn) toggleMarkBtn.style.display = '';
+        const idx = this.currentPhotoIndex;
+        if (idx !== null && this.photos[idx]) {
+          const photoDisplay = document.getElementById('cellPhotoDisplay');
+          const photoImg = document.getElementById('cellPhotoImg');
+          if (photoDisplay && photoImg) {
+            photoImg.src = this.photos[idx];
+            photoDisplay.style.display = 'block';
+          }
+          const noPhoto = document.getElementById('cellModalNoPhoto');
+          if (noPhoto) noPhoto.style.display = 'none';
+        } else {
+          const noPhoto = document.getElementById('cellModalNoPhoto');
+          if (noPhoto) noPhoto.style.display = 'flex';
+          const photoDisplay = document.getElementById('cellPhotoDisplay');
+          if (photoDisplay) photoDisplay.style.display = 'none';
+        }
+      });
+    }
+
+    // 端末に保存ボタン
+    const savePhotoToDeviceBtn = document.getElementById('savePhotoToDeviceBtn');
+    if (savePhotoToDeviceBtn) {
+      savePhotoToDeviceBtn.addEventListener('click', () => {
+        const idx = this.currentPhotoIndex;
+        if (idx !== null && this.photos[idx]) {
+          this.savePhotoToDevice(this.photos[idx], `osanpo-bingo-${Date.now()}.jpg`);
+        }
       });
     }
     
@@ -2104,10 +2118,9 @@ class OsanpoBingo {
       previewImg.src = compressedData;
       preview.style.display = 'block';
       this.tempPhotoData = compressedData;
-      const uploadLabel = document.getElementById('uploadPhotoLabel');
-      const toggleMarkBtn = document.getElementById('toggleMarkBtn');
-      if (uploadLabel) uploadLabel.style.display = 'none';
-      if (toggleMarkBtn) toggleMarkBtn.style.display = 'none';
+      // State C と State A を非表示にして State B を表示
+      const noPhoto = document.getElementById('cellModalNoPhoto');
+      if (noPhoto) noPhoto.style.display = 'none';
     });
   }
   
@@ -2151,11 +2164,11 @@ class OsanpoBingo {
       }
     }
     
-    // ボタンのテキストを更新
+    // ボタンのテキストを更新（モーダルがまだ開いている場合）
     const toggleMarkBtn = document.getElementById('toggleMarkBtn');
     if (toggleMarkBtn) {
       if (this.markedCells.has(index)) {
-        toggleMarkBtn.textContent = '✓ マーク済み';
+        toggleMarkBtn.textContent = '✓ マーク済み（解除）';
         toggleMarkBtn.classList.add('marked');
       } else {
         toggleMarkBtn.textContent = '✓ マークする';
@@ -2173,8 +2186,6 @@ class OsanpoBingo {
     if (photoInput) photoInput.value = '';
     const photoPreview = document.getElementById('cellPhotoPreview');
     if (photoPreview) photoPreview.style.display = 'none';
-    const uploadLabel = document.getElementById('uploadPhotoLabel');
-    if (uploadLabel) uploadLabel.style.display = '';
   }
   
   // 画像圧縮
@@ -2217,6 +2228,37 @@ class OsanpoBingo {
     reader.readAsDataURL(file);
   }
   
+  // 写真をデバイスライブラリに保存
+  async savePhotoToDevice(photoData, filename) {
+    try {
+      const response = await fetch(photoData);
+      const blob = await response.blob();
+      const file = new File([blob], filename, { type: blob.type });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'お散歩ビンゴ写真' });
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+          // Share失敗時はダウンロードにフォールバック
+        }
+      }
+
+      // フォールバック: ダウンロードリンク
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showAlert('写真の保存に失敗しました。');
+    }
+  }
+
   // セル写真を保存
   async saveCellPhoto() {
     if (this.currentPhotoIndex === null || !this.tempPhotoData) return;
