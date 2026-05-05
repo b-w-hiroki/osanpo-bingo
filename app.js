@@ -1074,9 +1074,13 @@ class OsanpoBingo {
       clone.id = 'screenshotBoardClone';
       targetBoard.innerHTML = '';
       targetBoard.appendChild(clone);
-      // クローン後にセルサイズが変わるため、テキストを再フィット
+      // クローン後にセルサイズが変わるため、テキストを再フィット＋高さを明示設定
       requestAnimationFrame(() => {
-        clone.querySelectorAll('.bingo-cell').forEach(c => this.fitCellText(c));
+        clone.querySelectorAll('.bingo-cell').forEach(c => {
+          this.fitCellText(c);
+          const w = c.offsetWidth;
+          if (w > 0) c.style.height = `${Math.round(w * 6 / 5)}px`;
+        });
       });
       // 写真ありセルのみタップで拡大＆保存
       clone.addEventListener('click', (e) => {
@@ -1114,34 +1118,30 @@ class OsanpoBingo {
     view.style.display = 'flex';
   }
   
-  /** 写真をフルスクリーンで表示するライトボックス（保存ボタン付き） */
+  /** 写真を通常モーダルスタイルで表示（保存ボタン付き） */
   showResultPhotoLightbox(src, topicText = '') {
     const existing = document.getElementById('resultPhotoLightbox');
     if (existing) existing.remove();
 
     const box = document.createElement('div');
     box.id = 'resultPhotoLightbox';
-    box.className = 'result-photo-lightbox';
+    box.className = 'modal';
+    box.style.display = 'flex';
     box.innerHTML = `
-      <img src="${src}" alt="写真">
-      <div class="result-photo-lightbox-actions">
-        <button class="result-photo-save-btn">📥 端末に保存</button>
-        <span class="result-photo-lightbox-hint">背景タップで閉じる</span>
+      <div class="modal-content">
+        <button class="modal-close" id="resultPhotoClose">✕</button>
+        ${topicText ? `<p class="result-photo-modal-title">${topicText}</p>` : ''}
+        <img src="${src}" alt="写真" class="result-photo-modal-img">
+        <button class="btn btn-primary btn-large result-photo-save-btn">📥 端末に保存</button>
       </div>
     `;
 
-    box.addEventListener('click', (e) => {
-      if (!e.target.closest('.result-photo-save-btn')) box.remove();
+    box.addEventListener('click', (e) => { if (e.target === box) box.remove(); });
+    box.querySelector('#resultPhotoClose').addEventListener('click', () => box.remove());
+    box.querySelector('.result-photo-save-btn').addEventListener('click', () => {
+      const filename = `osanpo-bingo-${topicText || Date.now()}.jpg`;
+      this.savePhotoToDevice(src, filename);
     });
-
-    const saveBtn = box.querySelector('.result-photo-save-btn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const filename = `osanpo-bingo-${topicText || Date.now()}.jpg`;
-        this.savePhotoToDevice(src, filename);
-      });
-    }
 
     const onKey = (e) => { if (e.key === 'Escape') { box.remove(); document.removeEventListener('keydown', onKey); } };
     document.addEventListener('keydown', onKey);
@@ -1234,6 +1234,24 @@ class OsanpoBingo {
       const clone = boardEl.firstChild.cloneNode(true);
       captureBoard.innerHTML = '';
       captureBoard.appendChild(clone);
+
+      // html2canvasはaspect-ratioを正しくレンダリングできないため、
+      // セル幅から高さを明示的に計算してpxで設定する
+      requestAnimationFrame(() => {
+        clone.querySelectorAll('.bingo-cell').forEach(cell => {
+          const w = cell.offsetWidth;
+          if (w > 0) cell.style.height = `${Math.round(w * 6 / 5)}px`;
+        });
+      });
+
+      // 写真ありセルのみタップで保存モーダルを表示
+      clone.addEventListener('click', (e) => {
+        const cell = e.target.closest('.bingo-cell.has-photo');
+        if (!cell) return;
+        const img = cell.querySelector('.cell-photo-img');
+        const topicText = cell.querySelector('.cell-text')?.textContent?.trim() || '';
+        if (img) this.showResultPhotoLightbox(img.src, topicText);
+      });
     }
     
     editArea.style.display = 'none';

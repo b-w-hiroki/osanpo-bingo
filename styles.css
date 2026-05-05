@@ -1431,9 +1431,14 @@ h1 {
 }
 
 /* 写真ありセルのみタップ可能・拡大ヒント */
-.result-board-wrap .bingo-cell.has-photo {
+.result-board-wrap .bingo-cell.has-photo,
+.result-capture-board .bingo-cell.has-photo {
   cursor: zoom-in;
   pointer-events: auto;
+}
+.result-capture-board .bingo-cell {
+  cursor: default;
+  pointer-events: none;
 }
 .result-board-wrap .bingo-cell.has-photo:hover {
   transform: translateY(-2px);
@@ -1442,60 +1447,20 @@ h1 {
   border-color: var(--primary-light);
 }
 
-/* 写真ライトボックス */
-.result-photo-lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.88);
-  z-index: 3000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  animation: fadeIn 0.2s ease;
-  padding: 16px;
-}
-
-.result-photo-lightbox img {
-  max-width: 90vw;
-  max-height: 75vh;
-  object-fit: contain;
-  border-radius: var(--radius-md);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-}
-
-.result-photo-lightbox-actions {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.result-photo-save-btn {
-  background: white;
+/* 写真保存モーダル（通常モーダルスタイルを継承） */
+.result-photo-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 var(--spacing-md) 0;
   color: var(--text);
-  border: none;
+}
+
+.result-photo-modal-img {
+  width: 100%;
   border-radius: var(--radius-md);
-  padding: 10px 24px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.result-photo-save-btn:active {
-  opacity: 0.8;
-}
-
-.result-photo-lightbox-hint {
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.78rem;
-  pointer-events: none;
-  white-space: nowrap;
+  margin-bottom: var(--spacing-md);
+  display: block;
 }
 
 .result-stats-row {
