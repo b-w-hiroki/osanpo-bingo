@@ -1431,15 +1431,29 @@ h1 {
 }
 
 /* 写真ありセルのみタップ可能・拡大ヒント */
-.result-board-wrap .bingo-cell.has-photo,
-.result-capture-board .bingo-cell.has-photo {
+.result-board-wrap .bingo-cell.has-photo {
   cursor: zoom-in;
   pointer-events: auto;
 }
+
+/* 共有画面: 写真ありセルはクリック可能だがホバーエフェクトなし */
 .result-capture-board .bingo-cell {
   cursor: default;
   pointer-events: none;
 }
+.result-capture-board .bingo-cell.has-photo {
+  cursor: pointer;
+  pointer-events: auto;
+}
+.result-capture-board .bingo-cell:hover,
+.result-capture-board .bingo-cell.has-photo:hover {
+  transform: none;
+  box-shadow: none;
+}
+.result-capture-board .bingo-cell.marked:hover { background: var(--cell-marked); border-color: var(--primary-dark); }
+.result-capture-board .bingo-cell.bingo:hover  { background: var(--cell-bingo);  border-color: var(--accent); }
+.result-capture-board .bingo-cell.free:hover   { background: var(--cell-free);   border-color: var(--primary); }
+.result-capture-board .bingo-cell:not(.marked):not(.bingo):not(.free):hover { background: var(--cell-bg); border-color: var(--cell-border); }
 .result-board-wrap .bingo-cell.has-photo:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
