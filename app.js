@@ -254,32 +254,37 @@ class OsanpoBingo {
     const customCount = this.customTopics.length;
     const randomCount = 24 - customCount;
     
-    const boardSeedUserId = this.userId;
+    // 合言葉がある場合は全員同じボードになるよう userId・salt をシードから除外
+    const isShared = this.roomCode && this.roomCode !== 'solo';
+    const seedUserId = isShared ? '' : this.userId;
+    const seedSalt   = isShared ? '' : shuffleSalt;
+
     // 難易度に応じてランダムお題を取得
     const randomTopics = selectTopicsForGame(
-      this.difficulty, 
-      this.roomCode, 
-      boardSeedUserId,
-      shuffleSalt,
+      this.difficulty,
+      this.roomCode,
+      seedUserId,
+      seedSalt,
       this.topicSetId || 'default'
     ).slice(0, randomCount);
-    
+
     // カスタムお題 + ランダムお題を合わせてシャッフル
     const allTopics = [...this.customTopics, ...randomTopics];
-    const seedStr = [this.roomCode, boardSeedUserId, shuffleSalt, 'mix', this.topicSetId || 'default'].filter(Boolean).join('-');
+    const seedStr = [this.roomCode, seedUserId, seedSalt, 'mix', this.topicSetId || 'default'].filter(Boolean).join('-');
     const seed = stringToSeed(seedStr);
+    console.log(`[board seed] isShared=${isShared} seedStr="${seedStr}" seed=${seed}`);
     // シャッフル後に四隅制約を適用（ガチおに以外はおにが四隅に来ないよう保証）
     const shuffledTopics = enforceCornerConstraint(
       shuffleWithSeed(allTopics, seed),
       this.difficulty
     );
-    
+
     // 25マスのボードを作成
     this.board = [];
     const lmDB = typeof landmarkDatabase !== 'undefined' ? landmarkDatabase : [];
     if (this.landmarkMode && lmDB.length > 0) {
       // ランドマークモード: 中央=フリー枠、追加位置にランドマーク配置
-      const lmSeed = stringToSeed([this.roomCode, boardSeedUserId, shuffleSalt, 'lm'].filter(Boolean).join('-'));
+      const lmSeed = stringToSeed([this.roomCode, seedUserId, seedSalt, 'lm'].filter(Boolean).join('-'));
       const lmRng = createRng(lmSeed);
       const count = this._getLandmarkCount(lmRng);
       const landmarkPositions = new Set([12]);
@@ -1757,7 +1762,10 @@ class OsanpoBingo {
         this.gameStartTime = Date.now();
         this.battleTopicOwners = {};
 
-        const initialSalt = this.gameType === 'battle' ? '' : Date.now().toString();
+        // 合言葉あり or バトル → salt なし（全員同じボード）、ソロ → Date.now() でランダム
+        const initialSalt = (roomCode && roomCode !== 'solo') || this.gameType === 'battle'
+          ? ''
+          : Date.now().toString();
         this.createBoard(roomCode, difficulty, initialSalt, customTopics);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
