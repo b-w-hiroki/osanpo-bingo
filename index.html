@@ -3,22 +3,230 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="お散歩をもっと楽しく！友達と一緒に遊べるビンゴゲーム">
+  <meta name="description" content="300種類以上のお題から毎回ランダムに生成！写真を撮ってマークする散歩ビンゴ。合言葉で友達・家族と同じボードで遊べる。アプリ不要・無料。">
   <meta name="theme-color" content="#7eb89a">
   <title>お散歩ビンゴ - 散歩がもっと楽しくなる</title>
-  
+
   <!-- OGP -->
   <meta property="og:title" content="お散歩ビンゴ - 散歩がもっと楽しくなる">
-  <meta property="og:description" content="いつもの散歩がワクワクする冒険に！友達や家族と一緒に遊べるビンゴゲーム。アプリ不要・無料。">
+  <meta property="og:description" content="いつもの散歩がワクワクする冒険に！300種類以上のお題、写真でマーク、友達と対戦も。アプリ不要・無料。">
   <meta property="og:image" content="static/hero-osanpo-2026.png">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="お散歩ビンゴ">
-  <meta name="twitter:description" content="いつもの散歩がワクワクする冒険に！友達や家族と一緒に遊べるビンゴゲーム。">
-  
+  <meta name="twitter:description" content="いつもの散歩がワクワクする冒険に！300種類以上のお題、写真でマーク、友達と対戦も。">
+
   <link rel="stylesheet" href="landing.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    /* ===== ヒーロー内のstats+CTAを縦積みに ===== */
+    .hero-content {
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    /* ===== キャッチチップ（ヒーロー直下） ===== */
+    .stat-chips {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: rgba(255,255,255,0.85);
+      border: 1.5px solid rgba(126,184,154,0.5);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #3d7a5c;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ===== セクション共通 ===== */
+    .lp-section {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.04);
+      padding: 24px 20px;
+      margin-bottom: 16px;
+    }
+    .lp-section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #3d7a5c;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lp-section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(to right, #a8d5ba, transparent);
+      border-radius: 2px;
+    }
+
+    /* ===== 遊び方ステップ ===== */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .step-circle {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      background: linear-gradient(145deg, #7eb89a, #5a9b7d);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(90,155,125,0.35);
+    }
+    .step-body strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2d3436;
+      margin-bottom: 3px;
+    }
+    .step-body p {
+      margin: 0;
+      font-size: 12px;
+      color: #636e72;
+      line-height: 1.6;
+    }
+
+    /* ===== 特徴カード ===== */
+    .feature-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .feature-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px;
+      background: #f8fdf9;
+      border-radius: 12px;
+    }
+    .feature-icon-wrap {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      background: #fff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .feature-body strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #2d3436;
+      margin-bottom: 4px;
+    }
+    .feature-body p {
+      margin: 0;
+      font-size: 12px;
+      color: #636e72;
+      line-height: 1.65;
+    }
+
+    /* ===== マルチプレイ ===== */
+    .multi-box {
+      background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
+      border-radius: 12px;
+      padding: 18px 16px;
+      border: 1.5px solid #b3d9f2;
+    }
+    .multi-box-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #1565c0;
+      margin-bottom: 8px;
+    }
+    .multi-box p {
+      margin: 0;
+      font-size: 13px;
+      color: #445;
+      line-height: 1.7;
+    }
+
+    /* ===== 難易度グリッド ===== */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .diff-card {
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .diff-card .diff-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+    .diff-card p {
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+    .diff-easy   { background: #e8f5e9; border: 1.5px solid #a5d6a7; color: #2e7d32; }
+    .diff-normal { background: #e3f2fd; border: 1.5px solid #90caf9; color: #1565c0; }
+    .diff-hard   { background: #fff3e0; border: 1.5px solid #ffcc80; color: #e65100; }
+    .diff-oni    { background: #fce4ec; border: 1.5px solid #f48fb1; color: #880e4f; }
+
+    /* ===== シーングリッド ===== */
+    .scene-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .scene-card {
+      background: #f8fdf9;
+      border-radius: 10px;
+      padding: 12px 6px;
+      text-align: center;
+    }
+    .scene-card .scene-emoji {
+      font-size: 26px;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .scene-card span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #3d7a5c;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
   <header class="global-header">
@@ -27,72 +235,147 @@
       <img src="icon-192.png" alt="" width="28" height="28"> お散歩ビンゴ
     </a>
   </header>
+
   <div class="landing-container">
-    
-    <!-- ヒーロー + CTA -->
+
+    <!-- ヒーロー -->
     <section class="hero" aria-label="メインビジュアル">
       <div class="hero-image-wrap">
         <img src="static/hero-osanpo-2026.png" alt="お散歩ビンゴのタイトルイラスト。公園を歩く家族、リスのマスコット、自然モチーフのビンゴカードの水彩風バナー。" class="hero-image">
       </div>
       <div class="hero-cta-strip">
         <div class="hero-content">
-          <a href="game.html" class="btn-start">お散歩ビンゴを始める</a>
+          <div class="stat-chips">
+            <span class="stat-chip">📋 300種類以上のお題</span>
+            <span class="stat-chip">📷 写真でマーク</span>
+            <span class="stat-chip">👥 友達と対戦</span>
+          </div>
+          <a href="game.html" class="btn-start">✨ お散歩ビンゴを始める</a>
         </div>
       </div>
     </section>
-    
-    <!-- メインコンテンツ（1ブロックに集約） -->
+
+    <!-- メインコンテンツ -->
     <section class="main-content">
-      <div class="content-grid">
-        <!-- 特徴 -->
-        <div class="content-block">
-          <h2 class="block-title">3つの特徴</h2>
-          <div class="feature-list">
-            <div class="feature-item">
-              <strong>みんなで楽しめる</strong>
-              <span>合言葉で友達・家族と一緒に</span>
-            </div>
-            <div class="feature-item">
-              <strong>思い出を残せる</strong>
-              <span>写真で記録、後で見返せる</span>
-            </div>
-            <div class="feature-item">
-              <strong>簡単に遊べる</strong>
-              <span>アプリ不要、ブラウザだけで</span>
+
+      <!-- 遊び方 -->
+      <div class="lp-section">
+        <h2 class="lp-section-title">🎯 遊び方</h2>
+        <div class="steps">
+          <div class="step-row">
+            <div class="step-circle">1</div>
+            <div class="step-body">
+              <strong>ゲームを開始してお散歩へ</strong>
+              <p>難易度やお題のセットを選んでスタート。毎回ランダムなボードが生成されるから、何度でも新鮮に楽しめる。</p>
             </div>
           </div>
-        </div>
-        
-        <!-- 遊び方 -->
-        <div class="content-block">
-          <h2 class="block-title">遊び方</h2>
-          <div class="howto-list">
-            <div class="howto-item">
-              <span class="step-num">1</span>
-              <span>散歩してお題を探す</span>
+          <div class="step-row">
+            <div class="step-circle">2</div>
+            <div class="step-body">
+              <strong>お題を見つけたら写真を撮ってマーク</strong>
+              <p>マスをタップして写真を撮影するだけ。証拠写真付きでマーク完了！写真なしのシンプルマークも選べる。</p>
             </div>
-            <div class="howto-item">
-              <span class="step-num">2</span>
-              <span>見つけたら写真を撮ってマーク</span>
-            </div>
-            <div class="howto-item">
-              <span class="step-num">3</span>
-              <span>縦・横・斜めで揃ったらビンゴ！</span>
+          </div>
+          <div class="step-row">
+            <div class="step-circle">3</div>
+            <div class="step-body">
+              <strong>縦・横・斜めで揃ったらビンゴ！</strong>
+              <p>ゲーム終了後は写真入りの結果ボードを画像として保存・共有できる。散歩の思い出として残せる。</p>
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- おすすめ -->
-      <div class="recommend-block">
-        <h2 class="block-title">こんな人におすすめ</h2>
-        <div class="recommend-grid">
-          <div class="recommend-item">家族で散歩</div>
-          <div class="recommend-item">犬の散歩</div>
-          <div class="recommend-item">運動不足解消</div>
-          <div class="recommend-item">写真好き</div>
-          <div class="recommend-item">自然を楽しむ</div>
-          <div class="recommend-item">友達と遊びたい</div>
+
+      <!-- 特徴 -->
+      <div class="lp-section">
+        <h2 class="lp-section-title">✨ ここがすごい</h2>
+        <div class="feature-cards">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📋</div>
+            <div class="feature-body">
+              <strong>300種類以上のお題、毎回違う</strong>
+              <p>信号機・マンホール・タンポポ・ダンゴムシ…街や自然のあちこちに潜むお題を探そう。難易度ごとに出やすいお題が変わり、飽きない。</p>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📷</div>
+            <div class="feature-body">
+              <strong>写真を撮ってマーク、思い出になる</strong>
+              <p>見つけた瞬間をその場でパシャ！写真入りの結果ボードは画像として保存できて、散歩の記録にもなる。</p>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📱</div>
+            <div class="feature-body">
+              <strong>アプリ不要、ブラウザだけで動く</strong>
+              <p>インストール不要。スマホのブラウザでURLを開くだけですぐ遊べる。オフラインにも対応。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- マルチプレイ -->
+      <div class="lp-section">
+        <h2 class="lp-section-title">👥 みんなで対戦できる</h2>
+        <div class="multi-box">
+          <div class="multi-box-head">
+            <span>🔑</span> 合言葉で同じボードを共有
+          </div>
+          <p>「みんなで遊ぶ」モードで合言葉を決めるだけで、友達・家族全員が同じお題ボードでスタート。誰が先にビンゴできるか競い合おう！公園の遠足、家族の散歩、課外活動にも。</p>
+        </div>
+      </div>
+
+      <!-- 難易度 -->
+      <div class="lp-section">
+        <h2 class="lp-section-title">📊 4つの難易度</h2>
+        <div class="diff-grid">
+          <div class="diff-card diff-easy">
+            <div class="diff-label">🟢 かんたん</div>
+            <p>信号機・花・ポストなど見つけやすいお題中心</p>
+          </div>
+          <div class="diff-card diff-normal">
+            <div class="diff-label">🔵 ふつう</div>
+            <p>少し探すお題も混ざってくる、ちょうどいい歯ごたえ</p>
+          </div>
+          <div class="diff-card diff-hard">
+            <div class="diff-label">🟠 むずかしい</div>
+            <p>レアなお題が増える。目を凝らして探そう！</p>
+          </div>
+          <div class="diff-card diff-oni">
+            <div class="diff-label">🔴 おに</div>
+            <p>激レアお題だらけ。達成できたら本物の猛者</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- シーン -->
+      <div class="lp-section">
+        <h2 class="lp-section-title">🌟 こんなシーンで大活躍</h2>
+        <div class="scene-grid">
+          <div class="scene-card">
+            <span class="scene-emoji">👨‍👩‍👧</span>
+            <span>家族の<br>お散歩</span>
+          </div>
+          <div class="scene-card">
+            <span class="scene-emoji">🐕</span>
+            <span>犬の<br>お散歩</span>
+          </div>
+          <div class="scene-card">
+            <span class="scene-emoji">🏃</span>
+            <span>ウォーキング・<br>運動</span>
+          </div>
+          <div class="scene-card">
+            <span class="scene-emoji">🌸</span>
+            <span>季節の<br>お出かけ</span>
+          </div>
+          <div class="scene-card">
+            <span class="scene-emoji">🏫</span>
+            <span>遠足・<br>校外学習</span>
+          </div>
+          <div class="scene-card">
+            <span class="scene-emoji">👫</span>
+            <span>友達と<br>対戦</span>
+          </div>
         </div>
       </div>
 
@@ -100,21 +383,19 @@
       <div class="ad-slot ad-slot-infeed" id="adSlotInfeed">
         <div class="ad-slot-inner">
           <span class="ad-slot-label">広告</span>
-          <!-- ↓ AdSense導入時にここを差し替え ↓ -->
           <div class="ad-placeholder">
             <p class="ad-placeholder-text">AD</p>
             <p class="ad-placeholder-sub">レスポンシブ広告</p>
           </div>
-          <!-- ↑ AdSense導入時にここを差し替え ↑ -->
         </div>
       </div>
-      
+
       <!-- CTA -->
       <div class="cta-bottom">
         <a href="game.html" class="btn-start btn-large">✨ お散歩ビンゴを始める</a>
       </div>
     </section>
-    
+
     <!-- フッター -->
     <footer class="footer">
       <p>© 2026 お散歩ビンゴ　<span class="dot">・</span>　アプリ不要・無料</p>
@@ -124,17 +405,14 @@
     <div class="ad-slot ad-slot-footer" id="adSlotFooter">
       <div class="ad-slot-inner">
         <span class="ad-slot-label">広告</span>
-        <!-- ↓ AdSense導入時にここを差し替え ↓ -->
         <div class="ad-placeholder ad-placeholder-banner">
           <p class="ad-placeholder-text">AD</p>
           <p class="ad-placeholder-sub">728 × 90</p>
         </div>
-        <!-- ↑ AdSense導入時にここを差し替え ↑ -->
       </div>
     </div>
   </div>
-  
-  <!-- Service Worker登録 -->
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

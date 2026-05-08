@@ -1,9 +1,9 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-04 11:37:40（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-05 16:17:06
 
-// お題ID → アイコン画像ファイル名
+// お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
   2: 'icon002_郵便ポスト.png',
   3: 'icon003_信号機.png',
@@ -163,17 +163,17 @@ const topicIconMap = {
   202: 'icon202_木漏れ日.png',
   205: 'icon205_縄跳び.png',
   209: 'icon209_屋外喫煙所.png',
-  210: 'icon210_自販機横のゴミ箱.png',
+  210: 'icon210_自販機横のゴミ箱.png',
   211: 'icon211_壁のイラスト.png',
   212: 'icon212_銅像.png',
   213: 'icon213_枝の風船.png',
-  214: 'icon214_しぼんだボール.png',
+  214: 'icon214_しぼんだボール.png',
   216: 'icon216_虹反射.png',
   219: 'icon219_鳥の巣.png',
   220: 'icon220_つぼみ.png',
   222: 'icon222_抜け殻.png',
   223: 'icon223_きのこ群.png',
-  224: 'icon224_ベンチ下ボール.png',
+  224: 'icon224_ベンチ下ボール.png',
   225: 'icon225_柵のタオル.png',
   245: 'icon245_マンホール周りの円形補修.png',
   253: 'icon253_雑草が出たすき間.png',
@@ -202,7 +202,7 @@ const topicIconMap = {
   422: 'icon422_緑の誘導表示.png',
   424: 'icon424_避難案内マーク.png',
   425: 'icon425_駐輪禁止マーク.png',
-  426: 'icon426_コンビニ外観.png',
+  426: 'icon426_コンビニ外観.png',
   427: 'icon427_防犯カメラ表示.png',
   428: 'icon428_工事中カラー.png',
   430: 'icon430_古いステッカー跡.png',
@@ -348,6 +348,26 @@ const topicIconMap = {
   639: 'icon639_駐車禁止.png',
   640: 'icon640_高さ制限.png',
   641: 'icon641_歩行者専用.png',
+  642: 'icon642_電波塔.png',
+  643: 'icon643_コンテナ.png',
+  644: 'icon644_タワマン.png',
+  645: 'icon645_ヤシの木.png',
+  646: 'icon646_ゴルフ打ちっぱなし.png',
+  647: 'icon647_バッティングセンター.png',
+  648: 'icon648_ドラム缶.png',
+  649: 'icon649_コンビニ.png',
+  650: 'icon650_ファミマ.png',
+  651: 'icon651_ローソン.png',
+  652: 'icon652_セブンイレブン.png',
+  653: 'icon653_デイリーヤマザキ.png',
+  654: 'icon654_重機.png',
+  655: 'icon655_ショベルカー.png',
+  656: 'icon656_ブルドーザー.png',
+  657: 'icon657_ダンプカー.png',
+  658: 'icon658_クレーン車.png',
+  659: 'icon659_ミキサー車.png',
+  660: 'icon660_セイコーマート.png',
+  661: 'icon661_ロードローラー.png'
 };
 
 function getTopicIcon(topic) {
@@ -361,19 +381,16 @@ function getTopicIcon(topic) {
   return `<span class="cell-icon">${topic.icon}</span>`;
 }
 
-// ランドマークDB
-// landmark000: 中央専用フリー枠（なんでも置ける）
-const landmarkFreeEntry = {id: 'landmark000', text: 'なんでも置ける！', iconFile: 'landmark000_フリー.png', type: 'landmark', category: 'ランドマーク', isFreeSlot: true};
-
+// ランドマークDB（地域の特別スポット・準備中）
 const landmarkDatabase = [
-  {id: 'landmark001', text: '自然', iconFile: 'landmark001_自然.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark002', text: '歴史的施設', iconFile: 'landmark002_歴史的施設.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark003', text: '最新施設', iconFile: 'landmark003_最新施設.png', type: 'landmark', category: 'ランドマーク'},
-  {id: 'landmark004', text: '観光地', iconFile: 'landmark004_観光地.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark001', text: 'ランドマーク①', iconFile: 'landmark001_自然.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark002', text: 'ランドマーク②', iconFile: 'landmark002_歴史的施設.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark003', text: 'ランドマーク③', iconFile: 'landmark003_最新施設.png', type: 'landmark', category: 'ランドマーク'},
+  {id: 'landmark004', text: 'ランドマーク④', iconFile: 'landmark004_観光地.png', type: 'landmark', category: 'ランドマーク'},
 ];
 
 const topicDatabase = {
-  // easy (93)
+  // かんたん（93個）: よく見かけるもの
   easy: [
     {id: 2, text: '郵便ポスト', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
     {id: 3, text: '信号機', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
@@ -467,9 +484,10 @@ const topicDatabase = {
     {id: 578, text: 'ポスト', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
     {id: 583, text: '三角コーン', icon: '🔍', category: '街インフラ', diff: 'easy', season: 'all'},
     {id: 611, text: 'カラス', icon: '🔍', category: '生活・学校', diff: 'easy', season: 'all'},
-    {id: 619, text: '広葉樹', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'},
+    {id: 619, text: '広葉樹', icon: '🔍', category: '自然・生き物', diff: 'easy', season: 'all'}
   ],
-  // normal (130)
+
+  // ふつう（134個）: 少し探す必要があるもの
   normal: [
     {id: 97, text: 'じょうろ', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
     {id: 98, text: 'ほうき', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
@@ -601,8 +619,13 @@ const topicDatabase = {
     {id: 639, text: '駐車禁止', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
     {id: 640, text: '高さ制限', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
     {id: 641, text: '歩行者専用', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
+    {id: 649, text: 'コンビニ', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 650, text: 'ファミマ', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 651, text: 'ローソン', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
+    {id: 652, text: 'セブンイレブン', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'}
   ],
-  // hard (86)
+
+  // むずかしい（102個）: よく観察しないと見つからないもの
   hard: [
     {id: 202, text: '木漏れ日', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
     {id: 209, text: '屋外喫煙所', icon: '🔍', category: '痕跡・発見', diff: 'hard', season: 'all'},
@@ -690,8 +713,25 @@ const topicDatabase = {
     {id: 632, text: '動物の遊具', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
     {id: 633, text: '可愛い置物', icon: '🔍', category: 'キャラクター掲示物', diff: 'hard', season: 'all'},
     {id: 634, text: '車両進入禁止', icon: '🔍', category: '街インフラ', diff: 'hard', season: 'all'},
+    {id: 642, text: '電波塔', icon: '🔍', category: '街インフラ', diff: 'hard', season: 'all'},
+    {id: 643, text: 'コンテナ', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 644, text: 'タワマン', icon: '🔍', category: '住宅・外構', diff: 'hard', season: 'all'},
+    {id: 645, text: 'ヤシの木', icon: '🔍', category: '自然・生き物', diff: 'hard', season: 'all'},
+    {id: 646, text: 'ゴルフ打ちっぱなし', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 647, text: 'バッティングセンター', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all'},
+    {id: 648, text: 'ドラム缶', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
+    {id: 653, text: 'デイリーヤマザキ', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all'},
+    {id: 654, text: '重機', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
+    {id: 655, text: 'ショベルカー', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
+    {id: 656, text: 'ブルドーザー', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
+    {id: 657, text: 'ダンプカー', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
+    {id: 658, text: 'クレーン車', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
+    {id: 659, text: 'ミキサー車', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
+    {id: 660, text: 'セイコーマート', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all'},
+    {id: 661, text: 'ロードローラー', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'}
   ],
-  // oni (34)
+
+  // おに（34個）: 相当注意しないと見つからないもの
   oni: [
     {id: 205, text: '縄跳び', icon: '🔍', category: '生活・学校', diff: 'oni', season: 'all'},
     {id: 275, text: '丸い排水穴', icon: '🔍', category: '線・模様観察', diff: 'oni', season: 'all'},
@@ -726,11 +766,9 @@ const topicDatabase = {
     {id: 594, text: '大型ビジョン', icon: '🔍', category: '商業・店舗', diff: 'oni', season: 'all'},
     {id: 597, text: '宣伝カー', icon: '🔍', category: '街構造・乗り物', diff: 'oni', season: 'all'},
     {id: 610, text: 'スズキ（秋）', icon: '🔍', category: '自然・生き物', diff: 'oni', season: 'autumn'},
-    {id: 615, text: '公衆電話', icon: '🔍', category: '生活・地域設備', diff: 'oni', season: 'all'},
-  ],
+    {id: 615, text: '公衆電話', icon: '🔍', category: '生活・地域設備', diff: 'oni', season: 'all'}
+  ]
 };
-
-
 
 
 /**
@@ -752,9 +790,9 @@ const topicSets = [
     monetizationType: 'free',
     topicIds: [
       25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-      37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+      37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 48,
       61, 62, 63, 64, 66, 67, 68, 69, 70, 71, 72,
-      193, 194, 199, 200, 201, 202, 205, 219, 220, 221, 223
+      219, 220,
     ]
   },
   {
@@ -763,10 +801,10 @@ const topicSets = [
     description: '親子で一緒に探しやすいお題セットです。',
     monetizationType: 'free',
     topicIds: [
-      1, 2, 3, 4, 5, 6, 7, 25, 26, 27, 28, 29, 30, 31,
+      2, 3, 4, 5, 6, 7, 25, 26, 27, 28, 29, 30, 31,
       37, 38, 39, 40, 41, 42, 61, 62, 63, 64, 66, 67, 68,
-      85, 86, 87, 91, 92, 93, 109, 110, 111, 112, 113, 114,
-      142, 145, 146, 147, 148, 149, 150, 165, 167
+      87, 91, 92, 93, 109, 111,
+      142, 145, 146, 147, 148, 149, 150, 167,
     ]
   },
   {
@@ -778,9 +816,9 @@ const topicSets = [
     sponsorLogo: null,
     campaignUrl: null,
     topicIds: [
-      1, 2, 3, 4, 5, 6, 7, 58, 73, 74, 75, 76, 77, 78,
+      2, 3, 4, 5, 6, 7, 58, 73, 74, 75, 76, 77, 78,
       79, 80, 81, 82, 83, 84, 142, 143, 144, 145, 149,
-      150, 151, 152, 153, 154
+      150, 151, 152, 153, 154,
     ]
   }
 ];
@@ -810,49 +848,38 @@ function getTopicById(id) {
 const GAME_DIFFICULTY_PROBS = {
   easy:   { easy: 0.70, normal: 0.25, hard: 0.05, oni: 0.00 },
   normal: { easy: 0.30, normal: 0.50, hard: 0.15, oni: 0.05 },
-  hard:   { easy: 0.10, normal: 0.30, hard: 0.45, oni: 0.15 },
+  hard:   { easy: 0.10, normal: 0.30, hard: 0.50, oni: 0.10 },
   oni:    { easy: 0.05, normal: 0.25, hard: 0.30, oni: 0.40 },
   gachi:  { easy: 0.00, normal: 0.00, hard: 0.00, oni: 1.00 },
-};
-
-const GAME_DIFFICULTY_WEIGHTS = {
-  easy:   { easy: 70, normal: 25, hard:  5, oni:   0 },
-  normal: { easy: 30, normal: 50, hard: 15, oni:   5 },
-  hard:   { easy: 10, normal: 30, hard: 50, oni:  10 },
-  oni:    { easy:  5, normal: 25, hard: 30, oni:  40 },
-  gacha:  { easy:  0, normal:  0, hard:  0, oni: 100 },
 };
 
 /**
  * カテゴリ別 24マス枠割り当て（合計=24）
  * ゲームごとに±1の揺らぎを加えてバリエーションを出す
+ * 件数30以上→3枠 / 件数10以上→1枠 / 件数5以上→1枠
+ * 件数5未満（劣化・補修・ズレ等）はフィラー枠で補完
  */
 const CATEGORY_QUOTAS = {
-  '自然・生き物': 2,      // 他カテゴリより約33%低く設定（運要素が強いため）
-  '街構造・乗り物': 3,
-  '街インフラ': 3,
-  '生活・学校': 3,
-  '家庭・食べ物': 2,
-  '商業・店舗': 2,
-  '季節・形・数': 1,
-  '痕跡・発見': 1,
-  '案内・注意表示': 1,
-  '線・模様観察': 1,
-  'キャラクター掲示物': 1,
-  '道路標示・路面表示': 1,
-  '生活・地域設備': 1,
-  'その他観察': 1,
-}; // 合計 = 23（残り1枠はフィラーで補完）
+  '自然・生き物':        3,  // 52件
+  '街インフラ':          3,  // 41件
+  '街構造・乗り物':      3,  // 41件
+  '商業・店舗':          2,  // 36件
+  '家庭・食べ物':        2,  // 31件
+  '生活・学校':          2,  // 29件
+  '季節・形・数':        1,  // 18件
+  '痕跡・発見':          1,  // 18件
+  '生活・地域設備':      1,  // 13件
+  '線・模様観察':        1,  // 12件
+  '案内・注意表示':      1,  // 12件
+  'その他観察':          1,  // 12件
+  '観光・地域情報':      1,  // 11件
+  'キャラクター掲示物':  1,  // 10件
+  '住宅・外構':          1,  //  7件
+  '道路標示・路面表示':  1,  //  7件
+}; // 合計 = 24（劣化・補修・ズレ等5件未満はフィラー枠で補完）
 
-/**
- * ビンゴボード内の四隅インデックス（5×5: 位置0,4,20,24）
- * FREEマス(12)挿入前の24要素配列における四隅インデックス
- *   board[0]  → topics[0]
- *   board[4]  → topics[4]
- *   board[20] → topics[19]  (12より後なので-1)
- *   board[24] → topics[23]
- */
-const CORNER_INDICES = [0, 4, 19, 23];
+// 四隅のボードインデックス（5×5ビンゴ）
+const CORNER_INDICES = [0, 4, 20, 24];
 
 /**
  * ガチおに以外のゲーム難易度で「おに」お題が四隅に来ないよう制御する
@@ -915,6 +942,26 @@ function createRng(seed) {
   };
 }
 
+function weightedSampleEffective(pool, count, rng) {
+  if (pool.length === 0) return [];
+  if (pool.length <= count) return [...pool];
+  const result = [];
+  const remaining = [...pool];
+  for (let i = 0; i < count; i++) {
+    if (remaining.length === 0) break;
+    const totalWeight = remaining.reduce((sum, t) => sum + (t._tierWeight || t._effectiveWeight || 1), 0);
+    let r = rng() * totalWeight;
+    let idx = remaining.length - 1;
+    for (let j = 0; j < remaining.length; j++) {
+      r -= (remaining[j]._tierWeight || remaining[j]._effectiveWeight || 1);
+      if (r <= 0) { idx = j; break; }
+    }
+    result.push(remaining[idx]);
+    remaining.splice(idx, 1);
+  }
+  return result;
+}
+
 /**
  * ゲーム難易度確率テーブルに基づき24件のお題を返す
  *
@@ -923,60 +970,13 @@ function createRng(seed) {
  *   2. カテゴリ別クォータでバランス選出
  *   3. 不足分を残りプールから補完
  *   4. シャッフル後に四隅制約を適用（ガチおに除く）
- */
-function buildWeightedPool(gameDifficulty, allowedIds, currentSeason) {
-  const weights = GAME_DIFFICULTY_WEIGHTS[gameDifficulty] || GAME_DIFFICULTY_WEIGHTS.normal;
-  const tiers = ['easy', 'normal', 'hard', 'oni'];
-
-  const allTopics = [];
-  for (const tier of tiers) {
-    const tierWeight = weights[tier];
-    if (tierWeight === 0) continue;
-    const tierTopics = topicDatabase[tier] || [];
-    for (const t of tierTopics) {
-      if (allowedIds && !allowedIds.has(t.id)) continue;
-      if (t.season && t.season !== 'all' && t.season !== currentSeason) continue;
-      allTopics.push({ ...t, _effectiveWeight: (t.weight || 1000) * tierWeight });
-    }
-  }
-
-  const nonOniTopics = allTopics.filter(t => t.diff !== 'oni');
-  return { allTopics, nonOniTopics };
-}
-
-function weightedSampleEffective(pool, count, rng) {
-  if (pool.length === 0) return [];
-  if (pool.length <= count) return [...pool];
-
-  const result = [];
-  const remaining = [...pool];
-
-  for (let i = 0; i < count; i++) {
-    if (remaining.length === 0) break;
-    const totalWeight = remaining.reduce((sum, t) => sum + t._effectiveWeight, 0);
-    let r = rng() * totalWeight;
-    let idx = remaining.length - 1;
-    for (let j = 0; j < remaining.length; j++) {
-      r -= remaining[j]._effectiveWeight;
-      if (r <= 0) { idx = j; break; }
-    }
-    result.push(remaining[idx]);
-    remaining.splice(idx, 1);
-  }
-
-  return result;
-}
-
-/**
- * 難易度重み付き非復元サンプリング。カテゴリ上限MAX_PER_CATで多様性を確保。
- * カテゴリクォータを廃止し、毎回異なる組み合わせが出やすいシンプルな設計。
  *
  * @param {string} gameDifficulty - 'easy'|'normal'|'hard'|'oni'|'gachi'
  * @param {string} roomCode
  * @param {string} userId
- * @param {string} shuffleSalt  - Date.now()等の可変値で毎回変化する
+ * @param {string} shuffleSalt
  * @param {string} topicSetId
- * @returns {Array} 24件のお題配列
+ * @returns {Array} 25件（インデックス12=フリーマス含む）のお題配列
  */
 function selectTopicsForGame(
   gameDifficulty,
@@ -985,6 +985,7 @@ function selectTopicsForGame(
   shuffleSalt = '',
   topicSetId = 'default'
 ) {
+  const probs = GAME_DIFFICULTY_PROBS[gameDifficulty] || GAME_DIFFICULTY_PROBS.normal;
   const set = getTopicSetById(topicSetId);
   const allowed = set.topicIds && set.topicIds.length > 0 ? new Set(set.topicIds) : null;
   const currentSeason = getCurrentSeason();
@@ -994,34 +995,65 @@ function selectTopicsForGame(
   const seed = seedStr ? stringToSeed(seedStr) : (Math.random() * 0xFFFFFFFF | 0);
   const rng = createRng(seed);
 
-  // 難易度重み付きプールを構築
-  const { allTopics } = buildWeightedPool(gameDifficulty, allowed, currentSeason);
+  // ティアごとにアイテムをフィルタして _tierWeight（確率/件数）を付与
+  const TIERS = ['easy', 'normal', 'hard', 'oni'];
+  const pool = TIERS.flatMap(tier => {
+    const tierProb = probs[tier] || 0;
+    if (tierProb === 0) return [];
+    const tierItems = (topicDatabase[tier] || [])
+      .filter(t => !t.season || t.season === 'all' || t.season === currentSeason)
+      .filter(t => !allowed || allowed.has(t.id));
+    if (tierItems.length === 0) return [];
+    const itemWeight = tierProb / tierItems.length;
+    return tierItems.map(t => ({ ...t, _tierWeight: itemWeight }));
+  });
 
-  // カテゴリ上限（1カテゴリから最大4件まで）
-  const MAX_PER_CAT = 4;
-  const selected = [];
-  const usedIds = new Set();
-  const catCounts = {};
-  const remaining = [...allTopics];
-
-  while (selected.length < 24 && remaining.length > 0) {
-    // カテゴリ上限未満の候補を優先。全滅なら上限を無視
-    const eligible = remaining.filter(t => (catCounts[t.category || ''] || 0) < MAX_PER_CAT);
-    const candidates = eligible.length > 0 ? eligible : remaining;
-    const [picked] = weightedSampleEffective(candidates, 1, rng);
-    if (!picked) break;
-    selected.push(picked);
-    usedIds.add(picked.id);
-    catCounts[picked.category || ''] = (catCounts[picked.category || ''] || 0) + 1;
-    const idx = remaining.findIndex(t => t.id === picked.id);
-    if (idx >= 0) remaining.splice(idx, 1);
+  // カテゴリ別グループ化（全プール）
+  const byCategory = {};
+  for (const t of pool) {
+    const cat = t.category || '不明';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(t);
   }
 
-  // プール不足時の無条件補完
+  // カテゴリクォータ抽選（±1の揺らぎ付き）
+  const selected = [];
+  const usedIds = new Set();
+
+  for (const [cat, baseQuota] of Object.entries(CATEGORY_QUOTAS)) {
+    const variance = Math.floor(rng() * 3) - 1;
+    const quota = Math.max(1, baseQuota + variance);
+    const catPool = (byCategory[cat] || []).filter(t => !usedIds.has(t.id));
+    const picked = weightedSampleEffective(catPool, quota, rng);
+    for (const t of picked) {
+      selected.push(t);
+      usedIds.add(t.id);
+    }
+  }
+
+  // 不足分をプール残りから補完（補完枠は同一カテゴリ最大2件）
   if (selected.length < 24) {
-    const TIERS = ['easy', 'normal', 'hard', 'oni'];
-    const fallback = TIERS.flatMap(t => topicDatabase[t] || []);
-    for (const t of fallback) {
+    const FILLER_CAT_MAX = 2;
+    const fillerCatCounts = {};
+    const filler = pool.filter(t => !usedIds.has(t.id));
+
+    while (selected.length < 24 && filler.length > 0) {
+      // カテゴリ上限未満の候補を優先。全滅なら上限なしで拾う
+      const eligible = filler.filter(t => (fillerCatCounts[t.category] || 0) < FILLER_CAT_MAX);
+      const candidates = eligible.length > 0 ? eligible : filler;
+      const [picked] = weightedSample(candidates, 1, rng);
+      if (!picked) break;
+      selected.push(picked);
+      usedIds.add(picked.id);
+      fillerCatCounts[picked.category] = (fillerCatCounts[picked.category] || 0) + 1;
+      filler.splice(filler.findIndex(t => t.id === picked.id), 1);
+    }
+  }
+
+  // プール自体が不足する場合は全ティアから無条件補完
+  if (selected.length < 24) {
+    const allTopics = TIERS.flatMap(t => topicDatabase[t] || []);
+    for (const t of allTopics) {
       if (selected.length >= 24) break;
       if (!usedIds.has(t.id)) { selected.push(t); usedIds.add(t.id); }
     }

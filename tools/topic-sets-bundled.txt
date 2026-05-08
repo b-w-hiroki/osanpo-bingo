@@ -84,36 +84,27 @@ const GAME_DIFFICULTY_PROBS = {
 /**
  * カテゴリ別 24マス枠割り当て（合計=24）
  * ゲームごとに±1の揺らぎを加えてバリエーションを出す
+ * 件数30以上→3枠 / 件数10以上→1枠 / 件数5以上→1枠
+ * 件数5未満（劣化・補修・ズレ等）はフィラー枠で補完
  */
 const CATEGORY_QUOTAS = {
-  '線・模様観察':       4,
-  '痕跡・発見':         3,
-  '自然・生き物':       2,
-  '街インフラ':         2,
-  '季節・形・数':       2,
-  '面・高さ観察':       1,
-  '生活・学校':         1,
-  '街構造・乗り物':     1,
-  '家庭・食べ物':       1,
-  '住宅・外構':         1,
-  '商業・店舗':         1,
-  '境界・終端・切れ目': 1,
-  '接続・固定・留め具': 1,
-  '素材境界・舗装差':   1,
-  '道路標示・路面表示': 1,
-  '舗装・縁石・路面状態': 1,
-  '劣化・補修・ズレ':   1
-}; // 合計 = 24
-
-/**
- * ビンゴボード内の四隅インデックス（5×5: 位置0,4,20,24）
- * FREEマス(12)挿入前の24要素配列における四隅インデックス
- *   board[0]  → topics[0]
- *   board[4]  → topics[4]
- *   board[20] → topics[19]  (12より後なので-1)
- *   board[24] → topics[23]
- */
-const CORNER_INDICES = [0, 4, 19, 23];
+  '自然・生き物':        3,  // 52件
+  '街インフラ':          3,  // 41件
+  '街構造・乗り物':      3,  // 41件
+  '商業・店舗':          2,  // 36件
+  '家庭・食べ物':        2,  // 31件
+  '生活・学校':          2,  // 29件
+  '季節・形・数':        1,  // 18件
+  '痕跡・発見':          1,  // 18件
+  '生活・地域設備':      1,  // 13件
+  '線・模様観察':        1,  // 12件
+  '案内・注意表示':      1,  // 12件
+  'その他観察':          1,  // 12件
+  '観光・地域情報':      1,  // 11件
+  'キャラクター掲示物':  1,  // 10件
+  '住宅・外構':          1,  //  7件
+  '道路標示・路面表示':  1,  //  7件
+}; // 合計 = 24（劣化・補修・ズレ等5件未満はフィラー枠で補完）
 
 // 四隅のボードインデックス（5×5ビンゴ）
 const CORNER_INDICES = [0, 4, 20, 24];
@@ -179,6 +170,26 @@ function createRng(seed) {
   };
 }
 
+function weightedSampleEffective(pool, count, rng) {
+  if (pool.length === 0) return [];
+  if (pool.length <= count) return [...pool];
+  const result = [];
+  const remaining = [...pool];
+  for (let i = 0; i < count; i++) {
+    if (remaining.length === 0) break;
+    const totalWeight = remaining.reduce((sum, t) => sum + (t._tierWeight || t._effectiveWeight || 1), 0);
+    let r = rng() * totalWeight;
+    let idx = remaining.length - 1;
+    for (let j = 0; j < remaining.length; j++) {
+      r -= (remaining[j]._tierWeight || remaining[j]._effectiveWeight || 1);
+      if (r <= 0) { idx = j; break; }
+    }
+    result.push(remaining[idx]);
+    remaining.splice(idx, 1);
+  }
+  return result;
+}
+
 /**
  * ゲーム難易度確率テーブルに基づき24件のお題を返す
  *
@@ -224,8 +235,6 @@ function selectTopicsForGame(
     const itemWeight = tierProb / tierItems.length;
     return tierItems.map(t => ({ ...t, _tierWeight: itemWeight }));
   });
-
-  const { allTopics, nonOniTopics } = buildWeightedPool(gameDifficulty, allowed, currentSeason);
 
   // カテゴリ別グループ化（全プール）
   const byCategory = {};
