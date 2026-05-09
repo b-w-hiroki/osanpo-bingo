@@ -1684,6 +1684,85 @@ class OsanpoBingo {
       modeJoinBtn.addEventListener('click', () => {
         hideAll();
         if (joinGameStep) joinGameStep.style.display = 'block';
+        // ステップ切り替え時にステータスをリセット
+        const statusEl = document.getElementById('joinRoomStatus');
+        const infoEl = document.getElementById('joinRoomInfo');
+        if (statusEl) { statusEl.textContent = ''; statusEl.className = 'join-room-status'; }
+        if (infoEl) infoEl.style.display = 'none';
+      });
+    }
+
+    // 合言葉入力 → ルーム存在チェック（デバウンス）
+    const joinRoomCodeEl = document.getElementById('joinRoomCodeInput');
+    const joinStatusEl = document.getElementById('joinRoomStatus');
+    const joinInfoEl = document.getElementById('joinRoomInfo');
+    const joinInfoContent = document.getElementById('joinRoomInfoContent');
+    let joinCheckTimer = null;
+
+    const checkJoinRoom = async (code) => {
+      if (!joinStatusEl) return;
+      if (!code) {
+        joinStatusEl.textContent = '';
+        joinStatusEl.className = 'join-room-status';
+        if (joinInfoEl) joinInfoEl.style.display = 'none';
+        return;
+      }
+      joinStatusEl.textContent = '確認中…';
+      joinStatusEl.className = 'join-room-status status-checking';
+      if (joinInfoEl) joinInfoEl.style.display = 'none';
+
+      if (!this.battleBackend.enabled) {
+        // バックエンドなし：入力があれば準備OK
+        joinStatusEl.textContent = '✓ 合言葉を確認しました';
+        joinStatusEl.className = 'join-room-status status-found';
+        return;
+      }
+
+      try {
+        const ep = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
+        ep.searchParams.set('select', 'owner_user_id');
+        ep.searchParams.set('room_code', `eq.${code}`);
+        const res = await fetch(ep.toString(), {
+          headers: {
+            apikey: this.battleBackend.key,
+            Authorization: `Bearer ${this.battleBackend.key}`
+          }
+        });
+        if (!res.ok) throw new Error('fetch failed');
+        const data = await res.json();
+        const players = new Set(data.map(d => d.owner_user_id));
+        if (players.size > 0) {
+          joinStatusEl.textContent = `✅ ルームが見つかりました`;
+          joinStatusEl.className = 'join-room-status status-found';
+          // 設定サマリー表示
+          if (joinInfoEl && joinInfoContent) {
+            joinInfoContent.innerHTML =
+              `<span class="join-room-info-chip">🎮 バトルモード</span>` +
+              `<span class="join-room-info-chip">👥 ${players.size}人参加中</span>`;
+            joinInfoEl.style.display = 'block';
+          }
+        } else {
+          joinStatusEl.textContent = '⚪ このコードのルームはまだ誰も使っていません';
+          joinStatusEl.className = 'join-room-status status-empty';
+          if (joinInfoEl) joinInfoEl.style.display = 'none';
+        }
+      } catch {
+        joinStatusEl.textContent = '';
+        joinStatusEl.className = 'join-room-status';
+        if (joinInfoEl) joinInfoEl.style.display = 'none';
+      }
+    };
+
+    if (joinRoomCodeEl) {
+      joinRoomCodeEl.addEventListener('input', () => {
+        clearTimeout(joinCheckTimer);
+        const code = joinRoomCodeEl.value.trim();
+        if (!code) {
+          if (joinStatusEl) { joinStatusEl.textContent = ''; joinStatusEl.className = 'join-room-status'; }
+          if (joinInfoEl) joinInfoEl.style.display = 'none';
+          return;
+        }
+        joinCheckTimer = setTimeout(() => checkJoinRoom(code), 500);
       });
     }
     
@@ -1827,7 +1906,6 @@ class OsanpoBingo {
       joinGameBtn.addEventListener('click', () => {
         this.stopBattleSyncLoop();
         const joinRoomCode = document.getElementById('joinRoomCodeInput');
-        const gameTypeJoin = document.getElementById('gameTypeJoin');
         const modal = document.getElementById('roomCodeModal');
 
         const roomCode = joinRoomCode?.value.trim();
@@ -1836,13 +1914,12 @@ class OsanpoBingo {
           return;
         }
 
-        // 参加側は難易度・フィールドを作成側に合わせる（UI省略のためデフォルト値を使用）
+        // 参加側は常にバトルモード（バトルモード選択からここに来る）
+        // 難易度・フィールドは合言葉から同じボードが生成される
         const difficulty = 'normal';
         this.topicSetId = 'default';
         this.playMode = 'photo';
-        this.gameType = BATTLE_MODE_ENABLED
-          ? (gameTypeJoin?.value || 'normal')
-          : 'normal';
+        this.gameType = 'battle';
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }

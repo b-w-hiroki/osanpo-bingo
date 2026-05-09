@@ -302,7 +302,7 @@
         <div id="joinGameStep" class="modal-step" style="display: none;">
           <h2>ゲームに参加</h2>
           <p class="modal-description">
-            合言葉を入力するだけで、同じお題のBINGOで遊べます。
+            ゲームを作った人に合言葉を教えてもらって入力しよう。
           </p>
 
           <div class="form-group">
@@ -313,24 +313,19 @@
               class="input-text"
               placeholder="合言葉を入力"
               maxlength="5"
+              autocomplete="off"
             >
-            <p class="form-help">
-              ゲームを作った人に合言葉を教えてもらおう
-            </p>
+            <div id="joinRoomStatus" class="join-room-status"></div>
           </div>
 
-          <div class="form-group">
-            <label for="gameTypeJoin">ゲームタイプ</label>
-            <select id="gameTypeJoin" class="select-box">
-              <option value="normal" selected>通常BINGO</option>
-              <option value="battle">バトル（陣取り）</option>
-            </select>
-            <p class="form-help">
-              作った人と同じゲームタイプを選んでね
-            </p>
+          <!-- 設定サマリー（合言葉ヒット時に表示） -->
+          <div id="joinRoomInfo" class="join-room-info" style="display:none">
+            <p class="join-room-info-label">このルームの設定</p>
+            <div id="joinRoomInfoContent" class="join-room-info-content"></div>
           </div>
 
-          <!-- 難易度・フィールドは作成側の設定と合わせるためhiddenで保持 -->
+          <!-- 難易度・フィールド・ゲームタイプはhiddenで保持（JS用） -->
+          <select id="gameTypeJoin" style="display:none"><option value="battle" selected>バトル</option></select>
           <select id="joinDifficultySelect" style="display:none">
             <option value="normal" selected>ふつう</option>
           </select>
