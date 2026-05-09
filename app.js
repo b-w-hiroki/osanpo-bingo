@@ -2273,18 +2273,16 @@ class OsanpoBingo {
         noPhoto.style.display = 'flex';
         if (toggleMarkBtn) {
           toggleMarkBtn.style.display = '';
-          if (this.gameType === 'battle') {
-            // バトルモードは写真でマス取得のため、マークボタンをカメラ誘導に変更
-            toggleMarkBtn.textContent = '写真を撮らずにマークする';
-            toggleMarkBtn.classList.remove('marked');
+          // スタンダード・バトル共通：マーク済み判定
+          const isMarked = this.gameType === 'battle'
+            ? this.getCellOwnerId(index) === this.battlePlayerId
+            : this.markedCells.has(index);
+          if (isMarked) {
+            toggleMarkBtn.textContent = 'マーク済み（解除）';
+            toggleMarkBtn.classList.add('marked');
           } else {
-            if (this.markedCells.has(index)) {
-              toggleMarkBtn.textContent = 'マーク済み（解除）';
-              toggleMarkBtn.classList.add('marked');
-            } else {
-              toggleMarkBtn.textContent = 'マークする';
-              toggleMarkBtn.classList.remove('marked');
-            }
+            toggleMarkBtn.textContent = 'マークする';
+            toggleMarkBtn.classList.remove('marked');
           }
         }
       }
