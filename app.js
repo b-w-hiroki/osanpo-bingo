@@ -1087,10 +1087,12 @@ class OsanpoBingo {
       clone.id = 'screenshotBoardClone';
       targetBoard.innerHTML = '';
       targetBoard.appendChild(clone);
-      // クローン後にテキストを再フィット（高さはaspect-ratio:1に任せる）
+      // クローン後にテキストを再フィット＆縦長（6/5）に高さ設定
       requestAnimationFrame(() => {
         clone.querySelectorAll('.bingo-cell').forEach(c => {
           this.fitCellText(c);
+          const w = c.offsetWidth;
+          if (w > 0) c.style.height = `${Math.round(w * 6 / 5)}px`;
         });
       });
       // 写真ありセルのみタップで拡大＆保存
@@ -1252,8 +1254,8 @@ class OsanpoBingo {
         clone.querySelectorAll('.bingo-cell').forEach(cell => {
           this.fitCellText(cell);
           const w = cell.offsetWidth;
-          // html2canvasはaspect-ratio非対応のため高さをpxで明示（1:1 = 正方形）
-          if (w > 0) cell.style.height = `${w}px`;
+          // html2canvasはaspect-ratio非対応のため高さをpxで明示（縦長 6/5）
+          if (w > 0) cell.style.height = `${Math.round(w * 6 / 5)}px`;
         });
         clone.querySelectorAll('.bingo-cell.has-photo').forEach(cell => {
           const img = cell.querySelector('.cell-photo-img');
