@@ -943,10 +943,12 @@ h1 {
   margin-top: 2px;
 }
 
-/* ステップ戻るリンク */
+/* ステップ戻るリンク（セクション区切り線付き） */
 .modal-step-back {
   text-align: center;
   margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--cell-border);
 }
 
 /* ===== 参加ステップ：ルームコードステータス ===== */
