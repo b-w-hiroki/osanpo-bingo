@@ -96,7 +96,7 @@ body {
   align-items: stretch;
   padding: 0;
   padding-bottom: max(20px, env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, var(--bg) 0%, #e8f2ec 55%, #d8ece2 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, #dff0df 55%, #cce8cc 100%);
   color: var(--text);
   text-align: center;
   overflow: visible;
@@ -109,7 +109,7 @@ body {
   max-height: none;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(180deg, #dceee3 0%, #e8eeea 55%, #d4e8dd 100%);
+  background: linear-gradient(180deg, #d0ecd0 0%, #dff0df 55%, #cce8cc 100%);
   border-radius: 0 0 clamp(18px, 4vw, 28px) clamp(18px, 4vw, 28px);
   box-shadow: 0 10px 32px rgba(90, 120, 100, 0.08);
 }
@@ -181,7 +181,7 @@ body {
   min-height: 50px;
   border: none;
   border-radius: 14px;
-  background: linear-gradient(165deg, #ffffff 0%, #eaf5ef 55%, #e2f0ea 100%);
+  background: linear-gradient(165deg, #ffffff 0%, #e8f5e8 55%, #d8efd8 100%);
   color: #157F1F;
   font-weight: 800;
   box-shadow:
