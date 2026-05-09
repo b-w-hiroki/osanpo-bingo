@@ -279,26 +279,24 @@ class OsanpoBingo {
       this.difficulty
     );
 
-    // 25マスのボードを作成
+    // 25マスのボードを作成（中央12番は常に☆フリーマス）
     this.board = [];
     const lmDB = typeof landmarkDatabase !== 'undefined' ? landmarkDatabase : [];
     if (this.landmarkMode && lmDB.length > 0) {
-      // ランドマークモード: 中央=フリー枠、追加位置にランドマーク配置
+      // ランドマークモード: 中央は常に☆フリーマス、12以外の位置にランドマーク配置
       const lmSeed = stringToSeed([this.roomCode, seedUserId, seedSalt, 'lm'].filter(Boolean).join('-'));
       const lmRng = createRng(lmSeed);
       const count = this._getLandmarkCount(lmRng);
-      const landmarkPositions = new Set([12]);
+      const landmarkPositions = new Set();
       const extraCandidates = shuffleWithSeed([...Array(25).keys()].filter(p => p !== 12), lmSeed + 1);
-      for (let i = 0; i < count - 1 && i < extraCandidates.length; i++) {
+      for (let i = 0; i < count && i < extraCandidates.length; i++) {
         landmarkPositions.add(extraCandidates[i]);
       }
-      const freeEntry = typeof landmarkFreeEntry !== 'undefined' ? landmarkFreeEntry : null;
       let topicIdx = 0;
       for (let i = 0; i < 25; i++) {
         if (i === 12) {
-          // 中央は「なんでも置ける！」フリー枠（自動マークしない）
-          const centerLm = freeEntry || lmDB[Math.floor(lmRng() * lmDB.length)];
-          this.board.push({...centerLm, isLandmark: true});
+          // 中央は常に☆フリーマス（写真・操作不可）
+          this.board.push({text: '', icon: '⭐', isFree: true});
         } else if (landmarkPositions.has(i)) {
           const lm = lmDB[Math.floor(lmRng() * lmDB.length)];
           this.board.push({...lm, isLandmark: true});
