@@ -197,27 +197,40 @@
           </div>
 
           <div class="form-group">
-            <label for="gameTypeCreate">ゲームタイプ</label>
-            <select id="gameTypeCreate" class="select-box">
+            <label>ゲームタイプ</label>
+            <select id="gameTypeCreate" style="display:none">
               <option value="normal" selected>通常BINGO</option>
               <option value="battle">バトル（陣取り）</option>
             </select>
+            <div class="stepper" id="gameTypeStepperCreate" data-sync="gameTypeCreate">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">通常BINGO</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
+            </div>
             <p class="form-help">
               バトルは「写真をアップロードした人」がマスを取得します（先着1名）
             </p>
           </div>
 
           <div class="form-group">
-            <label for="playerCountInput">参加人数</label>
-            <input
-              type="number"
-              id="playerCountInput"
-              class="input-text"
-              placeholder="例: 3"
-              min="1"
-              max="99"
-              value="1"
-            >
+            <label>参加人数</label>
+            <select id="playerCountInput" style="display:none">
+              <option value="1" selected>1人</option>
+              <option value="2">2人</option>
+              <option value="3">3人</option>
+              <option value="4">4人</option>
+              <option value="5">5人</option>
+              <option value="6">6人</option>
+              <option value="7">7人</option>
+              <option value="8">8人</option>
+              <option value="9">9人</option>
+              <option value="10">10人</option>
+            </select>
+            <div class="stepper" id="playerCountStepper" data-sync="playerCountInput">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">1人</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
+            </div>
             <p class="form-help">
               自分を含む人数（後から変更可）
             </p>

@@ -1583,11 +1583,13 @@ class OsanpoBingo {
         this.updateTopicSetHelpFor(ts);
       }
     });
-    // フィールドステッパーの表示テキストを同期
+    // 全ステッパーの表示テキストを同期
     [
-      { stepperId: 'topicSetStepperSolo',   selectId: 'topicSetSelectSolo' },
-      { stepperId: 'topicSetStepperCreate', selectId: 'topicSetSelectCreate' },
-      { stepperId: 'topicSetStepperJoin',   selectId: 'topicSetSelectJoin' },
+      { stepperId: 'topicSetStepperSolo',    selectId: 'topicSetSelectSolo' },
+      { stepperId: 'topicSetStepperCreate',  selectId: 'topicSetSelectCreate' },
+      { stepperId: 'topicSetStepperJoin',    selectId: 'topicSetSelectJoin' },
+      { stepperId: 'gameTypeStepperCreate',  selectId: 'gameTypeCreate' },
+      { stepperId: 'playerCountStepper',     selectId: 'playerCountInput' },
     ].forEach(({ stepperId, selectId }) => {
       const stepper = document.getElementById(stepperId);
       const sel     = document.getElementById(selectId);
