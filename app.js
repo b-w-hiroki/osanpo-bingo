@@ -2370,17 +2370,11 @@ class OsanpoBingo {
       });
     }
     
-    // マーク切り替えボタン（バトルモードは写真撮影にリダイレクト）
+    // マーク切り替えボタン（写真なしでマーク）
     if (toggleMarkBtn) {
       toggleMarkBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (this.gameType === 'battle') {
-          // バトルモードはカメラ入力を起動
-          const photoInput = document.getElementById('cellPhotoInput');
-          if (photoInput) photoInput.click();
-          return;
-        }
         const idx = this.currentPhotoIndex;
         if (idx !== null) {
           this.toggleMark(idx);
