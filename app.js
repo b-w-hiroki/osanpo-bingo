@@ -214,6 +214,12 @@ class OsanpoBingo {
     if (roomCodeStat) {
       roomCodeStat.addEventListener('click', () => this.copyRoomCode());
     }
+
+    // 距離表示タップ → GPS 許諾を再リクエスト
+    const distanceStat = document.getElementById('distanceStat');
+    if (distanceStat) {
+      distanceStat.addEventListener('click', () => this.handleDistanceTap());
+    }
     
     // 合言葉モーダル
     this.setupRoomCodeModal();
@@ -872,6 +878,44 @@ class OsanpoBingo {
     return `${(meters / 1000).toFixed(1)}km`;
   }
 
+  /** 距離表示タップ時：GPS 許諾が取れていなければ再リクエスト */
+  async handleDistanceTap() {
+    // すでに計測中なら何もしない
+    if (this.locationState === 'active') return;
+
+    if (!navigator.geolocation) {
+      showAlert('このブラウザでは位置情報が使用できません。');
+      return;
+    }
+
+    // Permissions API で現在の許諾状態を確認
+    let permState = 'prompt';
+    try {
+      const result = await navigator.permissions.query({ name: 'geolocation' });
+      permState = result.state; // 'granted' | 'denied' | 'prompt'
+    } catch (_) {
+      // Permissions API 非対応ブラウザは prompt として扱う
+    }
+
+    if (permState === 'denied') {
+      // ハード拒否済み → ブラウザ設定への案内
+      showAlert(
+        '位置情報の使用が拒否されています。\n\n' +
+        '距離を計測するには、ブラウザの設定から\nこのサイトの位置情報を「許可」に変更してください。\n\n' +
+        '📱 iPhoneの場合：\n設定 → プライバシーとセキュリティ → 位置情報サービス → Safari\n\n' +
+        '📱 Androidの場合：\nブラウザのアドレスバー横の🔒をタップ → 権限 → 位置情報'
+      );
+      return;
+    }
+
+    // 'prompt' または 'granted' → トラッキング再開
+    this.totalDistance = 0;
+    this.lastPosition = null;
+    this.locationState = 'idle';
+    this.stopLocationTracking();
+    this.startLocationTracking();
+  }
+
   /** GPS トラッキング開始（パーミッション確認あり） */
   startLocationTracking() {
     if (!navigator.geolocation) {
@@ -999,6 +1043,13 @@ class OsanpoBingo {
     }
     if (this.distanceElement) {
       this.distanceElement.textContent = this.formatDistance(this.totalDistance);
+    }
+    // 計測中でない場合はタップ可能スタイルを付与
+    const distanceStat = document.getElementById('distanceStat');
+    if (distanceStat) {
+      const tappable = this.locationState !== 'active';
+      distanceStat.classList.toggle('stat-item-clickable', tappable);
+      distanceStat.title = tappable ? '📍 タップして位置情報を再取得' : '';
     }
     this.updateDebugPanel();
   }
