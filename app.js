@@ -1825,21 +1825,19 @@ class OsanpoBingo {
       joinGameBtn.addEventListener('click', () => {
         this.stopBattleSyncLoop();
         const joinRoomCode = document.getElementById('joinRoomCodeInput');
-        const joinDifficulty = document.getElementById('joinDifficultySelect');
         const gameTypeJoin = document.getElementById('gameTypeJoin');
         const modal = document.getElementById('roomCodeModal');
-        const customTopicInputsJoin = document.getElementById('customTopicInputsJoin');
-        
+
         const roomCode = joinRoomCode?.value.trim();
         if (!roomCode) {
           showAlert('合言葉を入力してください');
           return;
         }
-        
-        const difficulty = joinDifficulty?.value || 'normal';
-        this.topicSetId = document.getElementById('topicSetSelectJoin')?.value || 'default';
-        const playModeRadio = document.querySelector('input[name="playModeJoin"]:checked');
-        this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
+
+        // 参加側は難易度・フィールドを作成側に合わせる（UI省略のためデフォルト値を使用）
+        const difficulty = 'normal';
+        this.topicSetId = 'default';
+        this.playMode = 'photo';
         this.gameType = BATTLE_MODE_ENABLED
           ? (gameTypeJoin?.value || 'normal')
           : 'normal';
@@ -1848,12 +1846,10 @@ class OsanpoBingo {
         }
         this.gameStartTime = Date.now();
         this.battleTopicOwners = {};
-        
+
         this.playerCount = 1;
-        // グループ＋自由記載：作った人から教えてもらったお題を入力（同じお題セットで並びだけ各自違うボードになる）
-        const customTopics = customTopicInputsJoin ? this.collectCustomTopics(customTopicInputsJoin) : [];
-        this.landmarkMode = (this.topicSetId === '観光地');
-        this.createBoard(roomCode, difficulty, '', customTopics);
+        this.landmarkMode = false;
+        this.createBoard(roomCode, difficulty, '', []);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
         this.totalDistance = 0;

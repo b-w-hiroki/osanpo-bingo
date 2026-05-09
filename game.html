@@ -83,7 +83,6 @@
             </button>
             <button type="button" id="modeGroupBtn" class="mode-btn mode-btn-join">
               <span class="mode-btn-label">バトルモード</span>
-              <span class="mode-btn-desc">同じお題でバトル！相手より早く探せ！</span>
             </button>
           </div>
           <p class="modal-back-link">
@@ -289,7 +288,7 @@
         <div id="joinGameStep" class="modal-step" style="display: none;">
           <h2>ゲームに参加</h2>
           <p class="modal-description">
-            同じ合言葉で参加すると、みんな同じお題のBINGOで遊べます。作った人から合言葉と難易度を聞いてね。
+            合言葉を入力するだけで、同じお題のBINGOで遊べます。
           </p>
 
           <div class="form-group">
@@ -302,7 +301,7 @@
               maxlength="5"
             >
             <p class="form-help">
-              ゲームを作った人に教えてもらおう（同じ合言葉なら同じお題になります）
+              ゲームを作った人に合言葉を教えてもらおう
             </p>
           </div>
 
@@ -317,58 +316,11 @@
             </p>
           </div>
 
-          <div class="form-group">
-            <label>難易度</label>
-            <select id="joinDifficultySelect" style="display:none">
-              <option value="easy">かんたん</option>
-              <option value="normal" selected>ふつう</option>
-              <option value="hard">むずかしい</option>
-              <option value="oni">おに</option>
-              <option value="gachi">ガチおに</option>
-            </select>
-            <div class="stepper" data-sync="joinDifficultySelect">
-              <button type="button" class="stepper-btn stepper-prev">◄</button>
-              <span class="stepper-value">ふつう</span>
-              <button type="button" class="stepper-btn stepper-next">►</button>
-            </div>
-            <p class="form-help">作った人と同じ難易度を選んでね</p>
-          </div>
-
-          <div class="form-group">
-            <label>フィールド</label>
-            <select id="topicSetSelectJoin" class="topic-set-select" style="display:none" aria-describedby="topicSetHelpJoin"></select>
-            <div class="stepper" id="topicSetStepperJoin" data-sync="topicSetSelectJoin">
-              <button type="button" class="stepper-btn stepper-prev">◄</button>
-              <span class="stepper-value">-</span>
-              <button type="button" class="stepper-btn stepper-next">►</button>
-            </div>
-            <p class="form-help topic-set-help" id="topicSetHelpJoin">作った人と同じフィールドを選んでね</p>
-          </div>
-
-          <div class="form-group" id="joinCustomTopicGroup">
-            <label for="joinCustomTopicCount">フリー入力マス</label>
-            <select id="joinCustomTopicCount" class="select-box">
-              <option value="0" selected>なし</option>
-              <option value="1">1マス</option>
-              <option value="2">2マス</option>
-              <option value="3">3マス</option>
-              <option value="4">4マス</option>
-              <option value="5">5マス</option>
-              <option value="6">6マス</option>
-              <option value="8">8マス</option>
-              <option value="10">10マス</option>
-              <option value="12">12マス</option>
-              <option value="14">14マス</option>
-              <option value="16">16マス</option>
-              <option value="18">18マス</option>
-              <option value="20">20マス</option>
-              <option value="24">24マス</option>
-            </select>
-            <p class="form-help">
-              作った人に「フリー入力マスは何個？」と聞いて、同じ数を選んでね。お題は作った人から教えてもらおう（みんなで回す場合も同じフィールドを使います）
-            </p>
-            <div id="customTopicInputsJoin" class="custom-topic-inputs" style="display: none;"></div>
-          </div>
+          <!-- 難易度・フィールドは作成側の設定と合わせるためhiddenで保持 -->
+          <select id="joinDifficultySelect" style="display:none">
+            <option value="normal" selected>ふつう</option>
+          </select>
+          <select id="topicSetSelectJoin" class="topic-set-select" style="display:none"></select>
 
           <button id="joinGameBtn" class="btn btn-primary btn-large">
             参加する
