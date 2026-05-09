@@ -1366,7 +1366,7 @@ h1 {
 .screenshot-view-inner {
   max-width: 600px;
   width: 100%;
-  margin: auto 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
@@ -1432,6 +1432,19 @@ h1 {
 .result-board-wrap .cell-text,
 .result-capture-board .cell-text {
   font-size: 0.8rem;
+}
+
+/* 結果ボード内のセルは xl/xxl も1行表示に戻す（折り返すとセルが伸びてしまう） */
+.result-board-wrap .cell-text-xl,
+.result-board-wrap .cell-text-xxl,
+.result-capture-board .cell-text-xl,
+.result-capture-board .cell-text-xxl {
+  white-space: nowrap;
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 結果画面: セルは原則タップ無効・ホバーなし */
