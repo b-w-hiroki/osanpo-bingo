@@ -90,6 +90,19 @@
       backdrop-filter: blur(4px);
     }
 
+    /* ===== 遊び方バナー画像 ===== */
+    .lp-section-howto-img {
+      padding-bottom: 0;
+      overflow: hidden;
+    }
+    .howto-banner-img {
+      display: block;
+      width: calc(100% + 40px);
+      margin: 0 -20px -0px;
+      border-radius: 0 0 14px 14px;
+      object-fit: cover;
+    }
+
     /* ===== セクション共通 ===== */
     .lp-section {
       background: #fff;
@@ -303,31 +316,13 @@
     <section class="main-content">
 
       <!-- 遊び方 -->
-      <div class="lp-section">
+      <div class="lp-section lp-section-howto-img">
         <h2 class="lp-section-title">遊び方</h2>
-        <div class="steps">
-          <div class="step-row">
-            <div class="step-circle">1</div>
-            <div class="step-body">
-              <strong>ゲームを開始しておさんぽへ</strong>
-              <p>難易度やフィールドを選んでスタート。毎回ランダムなボードが生成されるから、何度でも新鮮に楽しめる。</p>
-            </div>
-          </div>
-          <div class="step-row">
-            <div class="step-circle">2</div>
-            <div class="step-body">
-              <strong>お題を見つけたら写真を撮ってマーク</strong>
-              <p>マスをタップして写真を撮影するだけ。証拠写真付きでマーク完了！写真なしのシンプルマークも選べる。</p>
-            </div>
-          </div>
-          <div class="step-row">
-            <div class="step-circle">3</div>
-            <div class="step-body">
-              <strong>縦・横・斜めで揃ったらBINGO！</strong>
-              <p>ゲーム終了後は写真入りの結果ボードを画像として保存・共有できる。おさんぽの思い出として残せる。</p>
-            </div>
-          </div>
-        </div>
+        <img
+          src="static/howto-banner.png"
+          alt="遊び方：ゲームをスタートして、お題を見つけて写真で記録、BINGOを目指そう！"
+          class="howto-banner-img"
+        >
       </div>
 
       <!-- 特徴 -->
