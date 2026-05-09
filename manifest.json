@@ -1,7 +1,7 @@
 {
-  "name": "お散歩ビンゴ",
-  "short_name": "お散歩ビンゴ",
-  "description": "散歩中に見つけたものをマークしてビンゴを目指そう！",
+  "name": "おさんぽBINGO",
+  "short_name": "おさんぽBINGO",
+  "description": "おさんぽ中に見つけたものをマークしてBINGOを目指そう！",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

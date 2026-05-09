@@ -265,6 +265,7 @@ class OsanpoBingo {
       this.roomCode,
       seedUserId,
       seedSalt,
+      this.topicSetId || 'default',
       this.topicSetId || 'default'
     ).slice(0, randomCount);
 
@@ -692,7 +693,7 @@ class OsanpoBingo {
   showBingoMessage(count) {
     if (!this.messageElement) return;
     
-    this.messageElement.textContent = `🎉 ${count}本ビンゴ！`;
+    this.messageElement.textContent = `🎉 ${count}本BINGO！`;
     this.messageElement.style.display = 'block';
     
     // アニメーション用クラスを追加
@@ -760,7 +761,7 @@ class OsanpoBingo {
   _showBingoText(count) {
     const el = document.createElement('div');
     el.className = 'bingo-celebration-text';
-    el.innerHTML = `<span class="big">🎉 BINGO!</span><span class="sub">${count > 1 ? count + '本ビンゴ達成！' : 'ビンゴ達成！'}</span>`;
+    el.innerHTML = `<span class="big">🎉 BINGO!</span><span class="sub">${count > 1 ? count + '本BINGO達成！' : 'BINGO達成！'}</span>`;
     document.body.appendChild(el);
     el.addEventListener('animationend', () => el.remove(), { once: true });
   }
@@ -948,9 +949,10 @@ class OsanpoBingo {
     }
     
     if (this.markedCountElement) {
+      const markedNonFree = [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
       this.markedCountElement.textContent = this.gameType === 'battle'
         ? this.getBattleCounts().selfClaims
-        : this.markedCells.size;
+        : markedNonFree;
     }
     
     if (this.photoCountElement) {
@@ -1033,7 +1035,7 @@ class OsanpoBingo {
       showAlert('まずはゲームを始めてみましょう！');
       return;
     }
-    showConfirm('お散歩ビンゴを終了しますか？\n結果を記録・共有できます。').then((ok) => {
+    showConfirm('おさんぽBINGOを終了しますか？\n結果を記録・共有できます。').then((ok) => {
       if (ok) this.showResultView();
     });
   }
@@ -1102,7 +1104,7 @@ class OsanpoBingo {
     if (markedCountEl) {
       markedCountEl.textContent = (BATTLE_MODE_ENABLED && this.gameType === 'battle')
         ? this.getBattleCounts().selfClaims
-        : this.markedCells.size;
+        : [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
     }
 
     // 距離を表示
@@ -1204,7 +1206,7 @@ class OsanpoBingo {
     const dateEl = document.getElementById('resultDate');
     const boardEl = document.getElementById('screenshotBoard');
     
-    document.getElementById('resultCaptureTitle').textContent = 'お散歩ビンゴ';
+    document.getElementById('resultCaptureTitle').textContent = 'おさんぽBINGO';
     document.getElementById('resultCaptureDate').textContent = dateEl?.textContent || '-';
     
     const playTimeEl = document.getElementById('resultPlayTime');
@@ -1230,7 +1232,7 @@ class OsanpoBingo {
     document.getElementById('resultCaptureMarked').textContent =
       (BATTLE_MODE_ENABLED && this.gameType === 'battle')
         ? this.getBattleCounts().selfClaims
-        : this.markedCells.size;
+        : [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
     
     const captureBoard = document.getElementById('resultCaptureBoard');
     if (captureBoard && boardEl?.firstChild) {
@@ -1318,7 +1320,7 @@ class OsanpoBingo {
     
     if (navigator.share) {
       navigator.share({
-        title: 'お散歩ビンゴ',
+        title: 'おさんぽBINGO',
         text: text,
         url: shareUrl
       }).then(() => {
@@ -1341,14 +1343,14 @@ class OsanpoBingo {
     const bingo = this.bingoLines.length;
     const marked = (BATTLE_MODE_ENABLED && this.gameType === 'battle')
       ? this.getBattleCounts().selfClaims
-      : this.markedCells.size;
+      : [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
     return [
-      'お散歩ビンゴで遊んだ！',
+      'おさんぽBINGOで遊んだ！',
       dateEl?.textContent || '',
       playTimeEl ? playTimeEl + ' ' : '',
       groupText ? groupText + ' ' : '',
-      'ビンゴ' + bingo + '本・マーク' + marked + 'マス' + (this.totalDistance > 0 ? '・' + this.formatDistance(this.totalDistance) + '歩いた' : ''),
-      '#お散歩ビンゴ #散歩 #ビンゴ'
+      'BINGO' + bingo + '本・マーク' + marked + 'マス' + (this.totalDistance > 0 ? '・' + this.formatDistance(this.totalDistance) + '歩いた' : ''),
+      '#おさんぽBINGO #散歩 #BINGO'
     ].filter(Boolean).join('\n');
   }
   
@@ -1709,7 +1711,7 @@ class OsanpoBingo {
         this.topicSetId = document.getElementById('topicSetSelectSolo')?.value || 'default';
         this.gameType = 'normal';
         this.battleTopicOwners = {};
-        this.landmarkMode = document.querySelector('input[name="landmarkModeSolo"]:checked')?.value === 'on';
+        this.landmarkMode = (this.topicSetId === '観光地');
         const customTopics = this.collectCustomTopics(customTopicInputsSolo);
         this.gameStartTime = Date.now();
         this.roomCode = 'solo';
@@ -1753,7 +1755,7 @@ class OsanpoBingo {
         this.gameType = BATTLE_MODE_ENABLED
           ? (gameTypeCreate?.value || 'normal')
           : 'normal';
-        this.landmarkMode = document.querySelector('input[name="landmarkModeCreate"]:checked')?.value === 'on';
+        this.landmarkMode = (this.topicSetId === '観光地');
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
@@ -1812,7 +1814,7 @@ class OsanpoBingo {
         this.playerCount = 1;
         // グループ＋自由記載：作った人から教えてもらったお題を入力（同じお題セットで並びだけ各自違うボードになる）
         const customTopics = customTopicInputsJoin ? this.collectCustomTopics(customTopicInputsJoin) : [];
-        this.landmarkMode = document.querySelector('input[name="landmarkModeJoin"]:checked')?.value === 'on';
+        this.landmarkMode = (this.topicSetId === '観光地');
         this.createBoard(roomCode, difficulty, '', customTopics);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
@@ -2302,7 +2304,7 @@ class OsanpoBingo {
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'お散歩ビンゴ写真' });
+          await navigator.share({ files: [file], title: 'おさんぽBINGO写真' });
           return;
         } catch (e) {
           if (e.name === 'AbortError') return;
