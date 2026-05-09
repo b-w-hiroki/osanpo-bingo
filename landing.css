@@ -106,30 +106,9 @@ body {
 .hero-image-wrap {
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: none;
   overflow: hidden;
   position: relative;
   background: #ffffff;
-  border-radius: 0 0 clamp(18px, 4vw, 28px) clamp(18px, 4vw, 28px);
-  box-shadow: 0 10px 32px rgba(90, 120, 100, 0.08);
-}
-
-/* ボタン帯へ自然にフェード（イラストと一体感） */
-.hero-image-wrap::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 48%;
-  background: linear-gradient(
-    180deg,
-    rgba(232, 238, 234, 0) 0%,
-    rgba(200, 225, 210, 0.25) 40%,
-    rgba(175, 215, 195, 0.5) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
 }
 
 .hero-image {
@@ -142,25 +121,12 @@ body {
   z-index: 0;
 }
 
-/* CTA帯：角丸で画像とつなぐ（水平の「張り付き」感を弱める） */
+/* CTA帯 */
 .hero-cta-strip {
-  margin: 0 clamp(14px, 4vw, 28px) 0;
-  padding: clamp(18px, 3.5vw, 26px) clamp(16px, 4vw, 28px) clamp(6px, 2vw, 10px);
   display: flex;
   justify-content: center;
-  position: relative;
-  z-index: 2;
-  background: linear-gradient(
-    165deg,
-    rgba(238, 248, 242, 0.92) 0%,
-    rgba(218, 236, 226, 0.88) 45%,
-    rgba(205, 230, 216, 0.95) 100%
-  );
-  border-radius: clamp(18px, 4vw, 26px);
-  border: 1px solid rgba(90, 155, 125, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    0 12px 40px rgba(60, 100, 80, 0.1);
+  padding: 16px 24px;
+  background: #ffffff;
 }
 
 .hero-content {
