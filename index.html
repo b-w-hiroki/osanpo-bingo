@@ -29,23 +29,29 @@
     }
 
     /* ===== キャッチコピー ===== */
-    .hero-catchcopy {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    .hero-copy-block {
+      background: rgba(255,255,255,0.92);
+      border-radius: 14px;
+      padding: 16px 20px;
       text-align: center;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+    .hero-catchcopy {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a1a1a;
+      text-shadow: none;
       line-height: 1.5;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
     }
     .hero-subcopy {
       margin: 0;
       font-size: 13px;
       font-weight: 500;
-      color: rgba(255,255,255,0.95);
-      text-shadow: 0 1px 5px rgba(0,0,0,0.4);
-      text-align: center;
+      color: #444;
+      text-shadow: none;
       line-height: 1.7;
     }
 
@@ -270,13 +276,9 @@
       </div>
       <div class="hero-cta-strip">
         <div class="hero-content">
-          <p class="hero-catchcopy">いつもの散歩が、小さな冒険になる。</p>
-          <p class="hero-subcopy">お題を探しながら歩くだけで、毎日の景色がちょっと違って見えてくる。</p>
-          <div class="stat-chips">
-            <span class="stat-chip">300種類以上のお題</span>
-            <span class="stat-chip">写真でマーク</span>
-            <span class="stat-chip">難易度5種類</span>
-            <span class="stat-chip">みんなで同じお題</span>
+          <div class="hero-copy-block">
+            <p class="hero-catchcopy">いつもの散歩が、小さな冒険になる。</p>
+            <p class="hero-subcopy">お題を探しながら歩くだけで、毎日の景色がちょっと違って見えてくる。</p>
           </div>
           <a href="game.html" class="btn-start">おさんぽBINGOを始める</a>
         </div>
