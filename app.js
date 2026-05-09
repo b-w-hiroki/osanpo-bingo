@@ -986,6 +986,11 @@ class OsanpoBingo {
         if (statItem) statItem.style.display = 'none';
       }
     }
+    // スタンダードモードでは合言葉を非表示
+    const roomCodeStatEl = document.getElementById('roomCodeStat');
+    if (roomCodeStatEl) {
+      roomCodeStatEl.style.display = this.gameType === 'battle' ? '' : 'none';
+    }
     if (this.distanceElement) {
       this.distanceElement.textContent = this.formatDistance(this.totalDistance);
     }
