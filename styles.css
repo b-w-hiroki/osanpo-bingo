@@ -178,7 +178,7 @@ h1 {
 
 /* ==================== メインエリア ==================== */
 .main {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 /* ==================== ビンゴボード ==================== */
@@ -192,13 +192,11 @@ h1 {
   box-shadow: var(--shadow-md);
   margin-bottom: var(--spacing-lg);
   position: relative;
-  width: 105%;
-  margin-left: -2.5%;
 }
 
 /* ビンゴセル（画像・テキストは中央寄せ） */
 .bingo-cell {
-  aspect-ratio: 5/6;
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -221,6 +219,15 @@ h1 {
   padding-bottom: 2px;
 }
 
+/* ==================== 難易度グラデーション ==================== */
+/* むずかしい：薄めローズ */
+.bingo-cell.cell-diff-hard {
+  background: linear-gradient(145deg, #fff0f0 0%, #fdd0d0 100%);
+}
+/* おに：濃い赤 */
+.bingo-cell.cell-diff-oni {
+  background: linear-gradient(145deg, #f9a0a0 0%, #f07070 100%);
+}
 
 /* ==================== ランドマーク ☆ ==================== */
 @keyframes landmark-sparkle {
@@ -1119,7 +1126,7 @@ h1 {
 /* マス詳細モーダル */
 .cell-modal-header {
   text-align: center;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .cell-modal-icon {
@@ -1163,71 +1170,6 @@ h1 {
   margin-bottom: var(--spacing-md);
 }
 
-.cell-photo-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
-  gap: var(--spacing-sm);
-  padding-right: 40px; /* ×ボタン（position:absolute）との重なりを防ぐ */
-}
-
-.cell-photo-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cell-marked-badge {
-  display: inline-block;
-  background: #e6f7ee;
-  color: #2d7a4f;
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.cell-preview-badge {
-  display: inline-block;
-  background: #fff3e0;
-  color: #b45309;
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.cell-photo-actions {
-  display: flex;
-  gap: var(--spacing-xs);
-  flex-wrap: nowrap;
-}
-
-.cell-photo-actions .btn {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.8rem;
-  padding: 6px 8px;
-  white-space: nowrap;
-}
-
-.cell-modal-no-photo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
 .cell-modal-actions {
   display: flex;
   flex-direction: column;
@@ -1254,13 +1196,11 @@ h1 {
 
 .photo-preview-actions {
   display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: nowrap;
+  gap: var(--spacing-md);
 }
 
 .photo-preview-actions .btn {
   flex: 1;
-  white-space: nowrap;
 }
 
 .btn-small {
@@ -1394,10 +1334,7 @@ h1 {
   margin-bottom: var(--spacing-md);
 }
 
-.result-board-wrap .bingo-board,
-.result-capture-board .bingo-board {
-  width: 100%;
-  margin-left: 0;
+.result-board-wrap .bingo-board {
   margin-bottom: 0;
   gap: 1px;
   padding: 2px;
@@ -1435,25 +1372,6 @@ h1 {
   cursor: zoom-in;
   pointer-events: auto;
 }
-
-/* 共有画面: 写真ありセルはクリック可能だがホバーエフェクトなし */
-.result-capture-board .bingo-cell {
-  cursor: default;
-  pointer-events: none;
-}
-.result-capture-board .bingo-cell.has-photo {
-  cursor: pointer;
-  pointer-events: auto;
-}
-.result-capture-board .bingo-cell:hover,
-.result-capture-board .bingo-cell.has-photo:hover {
-  transform: none;
-  box-shadow: none;
-}
-.result-capture-board .bingo-cell.marked:hover { background: var(--cell-marked); border-color: var(--primary-dark); }
-.result-capture-board .bingo-cell.bingo:hover  { background: var(--cell-bingo);  border-color: var(--accent); }
-.result-capture-board .bingo-cell.free:hover   { background: var(--cell-free);   border-color: var(--primary); }
-.result-capture-board .bingo-cell:not(.marked):not(.bingo):not(.free):hover { background: var(--cell-bg); border-color: var(--cell-border); }
 .result-board-wrap .bingo-cell.has-photo:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
@@ -1461,20 +1379,36 @@ h1 {
   border-color: var(--primary-light);
 }
 
-/* 写真保存モーダル（通常モーダルスタイルを継承） */
-.result-photo-modal-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 0 0 var(--spacing-md) 0;
-  color: var(--text);
+/* 写真ライトボックス */
+.result-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease;
+  padding: 16px;
 }
 
-.result-photo-modal-img {
-  width: 100%;
+.result-photo-lightbox img {
+  max-width: 90vw;
+  max-height: 88vh;
+  object-fit: contain;
   border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-md);
-  display: block;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.result-photo-lightbox-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  pointer-events: none;
 }
 
 .result-stats-row {
@@ -1579,6 +1513,11 @@ h1 {
   margin: 0 0 var(--spacing-md) 0;
 }
 
+.result-capture-board .bingo-board {
+  margin-bottom: 0;
+  gap: 1px;
+  padding: 2px;
+}
 
 .result-capture-stats {
   display: flex;
