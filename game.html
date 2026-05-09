@@ -16,6 +16,41 @@
   
   <!-- CSS -->
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ===== トグルボタングループ ===== */
+    .toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .toggle-btn {
+      flex: 1;
+      min-width: 56px;
+      padding: 9px 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid #d0d0d0;
+      border-radius: 10px;
+      background: #f5f5f5;
+      color: #555;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.3;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .toggle-btn:hover {
+      border-color: #7eb89a;
+      color: #3d7a5c;
+      background: #f0faf4;
+    }
+    .toggle-btn.active {
+      background: #4a8b6a;
+      border-color: #4a8b6a;
+      color: #fff;
+      font-weight: 700;
+    }
+  </style>
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
@@ -62,33 +97,26 @@
             設定してすぐスタート
           </p>
           <div class="form-group">
-            <label for="playModeSolo">遊び方</label>
-            <div class="play-mode-options">
-              <label class="play-mode-option">
-                <input type="radio" name="playModeSolo" value="photo" checked>
-                <span class="play-mode-label">写真で記録</span>
-                <span class="play-mode-desc">見つけたら写真を撮ってマーク</span>
-              </label>
-              <label class="play-mode-option">
-                <input type="radio" name="playModeSolo" value="markOnly">
-                <span class="play-mode-label">マークだけ</span>
-                <span class="play-mode-desc">タップするだけでマーク</span>
-              </label>
+            <label>難易度</label>
+            <select id="difficultySelectSolo" class="select-box" style="display:none">
+              <option value="easy">かんたん</option>
+              <option value="normal" selected>ふつう</option>
+              <option value="hard">むずかしい</option>
+              <option value="oni">おに</option>
+              <option value="gachi">ガチおに</option>
+            </select>
+            <div class="toggle-group" data-sync="difficultySelectSolo">
+              <button type="button" class="toggle-btn" data-value="easy">かんたん</button>
+              <button type="button" class="toggle-btn active" data-value="normal">ふつう</button>
+              <button type="button" class="toggle-btn" data-value="hard">むずかしい</button>
+              <button type="button" class="toggle-btn" data-value="oni">おに</button>
+              <button type="button" class="toggle-btn" data-value="gachi">ガチおに</button>
             </div>
           </div>
           <div class="form-group">
-            <label for="difficultySelectSolo">難易度</label>
-            <select id="difficultySelectSolo" class="select-box">
-              <option value="easy">かんたん（よく見るもの）</option>
-              <option value="normal" selected>ふつう（少し探す）</option>
-              <option value="hard">むずかしい（レアなもの）</option>
-              <option value="oni">おに（かなりレア）</option>
-              <option value="gachi">ガチおに（全部レア）</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="topicSetSelectSolo">フィールド</label>
-            <select id="topicSetSelectSolo" class="select-box topic-set-select" aria-describedby="topicSetHelpSolo"></select>
+            <label>フィールド</label>
+            <select id="topicSetSelectSolo" class="select-box topic-set-select" style="display:none" aria-describedby="topicSetHelpSolo"></select>
+            <div class="toggle-group" id="topicSetToggleSolo" data-sync="topicSetSelectSolo"></div>
             <p class="form-help topic-set-help" id="topicSetHelpSolo"></p>
           </div>
           <div class="form-group">
@@ -166,21 +194,6 @@
           </div>
 
           <div class="form-group">
-            <label for="playModeCreate">遊び方</label>
-            <div class="play-mode-options">
-              <label class="play-mode-option">
-                <input type="radio" name="playModeCreate" value="photo" checked>
-                <span class="play-mode-label">写真で記録</span>
-                <span class="play-mode-desc">見つけたら写真を撮ってマーク</span>
-              </label>
-              <label class="play-mode-option">
-                <input type="radio" name="playModeCreate" value="markOnly">
-                <span class="play-mode-label">マークだけ</span>
-                <span class="play-mode-desc">タップするだけでマーク</span>
-              </label>
-            </div>
-          </div>
-          <div class="form-group">
             <label for="gameTypeCreate">ゲームタイプ</label>
             <select id="gameTypeCreate" class="select-box">
               <option value="normal" selected>通常BINGO</option>
@@ -208,22 +221,27 @@
           </div>
 
           <div class="form-group">
-            <label for="difficultySelect">難易度</label>
-            <select id="difficultySelect" class="select-box">
-              <option value="easy">かんたん（よく見るもの）</option>
-              <option value="normal" selected>ふつう（少し探す）</option>
-              <option value="hard">むずかしい（レアなもの）</option>
-              <option value="oni">おに（かなりレア）</option>
-              <option value="gachi">ガチおに（全部レア）</option>
+            <label>難易度</label>
+            <select id="difficultySelect" class="select-box" style="display:none">
+              <option value="easy">かんたん</option>
+              <option value="normal" selected>ふつう</option>
+              <option value="hard">むずかしい</option>
+              <option value="oni">おに</option>
+              <option value="gachi">ガチおに</option>
             </select>
-            <p class="form-help">
-              お題の見つけやすさが変わります
-            </p>
+            <div class="toggle-group" data-sync="difficultySelect">
+              <button type="button" class="toggle-btn" data-value="easy">かんたん</button>
+              <button type="button" class="toggle-btn active" data-value="normal">ふつう</button>
+              <button type="button" class="toggle-btn" data-value="hard">むずかしい</button>
+              <button type="button" class="toggle-btn" data-value="oni">おに</button>
+              <button type="button" class="toggle-btn" data-value="gachi">ガチおに</button>
+            </div>
           </div>
 
           <div class="form-group">
-            <label for="topicSetSelectCreate">フィールド</label>
-            <select id="topicSetSelectCreate" class="select-box topic-set-select" aria-describedby="topicSetHelpCreate"></select>
+            <label>フィールド</label>
+            <select id="topicSetSelectCreate" class="select-box topic-set-select" style="display:none" aria-describedby="topicSetHelpCreate"></select>
+            <div class="toggle-group" id="topicSetToggleCreate" data-sync="topicSetSelectCreate"></div>
             <p class="form-help topic-set-help" id="topicSetHelpCreate"></p>
           </div>
 
@@ -284,21 +302,6 @@
           </div>
 
           <div class="form-group">
-            <label for="playModeJoin">遊び方</label>
-            <div class="play-mode-options">
-              <label class="play-mode-option">
-                <input type="radio" name="playModeJoin" value="photo" checked>
-                <span class="play-mode-label">写真で記録</span>
-                <span class="play-mode-desc">見つけたら写真を撮ってマーク</span>
-              </label>
-              <label class="play-mode-option">
-                <input type="radio" name="playModeJoin" value="markOnly">
-                <span class="play-mode-label">マークだけ</span>
-                <span class="play-mode-desc">タップするだけでマーク</span>
-              </label>
-            </div>
-          </div>
-          <div class="form-group">
             <label for="gameTypeJoin">ゲームタイプ</label>
             <select id="gameTypeJoin" class="select-box">
               <option value="normal" selected>通常BINGO</option>
@@ -310,23 +313,29 @@
           </div>
 
           <div class="form-group">
-            <label for="joinDifficultySelect">難易度</label>
-            <select id="joinDifficultySelect" class="select-box">
-              <option value="easy">かんたん（よく見るもの）</option>
-              <option value="normal" selected>ふつう（少し探す）</option>
-              <option value="hard">むずかしい（レアなもの）</option>
-              <option value="oni">おに（かなりレア）</option>
-              <option value="gachi">ガチおに（全部レア）</option>
+            <label>難易度</label>
+            <select id="joinDifficultySelect" class="select-box" style="display:none">
+              <option value="easy">かんたん</option>
+              <option value="normal" selected>ふつう</option>
+              <option value="hard">むずかしい</option>
+              <option value="oni">おに</option>
+              <option value="gachi">ガチおに</option>
             </select>
-            <p class="form-help">
-              作った人と同じ難易度を選んでね
-            </p>
+            <div class="toggle-group" data-sync="joinDifficultySelect">
+              <button type="button" class="toggle-btn" data-value="easy">かんたん</button>
+              <button type="button" class="toggle-btn active" data-value="normal">ふつう</button>
+              <button type="button" class="toggle-btn" data-value="hard">むずかしい</button>
+              <button type="button" class="toggle-btn" data-value="oni">おに</button>
+              <button type="button" class="toggle-btn" data-value="gachi">ガチおに</button>
+            </div>
+            <p class="form-help">作った人と同じ難易度を選んでね</p>
           </div>
 
           <div class="form-group">
-            <label for="topicSetSelectJoin">フィールド</label>
-            <select id="topicSetSelectJoin" class="select-box topic-set-select" aria-describedby="topicSetHelpJoin"></select>
-            <p class="form-help topic-set-help" id="topicSetHelpJoin">作った人と同じフィールドを選んでください。</p>
+            <label>フィールド</label>
+            <select id="topicSetSelectJoin" class="select-box topic-set-select" style="display:none" aria-describedby="topicSetHelpJoin"></select>
+            <div class="toggle-group" id="topicSetToggleJoin" data-sync="topicSetSelectJoin"></div>
+            <p class="form-help topic-set-help" id="topicSetHelpJoin">作った人と同じフィールドを選んでね</p>
           </div>
 
           <div class="form-group" id="joinCustomTopicGroup">
@@ -624,6 +633,23 @@
     })();
   </script>
   
+  <!-- トグルボタン共通ハンドラ -->
+  <script>
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.toggle-btn');
+      if (!btn) return;
+      const group = btn.closest('.toggle-group[data-sync]');
+      if (!group) return;
+      group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const sel = document.getElementById(group.dataset.sync);
+      if (sel) {
+        sel.value = btn.dataset.value;
+        sel.dispatchEvent(new Event('change'));
+      }
+    });
+  </script>
+
   <!-- Service Worker登録 -->
   <script>
     if ('serviceWorker' in navigator) {

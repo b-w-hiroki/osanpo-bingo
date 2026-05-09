@@ -1464,6 +1464,8 @@ class OsanpoBingo {
     const available = topicSets.filter(
       (s) => s.monetizationType === 'free' || s.monetizationType === 'sponsored-ready'
     );
+
+    // hidden <select> を更新
     document.querySelectorAll('select.topic-set-select').forEach((sel) => {
       sel.innerHTML = '';
       available.forEach((set) => {
@@ -1475,12 +1477,33 @@ class OsanpoBingo {
             : set.name;
         sel.appendChild(opt);
       });
-      if (this.topicSetId && available.some((s) => s.id === this.topicSetId)) {
-        sel.value = this.topicSetId;
-      } else {
-        sel.value = 'default';
-      }
+      const current = (this.topicSetId && available.some((s) => s.id === this.topicSetId))
+        ? this.topicSetId : 'default';
+      sel.value = current;
     });
+
+    // フィールドトグルグループを構築
+    [
+      { toggleId: 'topicSetToggleSolo',   selectId: 'topicSetSelectSolo' },
+      { toggleId: 'topicSetToggleCreate', selectId: 'topicSetSelectCreate' },
+      { toggleId: 'topicSetToggleJoin',   selectId: 'topicSetSelectJoin' },
+    ].forEach(({ toggleId, selectId }) => {
+      const toggle = document.getElementById(toggleId);
+      const sel    = document.getElementById(selectId);
+      if (!toggle || !sel) return;
+      toggle.innerHTML = '';
+      available.forEach((set) => {
+        const label = set.sponsorName && set.monetizationType === 'sponsored-ready'
+          ? `${set.name}（${set.sponsorName}）` : set.name;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'toggle-btn' + (sel.value === set.id ? ' active' : '');
+        btn.dataset.value = set.id;
+        btn.textContent = label;
+        toggle.appendChild(btn);
+      });
+    });
+
     document.querySelectorAll('select.topic-set-select').forEach((sel) => this.updateTopicSetHelpFor(sel));
   }
   
