@@ -23,30 +23,30 @@
     /* ===== ヒーロー内のstats+CTAを縦積みに ===== */
     .hero-content {
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
     }
 
     /* ===== キャッチコピー ===== */
     .hero-catchcopy {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       color: #fff;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.45);
       text-align: center;
       line-height: 1.5;
       letter-spacing: 0.03em;
     }
     .hero-subcopy {
       margin: 0;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
-      color: rgba(255,255,255,0.92);
-      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 1px 5px rgba(0,0,0,0.4);
       text-align: center;
-      line-height: 1.65;
+      line-height: 1.7;
     }
 
     /* ===== キャッチチップ（ヒーロー直下） ===== */
@@ -57,13 +57,13 @@
       flex-wrap: wrap;
     }
     .stat-chip {
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.9);
       border: 1.5px solid rgba(126,184,154,0.5);
       border-radius: 20px;
-      padding: 5px 13px;
+      padding: 5px 14px;
       font-size: 12px;
       font-weight: 700;
-      color: #3d7a5c;
+      color: #2e6648;
       white-space: nowrap;
       backdrop-filter: blur(4px);
     }
@@ -72,16 +72,16 @@
     .lp-section {
       background: #fff;
       border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+      border: 1px solid rgba(0,0,0,0.05);
       padding: 24px 20px;
       margin-bottom: 16px;
     }
     .lp-section-title {
-      font-size: 1rem;
+      font-size: 17px;
       font-weight: 800;
-      color: #3d7a5c;
-      margin-bottom: 18px;
+      color: #1e5c3a;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -90,7 +90,7 @@
       content: '';
       flex: 1;
       height: 2px;
-      background: linear-gradient(to right, #a8d5ba, transparent);
+      background: linear-gradient(to right, #7eb89a, transparent);
       border-radius: 2px;
     }
 
@@ -98,154 +98,165 @@
     .steps {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
     .step-row {
       display: flex;
       align-items: flex-start;
-      gap: 14px;
+      gap: 16px;
     }
     .step-circle {
-      width: 34px;
-      height: 34px;
-      min-width: 34px;
-      background: linear-gradient(145deg, #7eb89a, #5a9b7d);
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      background: linear-gradient(145deg, #7eb89a, #4a8b6a);
       color: #fff;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 800;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 6px rgba(90,155,125,0.35);
+      box-shadow: 0 3px 8px rgba(74,139,106,0.4);
     }
     .step-body strong {
       display: block;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
-      color: #2d3436;
-      margin-bottom: 3px;
+      color: #1a1a1a;
+      margin-bottom: 5px;
+      line-height: 1.4;
     }
     .step-body p {
       margin: 0;
-      font-size: 12px;
-      color: #636e72;
-      line-height: 1.6;
-    }
-
-    /* ===== 特徴カード ===== */
-    .feature-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .feature-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 14px;
-      background: #f8fdf9;
-      border-radius: 12px;
-    }
-    .feature-icon-wrap {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      background: #fff;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-    .feature-body strong {
-      display: block;
       font-size: 13px;
-      font-weight: 700;
-      color: #2d3436;
-      margin-bottom: 4px;
-    }
-    .feature-body p {
-      margin: 0;
-      font-size: 12px;
-      color: #636e72;
-      line-height: 1.65;
-    }
-
-    /* ===== マルチプレイ ===== */
-    .multi-box {
-      background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
-      border-radius: 12px;
-      padding: 18px 16px;
-      border: 1.5px solid #b3d9f2;
-    }
-    .multi-box-head {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 800;
-      color: #1565c0;
-      margin-bottom: 8px;
-    }
-    .multi-box p {
-      margin: 0;
-      font-size: 13px;
-      color: #445;
+      color: #555;
       line-height: 1.7;
     }
 
-    /* ===== 難易度グリッド ===== */
-    .diff-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+    /* ===== 特徴チェックリスト ===== */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
-    .diff-card {
-      border-radius: 10px;
-      padding: 12px;
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid #eef2ee;
     }
-    .diff-card .diff-label {
+    .feature-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .feature-item:first-child {
+      padding-top: 0;
+    }
+    .feature-check {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      background: #4a8b6a;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 14px;
-      font-weight: 800;
-      margin-bottom: 5px;
+      justify-content: center;
+      margin-top: 1px;
     }
-    .diff-card p {
+    .feature-text strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .feature-text p {
       margin: 0;
-      font-size: 11px;
-      line-height: 1.6;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.7;
     }
-    .diff-easy   { background: #e8f5e9; border: 1.5px solid #a5d6a7; color: #2e7d32; }
-    .diff-normal { background: #e3f2fd; border: 1.5px solid #90caf9; color: #1565c0; }
-    .diff-hard   { background: #fff3e0; border: 1.5px solid #ffcc80; color: #e65100; }
-    .diff-oni    { background: #fce4ec; border: 1.5px solid #f48fb1; color: #880e4f; }
 
-    /* ===== シーングリッド ===== */
-    .scene-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    /* ===== バトルモード ===== */
+    .battle-box {
+      background: linear-gradient(135deg, #e8f5e9 0%, #e8f0fd 100%);
+      border-radius: 14px;
+      padding: 20px 18px;
+      border: 1.5px solid #a8c8e8;
+    }
+    .battle-box-head {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a3a7c;
+      margin-bottom: 10px;
+    }
+    .battle-box p {
+      margin: 0;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.75;
+    }
+
+    /* ===== 難易度リスト ===== */
+    .diff-list {
+      display: flex;
+      flex-direction: column;
       gap: 8px;
     }
-    .scene-card {
-      background: #f8fdf9;
-      border-radius: 10px;
-      padding: 12px 6px;
-      text-align: center;
+    .diff-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 16px;
+      border-radius: 12px;
     }
-    .scene-card .scene-emoji {
-      font-size: 26px;
-      display: block;
-      margin-bottom: 5px;
+    .diff-badge {
+      font-size: 14px;
+      font-weight: 800;
+      min-width: 80px;
+      white-space: nowrap;
     }
-    .scene-card span {
-      font-size: 11px;
+    .diff-row p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: inherit;
+      opacity: 0.85;
+    }
+    .diff-easy   { background: #e8f5e9; border: 1.5px solid #a5d6a7; color: #1b5e20; }
+    .diff-normal { background: #e3f2fd; border: 1.5px solid #90caf9; color: #0d3c78; }
+    .diff-hard   { background: #fff3e0; border: 1.5px solid #ffcc80; color: #bf360c; }
+    .diff-oni    { background: #fce4ec; border: 1.5px solid #f48fb1; color: #6a0030; }
+
+    /* ===== シーンリスト ===== */
+    .scene-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .scene-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f4faf6;
+      border-radius: 12px;
+      padding: 13px 14px;
+    }
+    .scene-item .scene-emoji {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .scene-item span {
+      font-size: 13px;
       font-weight: 600;
-      color: #3d7a5c;
-      line-height: 1.4;
+      color: #1e5c3a;
+      line-height: 1.45;
     }
   </style>
 </head>
@@ -305,32 +316,32 @@
 
       <!-- 特徴 -->
       <div class="lp-section">
-        <h2 class="lp-section-title">ここがすごい</h2>
-        <div class="feature-cards">
-          <div class="feature-card">
-            <div class="feature-icon-wrap">📷</div>
-            <div class="feature-body">
+        <h2 class="lp-section-title">できること</h2>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            <div class="feature-text">
               <strong>写真を撮ってマーク、思い出になる</strong>
               <p>見つけた瞬間をその場でパシャ！写真入りの結果ボードは画像として保存できて、おさんぽの記録にもなる。</p>
             </div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrap">⭐</div>
-            <div class="feature-body">
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            <div class="feature-text">
               <strong>難易度5種類で何度でも楽しめる</strong>
               <p>かんたん〜ガチおにまで5段階。難易度ごとに出るお題が変わるから、毎回新鮮な体験ができる。</p>
             </div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrap">✏️</div>
-            <div class="feature-body">
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            <div class="feature-text">
               <strong>好きなお題を自分で入れられる</strong>
               <p>フリー入力マスを最大24個設定して、自分だけのオリジナルBINGOボードに。イベントや授業にも使える。</p>
             </div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon-wrap">📱</div>
-            <div class="feature-body">
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            <div class="feature-text">
               <strong>アプリ不要、ブラウザだけで動く</strong>
               <p>インストール不要。スマホのブラウザでURLを開くだけですぐ遊べる。オフラインにも対応。</p>
             </div>
@@ -338,39 +349,37 @@
         </div>
       </div>
 
-      <!-- マルチプレイ -->
+      <!-- バトルモード -->
       <div class="lp-section">
-        <h2 class="lp-section-title">みんなで同じボードで楽しめる</h2>
-        <div class="multi-box">
-          <div class="multi-box-head">
-            合言葉で同じボードを共有
-          </div>
-          <p>バトルモードで合言葉を決めるだけで、友達・家族全員が同じお題ボードでスタート。誰が先にBINGOできるか楽しみながら歩こう！公園の遠足、家族のおさんぽ、課外活動にも。</p>
+        <h2 class="lp-section-title">みんなで同じボードで遊べる</h2>
+        <div class="battle-box">
+          <p class="battle-box-head">同じお題でバトル！相手より早く探せ！</p>
+          <p>バトルモードで合言葉を決めるだけで、友達・家族全員が同じお題ボードでスタート。誰が先にBINGOできるか楽しみながら歩こう。公園の遠足・家族のおさんぽ・課外活動にも。</p>
         </div>
       </div>
 
       <!-- 難易度 -->
       <div class="lp-section">
         <h2 class="lp-section-title">5種類の難易度</h2>
-        <div class="diff-grid">
-          <div class="diff-card diff-easy">
-            <div class="diff-label">かんたん</div>
+        <div class="diff-list">
+          <div class="diff-row diff-easy">
+            <span class="diff-badge">かんたん</span>
             <p>信号機・花・ポストなど見つけやすいお題中心</p>
           </div>
-          <div class="diff-card diff-normal">
-            <div class="diff-label">ふつう</div>
+          <div class="diff-row diff-normal">
+            <span class="diff-badge">ふつう</span>
             <p>少し探すお題も混ざってくる、ちょうどいい歯ごたえ</p>
           </div>
-          <div class="diff-card diff-hard">
-            <div class="diff-label">むずかしい</div>
-            <p>レアなお題が増える。目を凝らして探そう！</p>
+          <div class="diff-row diff-hard">
+            <span class="diff-badge">むずかしい</span>
+            <p>レアなお題が増える。目を凝らして探そう</p>
           </div>
-          <div class="diff-card diff-oni">
-            <div class="diff-label">おに</div>
+          <div class="diff-row diff-oni">
+            <span class="diff-badge">おに</span>
             <p>激レアお題だらけ。達成できたら本物の猛者</p>
           </div>
-          <div class="diff-card diff-oni" style="grid-column: span 2;">
-            <div class="diff-label">ガチおに</div>
+          <div class="diff-row diff-oni">
+            <span class="diff-badge">ガチおに</span>
             <p>全マスが激レアお題。完全制覇はほぼ不可能。挑戦者求む</p>
           </div>
         </div>
@@ -378,31 +387,31 @@
 
       <!-- シーン -->
       <div class="lp-section">
-        <h2 class="lp-section-title">こんなシーンで大活躍</h2>
-        <div class="scene-grid">
-          <div class="scene-card">
+        <h2 class="lp-section-title">こんなシーンで</h2>
+        <div class="scene-list">
+          <div class="scene-item">
             <span class="scene-emoji">👨‍👩‍👧</span>
-            <span>家族の<br>おさんぽ</span>
+            <span>家族のおさんぽ</span>
           </div>
-          <div class="scene-card">
+          <div class="scene-item">
             <span class="scene-emoji">🐕</span>
-            <span>犬の<br>おさんぽ</span>
+            <span>犬のおさんぽ</span>
           </div>
-          <div class="scene-card">
+          <div class="scene-item">
             <span class="scene-emoji">🏃</span>
-            <span>ウォーキング・<br>運動</span>
+            <span>ウォーキング・運動</span>
           </div>
-          <div class="scene-card">
+          <div class="scene-item">
             <span class="scene-emoji">🌸</span>
-            <span>季節の<br>おでかけ</span>
+            <span>季節のおでかけ</span>
           </div>
-          <div class="scene-card">
+          <div class="scene-item">
             <span class="scene-emoji">🏫</span>
-            <span>遠足・<br>校外学習</span>
+            <span>遠足・校外学習</span>
           </div>
-          <div class="scene-card">
+          <div class="scene-item">
             <span class="scene-emoji">👫</span>
-            <span>友達と<br>いっしょに</span>
+            <span>友達といっしょに</span>
           </div>
         </div>
       </div>
