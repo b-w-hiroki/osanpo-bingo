@@ -21,8 +21,8 @@ node_modules/
 # アイコンバックアップ（リサイズ時の元ファイル退避先）
 assets/icons/backup/
 
-# Supabase設定（公開リポジトリに載せない）
-battle-config.js
+# Supabase設定カスタマイズ用（battle-config.js は anon key のみなのでコミット対象）
+# battle-config.js
 
 # 作業用・バックアップフォルダ
 _icons-backup-before-import/

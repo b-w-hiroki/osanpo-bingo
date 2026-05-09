@@ -1,5 +1,5 @@
 // バトルモード: v1.0では封印中。有効化するには true に変更する。
-const BATTLE_MODE_ENABLED = false;
+const BATTLE_MODE_ENABLED = true;
 
 // お散歩ビンゴ - Phase 2: グループ機能 + 写真機能
 
