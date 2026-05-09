@@ -196,7 +196,7 @@ h1 {
 
 /* ビンゴセル（画像・テキストは中央寄せ） */
 .bingo-cell {
-  aspect-ratio: 1;
+  aspect-ratio: 5 / 6;
   display: flex;
   flex-direction: column;
   align-items: center;
