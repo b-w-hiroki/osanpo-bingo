@@ -1580,6 +1580,20 @@ class OsanpoBingo {
         this.updateTopicSetHelpFor(ts);
       }
     });
+    // フィールドステッパーの表示テキストを同期
+    [
+      { stepperId: 'topicSetStepperSolo',   selectId: 'topicSetSelectSolo' },
+      { stepperId: 'topicSetStepperCreate', selectId: 'topicSetSelectCreate' },
+      { stepperId: 'topicSetStepperJoin',   selectId: 'topicSetSelectJoin' },
+    ].forEach(({ stepperId, selectId }) => {
+      const stepper = document.getElementById(stepperId);
+      const sel     = document.getElementById(selectId);
+      if (!stepper || !sel) return;
+      const valueEl = stepper.querySelector('.stepper-value');
+      if (valueEl && sel.options[sel.selectedIndex]) {
+        valueEl.textContent = sel.options[sel.selectedIndex].textContent;
+      }
+    });
     if (customTopicCountSolo && customTopicInputsSolo) {
       const n = this.customTopics.length;
       customTopicCountSolo.value = String(n);
