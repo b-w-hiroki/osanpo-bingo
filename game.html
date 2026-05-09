@@ -17,38 +17,39 @@
   <!-- CSS -->
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* ===== トグルボタングループ ===== */
-    .toggle-group {
+    /* ===== ステッパー（◄ 値 ►） ===== */
+    .stepper {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+      align-items: center;
+      background: #f5f7f5;
+      border: 2px solid #c8ddd0;
+      border-radius: 12px;
+      overflow: hidden;
+      user-select: none;
     }
-    .toggle-btn {
-      flex: 1;
-      min-width: 56px;
-      padding: 9px 6px;
-      font-size: 13px;
-      font-weight: 600;
-      border: 2px solid #d0d0d0;
-      border-radius: 10px;
-      background: #f5f5f5;
-      color: #555;
+    .stepper-btn {
+      flex: 0 0 48px;
+      padding: 12px 0;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #4a8b6a;
       cursor: pointer;
       text-align: center;
-      line-height: 1.3;
-      transition: background 0.12s, border-color 0.12s, color 0.12s;
       -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
     }
-    .toggle-btn:hover {
-      border-color: #7eb89a;
-      color: #3d7a5c;
-      background: #f0faf4;
+    .stepper-btn:active {
+      background: rgba(74,139,106,0.12);
     }
-    .toggle-btn.active {
-      background: #4a8b6a;
-      border-color: #4a8b6a;
-      color: #fff;
+    .stepper-value {
+      flex: 1;
+      text-align: center;
+      font-size: 15px;
       font-weight: 700;
+      color: #1a1a1a;
+      padding: 12px 4px;
+      pointer-events: none;
     }
   </style>
   
@@ -98,25 +99,27 @@
           </p>
           <div class="form-group">
             <label>難易度</label>
-            <select id="difficultySelectSolo" class="select-box" style="display:none">
+            <select id="difficultySelectSolo" style="display:none">
               <option value="easy">かんたん</option>
               <option value="normal" selected>ふつう</option>
               <option value="hard">むずかしい</option>
               <option value="oni">おに</option>
               <option value="gachi">ガチおに</option>
             </select>
-            <div class="toggle-group" data-sync="difficultySelectSolo">
-              <button type="button" class="toggle-btn" data-value="easy">かんたん</button>
-              <button type="button" class="toggle-btn active" data-value="normal">ふつう</button>
-              <button type="button" class="toggle-btn" data-value="hard">むずかしい</button>
-              <button type="button" class="toggle-btn" data-value="oni">おに</button>
-              <button type="button" class="toggle-btn" data-value="gachi">ガチおに</button>
+            <div class="stepper" data-sync="difficultySelectSolo">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">ふつう</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
             </div>
           </div>
           <div class="form-group">
             <label>フィールド</label>
-            <select id="topicSetSelectSolo" class="select-box topic-set-select" style="display:none" aria-describedby="topicSetHelpSolo"></select>
-            <div class="toggle-group" id="topicSetToggleSolo" data-sync="topicSetSelectSolo"></div>
+            <select id="topicSetSelectSolo" class="topic-set-select" style="display:none" aria-describedby="topicSetHelpSolo"></select>
+            <div class="stepper" id="topicSetStepperSolo" data-sync="topicSetSelectSolo">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">-</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
+            </div>
             <p class="form-help topic-set-help" id="topicSetHelpSolo"></p>
           </div>
           <div class="form-group">
@@ -222,26 +225,28 @@
 
           <div class="form-group">
             <label>難易度</label>
-            <select id="difficultySelect" class="select-box" style="display:none">
+            <select id="difficultySelect" style="display:none">
               <option value="easy">かんたん</option>
               <option value="normal" selected>ふつう</option>
               <option value="hard">むずかしい</option>
               <option value="oni">おに</option>
               <option value="gachi">ガチおに</option>
             </select>
-            <div class="toggle-group" data-sync="difficultySelect">
-              <button type="button" class="toggle-btn" data-value="easy">かんたん</button>
-              <button type="button" class="toggle-btn active" data-value="normal">ふつう</button>
-              <button type="button" class="toggle-btn" data-value="hard">むずかしい</button>
-              <button type="button" class="toggle-btn" data-value="oni">おに</button>
-              <button type="button" class="toggle-btn" data-value="gachi">ガチおに</button>
+            <div class="stepper" data-sync="difficultySelect">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">ふつう</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
             </div>
           </div>
 
           <div class="form-group">
             <label>フィールド</label>
-            <select id="topicSetSelectCreate" class="select-box topic-set-select" style="display:none" aria-describedby="topicSetHelpCreate"></select>
-            <div class="toggle-group" id="topicSetToggleCreate" data-sync="topicSetSelectCreate"></div>
+            <select id="topicSetSelectCreate" class="topic-set-select" style="display:none" aria-describedby="topicSetHelpCreate"></select>
+            <div class="stepper" id="topicSetStepperCreate" data-sync="topicSetSelectCreate">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">-</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
+            </div>
             <p class="form-help topic-set-help" id="topicSetHelpCreate"></p>
           </div>
 
@@ -314,27 +319,29 @@
 
           <div class="form-group">
             <label>難易度</label>
-            <select id="joinDifficultySelect" class="select-box" style="display:none">
+            <select id="joinDifficultySelect" style="display:none">
               <option value="easy">かんたん</option>
               <option value="normal" selected>ふつう</option>
               <option value="hard">むずかしい</option>
               <option value="oni">おに</option>
               <option value="gachi">ガチおに</option>
             </select>
-            <div class="toggle-group" data-sync="joinDifficultySelect">
-              <button type="button" class="toggle-btn" data-value="easy">かんたん</button>
-              <button type="button" class="toggle-btn active" data-value="normal">ふつう</button>
-              <button type="button" class="toggle-btn" data-value="hard">むずかしい</button>
-              <button type="button" class="toggle-btn" data-value="oni">おに</button>
-              <button type="button" class="toggle-btn" data-value="gachi">ガチおに</button>
+            <div class="stepper" data-sync="joinDifficultySelect">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">ふつう</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
             </div>
             <p class="form-help">作った人と同じ難易度を選んでね</p>
           </div>
 
           <div class="form-group">
             <label>フィールド</label>
-            <select id="topicSetSelectJoin" class="select-box topic-set-select" style="display:none" aria-describedby="topicSetHelpJoin"></select>
-            <div class="toggle-group" id="topicSetToggleJoin" data-sync="topicSetSelectJoin"></div>
+            <select id="topicSetSelectJoin" class="topic-set-select" style="display:none" aria-describedby="topicSetHelpJoin"></select>
+            <div class="stepper" id="topicSetStepperJoin" data-sync="topicSetSelectJoin">
+              <button type="button" class="stepper-btn stepper-prev">◄</button>
+              <span class="stepper-value">-</span>
+              <button type="button" class="stepper-btn stepper-next">►</button>
+            </div>
             <p class="form-help topic-set-help" id="topicSetHelpJoin">作った人と同じフィールドを選んでね</p>
           </div>
 
@@ -633,20 +640,23 @@
     })();
   </script>
   
-  <!-- トグルボタン共通ハンドラ -->
+  <!-- ステッパー共通ハンドラ -->
   <script>
     document.addEventListener('click', function(e) {
-      const btn = e.target.closest('.toggle-btn');
+      const btn = e.target.closest('.stepper-btn');
       if (!btn) return;
-      const group = btn.closest('.toggle-group[data-sync]');
-      if (!group) return;
-      group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const sel = document.getElementById(group.dataset.sync);
-      if (sel) {
-        sel.value = btn.dataset.value;
-        sel.dispatchEvent(new Event('change'));
-      }
+      const stepper = btn.closest('.stepper[data-sync]');
+      if (!stepper) return;
+      const sel = document.getElementById(stepper.dataset.sync);
+      if (!sel || !sel.options.length) return;
+      const opts = Array.from(sel.options);
+      const cur = opts.findIndex(o => o.value === sel.value);
+      const next = btn.classList.contains('stepper-prev')
+        ? (cur - 1 + opts.length) % opts.length
+        : (cur + 1) % opts.length;
+      sel.value = opts[next].value;
+      stepper.querySelector('.stepper-value').textContent = opts[next].textContent;
+      sel.dispatchEvent(new Event('change'));
     });
   </script>
 

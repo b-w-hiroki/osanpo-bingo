@@ -1482,26 +1482,19 @@ class OsanpoBingo {
       sel.value = current;
     });
 
-    // フィールドトグルグループを構築
+    // フィールドステッパーの表示テキストを更新
     [
-      { toggleId: 'topicSetToggleSolo',   selectId: 'topicSetSelectSolo' },
-      { toggleId: 'topicSetToggleCreate', selectId: 'topicSetSelectCreate' },
-      { toggleId: 'topicSetToggleJoin',   selectId: 'topicSetSelectJoin' },
-    ].forEach(({ toggleId, selectId }) => {
-      const toggle = document.getElementById(toggleId);
-      const sel    = document.getElementById(selectId);
-      if (!toggle || !sel) return;
-      toggle.innerHTML = '';
-      available.forEach((set) => {
-        const label = set.sponsorName && set.monetizationType === 'sponsored-ready'
-          ? `${set.name}（${set.sponsorName}）` : set.name;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'toggle-btn' + (sel.value === set.id ? ' active' : '');
-        btn.dataset.value = set.id;
-        btn.textContent = label;
-        toggle.appendChild(btn);
-      });
+      { stepperId: 'topicSetStepperSolo',   selectId: 'topicSetSelectSolo' },
+      { stepperId: 'topicSetStepperCreate', selectId: 'topicSetSelectCreate' },
+      { stepperId: 'topicSetStepperJoin',   selectId: 'topicSetSelectJoin' },
+    ].forEach(({ stepperId, selectId }) => {
+      const stepper = document.getElementById(stepperId);
+      const sel     = document.getElementById(selectId);
+      if (!stepper || !sel) return;
+      const valueEl = stepper.querySelector('.stepper-value');
+      if (valueEl && sel.options[sel.selectedIndex]) {
+        valueEl.textContent = sel.options[sel.selectedIndex].textContent;
+      }
     });
 
     document.querySelectorAll('select.topic-set-select').forEach((sel) => this.updateTopicSetHelpFor(sel));
