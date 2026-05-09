@@ -628,9 +628,13 @@ h1 {
 }
 
 .stat-value {
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--primary-dark);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: center;
   word-break: keep-all;
   overflow-wrap: break-word;
@@ -1205,20 +1209,20 @@ h1 {
 /* マス詳細モーダル */
 .cell-modal-header {
   text-align: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
 }
 
 .cell-modal-icon {
-  font-size: 8rem;
-  margin-bottom: var(--spacing-sm);
+  font-size: 5rem;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .cell-modal-icon .cell-icon-img {
-  width: min(160px, 50vw);
-  height: min(160px, 50vw);
+  width: min(100px, 36vw);
+  height: min(100px, 36vw);
   object-fit: contain;
 }
 
