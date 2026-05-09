@@ -147,12 +147,12 @@ body {
   min-height: 50px;
   border: none;
   border-radius: 14px;
-  background: #157F1F;
+  background: #ff7498;
   color: #ffffff;
   font-weight: 800;
   box-shadow:
-    0 3px 0 #0e5c16,
-    0 6px 16px rgba(21, 127, 31, 0.25);
+    0 3px 0 #cc3d6a,
+    0 6px 16px rgba(255, 116, 152, 0.25);
   animation: none;
 }
 
@@ -163,17 +163,17 @@ body {
 .hero-content .btn-start:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 1px rgba(90, 155, 125, 0.25),
-    0 5px 0 rgba(90, 155, 125, 0.2),
-    0 16px 36px rgba(45, 80, 65, 0.18);
+    0 0 0 1px rgba(255, 116, 152, 0.25),
+    0 5px 0 rgba(255, 116, 152, 0.2),
+    0 16px 36px rgba(255, 116, 152, 0.18);
 }
 
 .hero-content .btn-start:active {
   transform: translateY(0);
   box-shadow:
-    0 0 0 1px rgba(90, 155, 125, 0.2),
-    0 2px 0 rgba(90, 155, 125, 0.18),
-    0 6px 16px rgba(45, 52, 54, 0.1);
+    0 0 0 1px rgba(255, 116, 152, 0.2),
+    0 2px 0 rgba(255, 116, 152, 0.18),
+    0 6px 16px rgba(255, 116, 152, 0.1);
 }
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
@@ -181,7 +181,7 @@ body {
   display: inline-block;
   padding: 18px 36px;
   min-height: 52px;
-  background: #157F1F;
+  background: #ff7498;
   color: #ffffff;
   font-size: 1.15rem;
   font-weight: 700;
@@ -189,8 +189,8 @@ body {
   border-radius: 14px;
   border: none;
   box-shadow:
-    0 3px 0 #0e5c16,
-    0 6px 16px rgba(21, 127, 31, 0.25);
+    0 3px 0 #cc3d6a,
+    0 6px 16px rgba(255, 116, 152, 0.25);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
@@ -219,22 +219,22 @@ body {
 
 .btn-start:hover {
   animation: none;
-  background: #1a9422;
+  background: #ff5a84;
   transform: translateY(-4px);
   box-shadow:
-    0 6px 0 #0e5c16,
-    0 10px 24px rgba(21, 127, 31, 0.35);
+    0 6px 0 #cc3d6a,
+    0 10px 24px rgba(255, 116, 152, 0.35);
 }
 
 .btn-start:active {
   transform: translateY(2px);
   box-shadow:
-    0 2px 0 #0e5c16,
-    0 2px 8px rgba(21, 127, 31, 0.2);
+    0 2px 0 #cc3d6a,
+    0 2px 8px rgba(255, 116, 152, 0.2);
 }
 
 .btn-start:focus-visible {
-  outline: 3px solid var(--primary-light);
+  outline: 3px solid #ff9ab5;
   outline-offset: 3px;
 }
 
