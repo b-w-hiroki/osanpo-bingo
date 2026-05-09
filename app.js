@@ -1094,7 +1094,7 @@ class OsanpoBingo {
     if (distanceStat) {
       const tappable = this.locationState !== 'active';
       distanceStat.classList.toggle('stat-item-clickable', tappable);
-      distanceStat.title = tappable ? '📍 タップして位置情報を再取得' : '';
+      distanceStat.title = tappable ? 'タップして位置情報を再取得' : '';
     }
     this.updateDebugPanel();
   }
@@ -1244,7 +1244,7 @@ class OsanpoBingo {
         <button class="modal-close" id="resultPhotoClose">✕</button>
         ${topicText ? `<p class="result-photo-modal-title">${topicText}</p>` : ''}
         <img src="${src}" alt="写真" class="result-photo-modal-img">
-        <button class="btn btn-primary btn-large result-photo-save-btn">📥 端末に保存</button>
+        <button class="btn btn-primary btn-large result-photo-save-btn">端末に保存</button>
       </div>
     `;
 
@@ -1814,7 +1814,7 @@ class OsanpoBingo {
 
       if (!this.battleBackend.enabled) {
         // バックエンドなし：入力があれば準備OK
-        joinStatusEl.textContent = '✓ 合言葉を確認しました';
+        joinStatusEl.textContent = '合言葉を確認しました';
         joinStatusEl.className = 'join-room-status status-found';
         return;
       }
@@ -1833,7 +1833,7 @@ class OsanpoBingo {
         const data = await res.json();
         const players = new Set(data.map(d => d.owner_user_id));
         if (players.size > 0) {
-          joinStatusEl.textContent = `✅ ルームが見つかりました`;
+          joinStatusEl.textContent = `ルームが見つかりました`;
           joinStatusEl.className = 'join-room-status status-found';
           // 設定サマリー表示
           if (joinInfoEl && joinInfoContent) {
@@ -1851,18 +1851,18 @@ class OsanpoBingo {
                   const s = JSON.parse(sRows[0].owner_user_id);
                   const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
                   const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
-                  settingsChips = `<span class="join-room-info-chip">🎯 ${dLabel}${tsLabel}</span>`;
+                  settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
                 }
               }
             } catch (_) {}
             joinInfoContent.innerHTML =
-              `<span class="join-room-info-chip">🎮 バトルモード</span>` +
-              `<span class="join-room-info-chip">👥 ${players.size}人参加中</span>` +
+              `<span class="join-room-info-chip">バトルモード</span>` +
+              `<span class="join-room-info-chip">${players.size}人参加中</span>` +
               settingsChips;
             joinInfoEl.style.display = 'block';
           }
         } else {
-          joinStatusEl.textContent = '⚪ このコードのルームはまだ誰も使っていません';
+          joinStatusEl.textContent = 'このコードのルームはまだ誰も使っていません';
           joinStatusEl.className = 'join-room-status status-empty';
           if (joinInfoEl) joinInfoEl.style.display = 'none';
         }
@@ -2285,14 +2285,14 @@ class OsanpoBingo {
           toggleMarkBtn.style.display = '';
           if (this.gameType === 'battle') {
             // バトルモードは写真でマス取得のため、マークボタンをカメラ誘導に変更
-            toggleMarkBtn.textContent = '📷 写真を撮ってマスを取る';
+            toggleMarkBtn.textContent = '写真を撮ってマスを取る';
             toggleMarkBtn.classList.remove('marked');
           } else {
             if (this.markedCells.has(index)) {
-              toggleMarkBtn.textContent = '✓ マーク済み（解除）';
+              toggleMarkBtn.textContent = 'マーク済み（解除）';
               toggleMarkBtn.classList.add('marked');
             } else {
-              toggleMarkBtn.textContent = '✓ マークする';
+              toggleMarkBtn.textContent = 'マークする';
               toggleMarkBtn.classList.remove('marked');
             }
           }
@@ -2487,10 +2487,10 @@ class OsanpoBingo {
     const toggleMarkBtn = document.getElementById('toggleMarkBtn');
     if (toggleMarkBtn) {
       if (this.markedCells.has(index)) {
-        toggleMarkBtn.textContent = '✓ マーク済み（解除）';
+        toggleMarkBtn.textContent = 'マーク済み（解除）';
         toggleMarkBtn.classList.add('marked');
       } else {
-        toggleMarkBtn.textContent = '✓ マークする';
+        toggleMarkBtn.textContent = 'マークする';
         toggleMarkBtn.classList.remove('marked');
       }
     }
