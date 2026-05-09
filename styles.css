@@ -2,10 +2,10 @@
 
 /* ==================== 変数定義 ==================== */
 :root {
-  /* カラーパレット: 爽やかなグリーン系 */
-  --primary: #7eb89a;
-  --primary-light: #a8d5ba;
-  --primary-dark: #5a9b7d;
+  /* カラーパレット: グリーン系 */
+  --primary: #157F1F;
+  --primary-light: #4aaf54;
+  --primary-dark: #0e5c16;
   --accent: #ffb347;
   
   /* 背景 */
@@ -259,7 +259,7 @@ h1 {
 .bingo-cell.free        { background: var(--cell-free); }
 .bingo-cell.locked,
 .bingo-cell.locked.marked { background: #cfd8dc; }
-.bingo-cell.claimed-self  { background: #7eb89a; }
+.bingo-cell.claimed-self  { background: #157F1F; }
 
 /* ホバー効果 */
 .bingo-cell:hover {
@@ -316,8 +316,8 @@ h1 {
 }
 
 .bingo-cell.claimed-self {
-  background: #7eb89a;
-  border-color: #5a9b7d;
+  background: #157F1F;
+  border-color: #0e5c16;
   color: #fff;
 }
 
@@ -975,7 +975,7 @@ h1 {
 .join-room-info-label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4a8b6a;
+  color: #157F1F;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 8px;

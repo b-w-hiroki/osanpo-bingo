@@ -1,9 +1,9 @@
 /* お散歩ビンゴ - ランディングページ（モバイルファースト・デザイナー調整版） */
 
 :root {
-  --primary: #7eb89a;
-  --primary-light: #a8d5ba;
-  --primary-dark: #5a9b7d;
+  --primary: #157F1F;
+  --primary-light: #4aaf54;
+  --primary-dark: #0e5c16;
   --bg: #f8faf9;
   --card-bg: #ffffff;
   --text: #2d3436;
@@ -182,7 +182,7 @@ body {
   border: none;
   border-radius: 14px;
   background: linear-gradient(165deg, #ffffff 0%, #eaf5ef 55%, #e2f0ea 100%);
-  color: #3d7a62;
+  color: #157F1F;
   font-weight: 800;
   box-shadow:
     0 0 0 1px rgba(90, 155, 125, 0.18),
