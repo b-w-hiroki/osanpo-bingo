@@ -49,14 +49,17 @@
       text-align: center;
     }
 
+    /* ===== body の固定ヘッダー分パディングをリセット（index.htmlにはヘッダーなし） ===== */
+    body { padding-top: 0; }
+
     /* ===== ロゴモードヒーロー ===== */
     .hero-logo-mode {
       background: #ffffff;
-      padding: 32px 24px 28px;
+      padding: 16px 24px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
     }
     .hero-logo-wrap {
       display: flex;
@@ -429,8 +432,8 @@
         </div>
       </div>
 
-      <!-- 広告枠（インフィード） -->
-      <div class="ad-slot ad-slot-infeed" id="adSlotInfeed">
+      <!-- 広告枠（インフィード）※PV増加後に表示 -->
+      <div class="ad-slot ad-slot-infeed" id="adSlotInfeed" style="display:none">
         <div class="ad-slot-inner">
           <span class="ad-slot-label">広告</span>
           <div class="ad-placeholder">
@@ -451,8 +454,8 @@
       <p>© 2026 おさんぽビンゴ　<span class="dot">・</span>　アプリ不要・無料</p>
     </footer>
 
-    <!-- 広告枠（フッター上） -->
-    <div class="ad-slot ad-slot-footer" id="adSlotFooter">
+    <!-- 広告枠（フッター上）※PV増加後に表示 -->
+    <div class="ad-slot ad-slot-footer" id="adSlotFooter" style="display:none">
       <div class="ad-slot-inner">
         <span class="ad-slot-label">広告</span>
         <div class="ad-placeholder ad-placeholder-banner">
