@@ -1087,12 +1087,10 @@ class OsanpoBingo {
       clone.id = 'screenshotBoardClone';
       targetBoard.innerHTML = '';
       targetBoard.appendChild(clone);
-      // クローン後にセルサイズが変わるため、テキストを再フィット＋高さを明示設定
+      // クローン後にテキストを再フィット（高さはaspect-ratio:1に任せる）
       requestAnimationFrame(() => {
         clone.querySelectorAll('.bingo-cell').forEach(c => {
           this.fitCellText(c);
-          const w = c.offsetWidth;
-          if (w > 0) c.style.height = `${Math.round(w * 6 / 5)}px`;
         });
       });
       // 写真ありセルのみタップで拡大＆保存
