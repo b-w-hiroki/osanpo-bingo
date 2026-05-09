@@ -28,6 +28,27 @@
       max-width: 380px;
     }
 
+    /* ===== キャッチコピー ===== */
+    .hero-catchcopy {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+      text-align: center;
+      line-height: 1.5;
+      letter-spacing: 0.03em;
+    }
+    .hero-subcopy {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.92);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      text-align: center;
+      line-height: 1.65;
+    }
+
     /* ===== キャッチチップ（ヒーロー直下） ===== */
     .stat-chips {
       display: flex;
@@ -229,13 +250,6 @@
   </style>
 </head>
 <body>
-  <header class="global-header">
-    <a href="../" class="global-header-back" aria-label="サイト一覧へ戻る">← 一覧</a>
-    <a href="index.html" class="global-header-product" aria-label="おさんぽBINGOトップへ">
-      <img src="icon-192.png" alt="" width="28" height="28"> おさんぽBINGO
-    </a>
-  </header>
-
   <div class="landing-container">
 
     <!-- ヒーロー -->
@@ -245,6 +259,8 @@
       </div>
       <div class="hero-cta-strip">
         <div class="hero-content">
+          <p class="hero-catchcopy">いつもの散歩が、小さな冒険になる。</p>
+          <p class="hero-subcopy">お題を探しながら歩くだけで、毎日の景色がちょっと違って見えてくる。</p>
           <div class="stat-chips">
             <span class="stat-chip">300種類以上のお題</span>
             <span class="stat-chip">写真でマーク</span>
