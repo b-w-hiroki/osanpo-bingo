@@ -1252,7 +1252,8 @@ class OsanpoBingo {
         clone.querySelectorAll('.bingo-cell').forEach(cell => {
           this.fitCellText(cell);
           const w = cell.offsetWidth;
-          if (w > 0) cell.style.height = `${Math.round(w * 6 / 5)}px`;
+          // html2canvasはaspect-ratio非対応のため高さをpxで明示（1:1 = 正方形）
+          if (w > 0) cell.style.height = `${w}px`;
         });
         clone.querySelectorAll('.bingo-cell.has-photo').forEach(cell => {
           const img = cell.querySelector('.cell-photo-img');
