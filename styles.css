@@ -1480,17 +1480,16 @@ h1 {
   font-size: 0.8rem;
 }
 
-/* 結果ボード内のセルは xl/xxl も1行表示に戻す（折り返すとセルが伸びてしまう） */
+/* 結果ボードの xl/xxl はゲームボードと同じ2行折り返し（高さはJSで固定済み） */
 .result-board-wrap .cell-text-xl,
 .result-board-wrap .cell-text-xxl,
 .result-capture-board .cell-text-xl,
 .result-capture-board .cell-text-xxl {
-  white-space: nowrap;
-  display: block;
-  -webkit-line-clamp: unset;
-  -webkit-box-orient: unset;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* 結果画面: セルは原則タップ無効・ホバーなし */

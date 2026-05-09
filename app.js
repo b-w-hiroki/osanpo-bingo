@@ -1252,6 +1252,7 @@ class OsanpoBingo {
       // ① 高さを明示的にpx設定 ② 写真をbackground-imageに変換する
       requestAnimationFrame(() => {
         clone.querySelectorAll('.bingo-cell').forEach(cell => {
+          this.fitCellText(cell);
           const w = cell.offsetWidth;
           if (w > 0) cell.style.height = `${Math.round(w * 6 / 5)}px`;
         });
