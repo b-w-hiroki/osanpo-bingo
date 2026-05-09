@@ -1265,8 +1265,7 @@ h1 {
 
 /* ---- State C: 写真なし ---- */
 .cell-modal-no-photo {
-  display: flex !important;
-  flex-direction: column !important;
+  flex-direction: column;
   gap: var(--spacing-md);
   margin-top: var(--spacing-sm);
   width: 100%;
