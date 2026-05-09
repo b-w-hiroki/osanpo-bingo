@@ -582,7 +582,10 @@ class OsanpoBingo {
     textEl.style.whiteSpace = '';
     textEl.style.lineHeight = '';
 
-    const MIN_PX = 7;
+    const MIN_PX = 9;
+
+    // xl/xxl はCSS側で2行折り返し済み → 強制縮小しない
+    if (textEl.classList.contains('cell-text-xl') || textEl.classList.contains('cell-text-xxl')) return;
 
     // はみ出しがなければそのまま終了
     if (textEl.scrollWidth <= textEl.offsetWidth) return;
@@ -1040,7 +1043,7 @@ class OsanpoBingo {
       showAlert('まずはゲームを始めてみましょう！');
       return;
     }
-    showConfirm('おさんぽBINGOを終了しますか？\n結果を記録・共有できます。').then((ok) => {
+    showConfirm('おさんぽビンゴを終了しますか？\n結果を記録・共有できます。').then((ok) => {
       if (ok) this.showResultView();
     });
   }
@@ -1211,7 +1214,7 @@ class OsanpoBingo {
     const dateEl = document.getElementById('resultDate');
     const boardEl = document.getElementById('screenshotBoard');
     
-    document.getElementById('resultCaptureTitle').textContent = 'おさんぽBINGO';
+    document.getElementById('resultCaptureTitle').textContent = 'おさんぽビンゴ';
     document.getElementById('resultCaptureDate').textContent = dateEl?.textContent || '-';
     
     const playTimeEl = document.getElementById('resultPlayTime');
@@ -1325,7 +1328,7 @@ class OsanpoBingo {
     
     if (navigator.share) {
       navigator.share({
-        title: 'おさんぽBINGO',
+        title: 'おさんぽビンゴ',
         text: text,
         url: shareUrl
       }).then(() => {
@@ -1350,12 +1353,12 @@ class OsanpoBingo {
       ? this.getBattleCounts().selfClaims
       : [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
     return [
-      'おさんぽBINGOで遊んだ！',
+      'おさんぽビンゴで遊んだ！',
       dateEl?.textContent || '',
       playTimeEl ? playTimeEl + ' ' : '',
       groupText ? groupText + ' ' : '',
       'BINGO' + bingo + '本・マーク' + marked + 'マス' + (this.totalDistance > 0 ? '・' + this.formatDistance(this.totalDistance) + '歩いた' : ''),
-      '#おさんぽBINGO #散歩 #BINGO'
+      '#おさんぽビンゴ #散歩 #ビンゴ'
     ].filter(Boolean).join('\n');
   }
   
@@ -2339,7 +2342,7 @@ class OsanpoBingo {
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'おさんぽBINGO写真' });
+          await navigator.share({ files: [file], title: 'おさんぽビンゴ写真' });
           return;
         } catch (e) {
           if (e.name === 'AbortError') return;
