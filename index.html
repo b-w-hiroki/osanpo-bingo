@@ -51,14 +51,17 @@
 
     /* ===== ロゴモードヒーロー ===== */
     .hero-logo-mode {
-      background: linear-gradient(160deg, #d8efd8 0%, #c8e8c8 40%, #b8e0b8 100%);
-      padding-top: 28px;
+      background: #ffffff;
+      padding: 32px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
     }
     .hero-logo-wrap {
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0 24px;
     }
     .hero-logo-img {
       width: min(260px, 72vw);
@@ -68,7 +71,14 @@
       border-radius: 20px;
     }
     .hero-cta-strip-logo {
-      margin-top: 20px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
     }
 
     /* ===== キャッチチップ（ヒーロー直下） ===== */
@@ -303,12 +313,8 @@
       <div class="hero-logo-wrap">
         <img src="static/osanpo-bingo-battle.png" alt="おさんぽビンゴ ロゴ。ビンゴグリッドに並んだお散歩アイテムと、バトルモードバッジ。" class="hero-logo-img">
       </div>
-      <div class="hero-cta-strip hero-cta-strip-logo">
-        <div class="hero-content">
-          <p class="hero-catchcopy">いつもの散歩が、小さな冒険になる。</p>
-          <p class="hero-subcopy">毎日の景色がちょっと違って見えてくる。</p>
-          <a href="game.html" class="btn-start">おさんぽビンゴを始める</a>
-        </div>
+      <div class="hero-cta-strip-logo">
+        <a href="game.html" class="btn-start">おさんぽビンゴを始める</a>
       </div>
     </section>
 
