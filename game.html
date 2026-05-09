@@ -604,15 +604,16 @@
   <!-- ステッパー共通ハンドラ -->
   <script>
     document.addEventListener('click', function(e) {
-      const btn = e.target.closest('.stepper-btn');
-      if (!btn) return;
-      const stepper = btn.closest('.stepper[data-sync]');
+      // ステッパー本体（またはその子要素）がクリックされたか判定
+      const stepper = e.target.closest('.stepper[data-sync]');
       if (!stepper) return;
       const sel = document.getElementById(stepper.dataset.sync);
       if (!sel || !sel.options.length) return;
       const opts = Array.from(sel.options);
       const cur = opts.findIndex(o => o.value === sel.value);
-      const next = btn.classList.contains('stepper-prev')
+      // 左矢印ボタンのみ「前へ」、本体タップ・右矢印ボタンはすべて「次へ」
+      const isPrev = !!e.target.closest('.stepper-prev');
+      const next = isPrev
         ? (cur - 1 + opts.length) % opts.length
         : (cur + 1) % opts.length;
       sel.value = opts[next].value;
