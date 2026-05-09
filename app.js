@@ -919,11 +919,14 @@ class OsanpoBingo {
   onLocationUpdate(pos) {
     const { latitude, longitude, accuracy } = pos.coords;
 
-    // 精度 30m 超はノイズとして無視
-    if (accuracy > 30) return;
+    // GPS が取れた時点で active に（精度不問）
+    if (this.locationState !== 'active') {
+      this.locationState = 'active';
+      this.updateStats();
+    }
 
-    // 最初の有効な位置が取れた → active に
-    this.locationState = 'active';
+    // 精度 50m 超は距離加算に使わない（ノイズ除去）
+    if (accuracy > 50) return;
 
     if (this.lastPosition) {
       const dist = this.haversineDistance(
