@@ -4,7 +4,7 @@
   --primary: #157F1F;
   --primary-light: #4aaf54;
   --primary-dark: #0e5c16;
-  --bg: #f8faf9;
+  --bg: #ffffff;
   --card-bg: #ffffff;
   --text: #2d3436;
   --text-light: #636e72;
@@ -96,7 +96,7 @@ body {
   align-items: stretch;
   padding: 0;
   padding-bottom: max(20px, env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, var(--bg) 0%, #dff0df 55%, #cce8cc 100%);
+  background: #ffffff;
   color: var(--text);
   text-align: center;
   overflow: visible;
@@ -109,7 +109,7 @@ body {
   max-height: none;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(180deg, #d0ecd0 0%, #dff0df 55%, #cce8cc 100%);
+  background: #ffffff;
   border-radius: 0 0 clamp(18px, 4vw, 28px) clamp(18px, 4vw, 28px);
   box-shadow: 0 10px 32px rgba(90, 120, 100, 0.08);
 }
@@ -181,13 +181,12 @@ body {
   min-height: 50px;
   border: none;
   border-radius: 14px;
-  background: linear-gradient(165deg, #ffffff 0%, #e8f5e8 55%, #d8efd8 100%);
-  color: #157F1F;
+  background: #157F1F;
+  color: #ffffff;
   font-weight: 800;
   box-shadow:
-    0 0 0 1px rgba(90, 155, 125, 0.18),
-    0 3px 0 rgba(90, 155, 125, 0.22),
-    0 10px 28px rgba(45, 80, 65, 0.14);
+    0 3px 0 #0e5c16,
+    0 6px 16px rgba(21, 127, 31, 0.25);
   animation: none;
 }
 
@@ -216,17 +215,16 @@ body {
   display: inline-block;
   padding: 18px 36px;
   min-height: 52px;
-  background: linear-gradient(180deg, #ffffff 0%, #f0f4f2 100%);
-  color: var(--primary-dark);
+  background: #157F1F;
+  color: #ffffff;
   font-size: 1.15rem;
   font-weight: 700;
   text-decoration: none;
   border-radius: 14px;
-  border: 2px solid rgba(90, 155, 125, 0.35);
+  border: none;
   box-shadow:
-    0 3px 0 #b8d4c4,
-    0 6px 16px rgba(45, 52, 54, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    0 3px 0 #0e5c16,
+    0 6px 16px rgba(21, 127, 31, 0.25);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
@@ -255,18 +253,18 @@ body {
 
 .btn-start:hover {
   animation: none;
+  background: #1a9422;
   transform: translateY(-4px);
   box-shadow:
-    0 6px 0 #c5d9cd,
-    0 10px 24px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
+    0 6px 0 #0e5c16,
+    0 10px 24px rgba(21, 127, 31, 0.35);
 }
 
 .btn-start:active {
   transform: translateY(2px);
   box-shadow:
-    0 2px 0 #c5d9cd,
-    0 2px 8px rgba(0, 0, 0, 0.15);
+    0 2px 0 #0e5c16,
+    0 2px 8px rgba(21, 127, 31, 0.2);
 }
 
 .btn-start:focus-visible {
