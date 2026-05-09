@@ -1229,6 +1229,7 @@ h1 {
   justify-content: space-between;
   margin-bottom: var(--spacing-sm);
   gap: var(--spacing-sm);
+  padding-right: 44px; /* ×ボタン（36px）+ right:16px 分の被り防止 */
 }
 
 .cell-photo-title {

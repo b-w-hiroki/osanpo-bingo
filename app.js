@@ -1639,9 +1639,6 @@ class OsanpoBingo {
     
     const roomCodeInput = document.getElementById('roomCodeInput');
     const difficultySelect = document.getElementById('difficultySelect');
-    const playerCountInput = document.getElementById('playerCountInput');
-    const gameTypeCreate = document.getElementById('gameTypeCreate');
-    const gameTypeJoin = document.getElementById('gameTypeJoin');
     const customTopicCountSelect = document.getElementById('customTopicCount');
     const customTopicInputsContainer = document.getElementById('customTopicInputs');
     
@@ -1653,7 +1650,6 @@ class OsanpoBingo {
       roomCodeInput.value = (this.roomCode && this.roomCode !== 'solo') ? this.roomCode : this.generateRoomCode();
     }
     if (difficultySelect) difficultySelect.value = this.difficulty || 'normal';
-    if (playerCountInput) playerCountInput.value = this.playerCount || 1;
     
     const setPlayModeRadios = (name, value) => {
       const photo = document.querySelector(`input[name="${name}"][value="photo"]`);
@@ -1669,8 +1665,6 @@ class OsanpoBingo {
     const customTopicCountSolo = document.getElementById('customTopicCountSolo');
     const customTopicInputsSolo = document.getElementById('customTopicInputsSolo');
     if (difficultySelectSolo) difficultySelectSolo.value = this.difficulty || 'normal';
-    if (gameTypeCreate) gameTypeCreate.value = this.gameType || 'normal';
-    if (gameTypeJoin) gameTypeJoin.value = this.gameType || 'normal';
     const joinDifficultySelect = document.getElementById('joinDifficultySelect');
     if (joinDifficultySelect) joinDifficultySelect.value = this.difficulty || 'normal';
     ['topicSetSelectSolo', 'topicSetSelectCreate', 'topicSetSelectJoin'].forEach((id) => {
@@ -1689,8 +1683,6 @@ class OsanpoBingo {
       { stepperId: 'topicSetStepperSolo',    selectId: 'topicSetSelectSolo' },
       { stepperId: 'topicSetStepperCreate',  selectId: 'topicSetSelectCreate' },
       { stepperId: 'topicSetStepperJoin',    selectId: 'topicSetSelectJoin' },
-      { stepperId: 'gameTypeStepperCreate',  selectId: 'gameTypeCreate' },
-      { stepperId: 'playerCountStepper',     selectId: 'playerCountInput' },
     ].forEach(({ stepperId, selectId }) => {
       const stepper = document.getElementById(stepperId);
       const sel     = document.getElementById(selectId);
@@ -1974,26 +1966,19 @@ class OsanpoBingo {
       startGameBtn.addEventListener('click', () => {
         this.stopBattleSyncLoop();
         const difficultySelect = document.getElementById('difficultySelect');
-        const playerCountInput = document.getElementById('playerCountInput');
-        const gameTypeCreate = document.getElementById('gameTypeCreate');
         const modal = document.getElementById('roomCodeModal');
-        
+
         const roomCode = roomCodeInput?.value.trim() || this.generateRoomCode();
         const difficulty = difficultySelect?.value || 'normal';
-        const playerCount = parseInt(playerCountInput?.value) || 1;
-        
+
         // フリー入力マスのお題を収集
         const customTopics = this.collectCustomTopics();
-        
-        // 参加人数を保存
-        this.playerCount = Math.max(1, Math.min(99, playerCount));
-        
+
         this.topicSetId = document.getElementById('topicSetSelectCreate')?.value || 'default';
         const playModeRadio = document.querySelector('input[name="playModeCreate"]:checked');
         this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
-        this.gameType = BATTLE_MODE_ENABLED
-          ? (gameTypeCreate?.value || 'normal')
-          : 'normal';
+        // バトルモードは常に陣取り
+        this.gameType = BATTLE_MODE_ENABLED ? 'battle' : 'normal';
         this.landmarkMode = (this.topicSetId === '観光地');
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
@@ -2285,7 +2270,7 @@ class OsanpoBingo {
           toggleMarkBtn.style.display = '';
           if (this.gameType === 'battle') {
             // バトルモードは写真でマス取得のため、マークボタンをカメラ誘導に変更
-            toggleMarkBtn.textContent = '写真を撮ってマスを取る';
+            toggleMarkBtn.textContent = '写真を撮らずにマークする';
             toggleMarkBtn.classList.remove('marked');
           } else {
             if (this.markedCells.has(index)) {
@@ -2605,14 +2590,10 @@ class OsanpoBingo {
           this.closeCellModal();
           return;
         }
-        if (claimResult === 'unknown') {
-          showAlert('通信エラーが発生しました。数秒後に自動で反映されます。');
-          return;
-        }
-        // 'claimed' または 'self'（冪等）→ 写真保存処理を続行
+        // 'claimed' / 'self' / 'unknown' → 写真保存処理を続行（unknownはシンクループで後から反映）
       } catch (e) {
-        showAlert('取得確認に失敗しました。通信環境を確認して再試行してください。');
-        return;
+        // サーバー通信エラー → ブロックせずローカル保存を続行。シンクループで後から同期。
+        console.warn('battle claim server error, proceeding locally:', e);
       }
       if (topicKey) this.battleTopicOwners[topicKey] = this.battlePlayerId;
     }
