@@ -1265,10 +1265,16 @@ h1 {
 
 /* ---- State C: 写真なし ---- */
 .cell-modal-no-photo {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   gap: var(--spacing-md);
   margin-top: var(--spacing-sm);
+  width: 100%;
+}
+
+.cell-modal-no-photo .btn {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cell-modal-actions {
