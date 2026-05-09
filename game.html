@@ -192,47 +192,7 @@
               </button>
             </div>
             <p class="form-help">
-              友達に合言葉を教えてあげよう（同じ合言葉なら同じお題になります）
-            </p>
-          </div>
-
-          <div class="form-group">
-            <label>ゲームタイプ</label>
-            <select id="gameTypeCreate" style="display:none">
-              <option value="normal" selected>通常BINGO</option>
-              <option value="battle">バトル（陣取り）</option>
-            </select>
-            <div class="stepper" id="gameTypeStepperCreate" data-sync="gameTypeCreate">
-              <button type="button" class="stepper-btn stepper-prev">◄</button>
-              <span class="stepper-value">通常BINGO</span>
-              <button type="button" class="stepper-btn stepper-next">►</button>
-            </div>
-            <p class="form-help">
-              バトルは「写真をアップロードした人」がマスを取得します（先着1名）
-            </p>
-          </div>
-
-          <div class="form-group">
-            <label>参加人数</label>
-            <select id="playerCountInput" style="display:none">
-              <option value="1" selected>1人</option>
-              <option value="2">2人</option>
-              <option value="3">3人</option>
-              <option value="4">4人</option>
-              <option value="5">5人</option>
-              <option value="6">6人</option>
-              <option value="7">7人</option>
-              <option value="8">8人</option>
-              <option value="9">9人</option>
-              <option value="10">10人</option>
-            </select>
-            <div class="stepper" id="playerCountStepper" data-sync="playerCountInput">
-              <button type="button" class="stepper-btn stepper-prev">◄</button>
-              <span class="stepper-value">1人</span>
-              <button type="button" class="stepper-btn stepper-next">►</button>
-            </div>
-            <p class="form-help">
-              自分を含む人数（後から変更可）
+              友達に合言葉を教えてあげよう
             </p>
           </div>
 
@@ -324,8 +284,7 @@
             <div id="joinRoomInfoContent" class="join-room-info-content"></div>
           </div>
 
-          <!-- 難易度・フィールド・ゲームタイプはhiddenで保持（JS用） -->
-          <select id="gameTypeJoin" style="display:none"><option value="battle" selected>バトル</option></select>
+          <!-- 難易度・フィールドはhiddenで保持（JS用） -->
           <select id="joinDifficultySelect" style="display:none">
             <option value="normal" selected>ふつう</option>
           </select>
@@ -372,8 +331,8 @@
         <!-- State B: プレビュー（新規アップロード時） -->
         <div id="cellPhotoPreview" class="photo-preview" style="display: none;">
           <div class="cell-photo-header">
-            <span class="cell-photo-title" id="cellModalPreviewTitle"></span>
             <span class="cell-preview-badge">確認中</span>
+            <span class="cell-photo-title" id="cellModalPreviewTitle"></span>
           </div>
           <img id="cellPhotoPreviewImg" alt="プレビュー">
           <div class="photo-preview-actions">
