@@ -135,7 +135,7 @@ body.page-game {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 10px;
 }
 
 /* ==================== ヘッダー ==================== */
@@ -277,7 +277,7 @@ h1 {
 
 /* ===== バトルスコアボード ===== */
 .battle-scoreboard {
-  margin: -12px 0 4px; /* ボードとの余白を詰める */
+  margin: 0;
   padding: 10px 14px;
   background: #f8faf8;
   border: 1.5px solid #d0e8d0;
@@ -634,11 +634,11 @@ h1 {
   font-size: 1.5rem;
   font-weight: 700;
   color: #fff;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: #c05000;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 0;
 }
 
 .bingo-message.pulse {
@@ -650,7 +650,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 0;
 }
 
 .stat-item {
