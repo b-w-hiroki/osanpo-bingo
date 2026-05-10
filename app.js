@@ -127,6 +127,7 @@ class OsanpoBingo {
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
+    this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
     this.battleCellOwners = {};  // バトル用: {cellIndex: userId}
     this.battleBingoOwners = {};  // バトル用: {lineIndex: userId} ビンゴ成立権
     this.battlePresencePlayers = new Set(); // バトル用: 参加者全員のplayerIdセット
@@ -319,7 +320,9 @@ class OsanpoBingo {
 
     // 25マスのボードを作成（中央12番は常に☆フリーマス）
     this.board = [];
-    const lmDB = typeof landmarkDatabase !== 'undefined' ? landmarkDatabase : [];
+    const lmDB = typeof getLandmarksByRegion === 'function'
+      ? getLandmarksByRegion(this.landmarkRegion)
+      : (typeof landmarkDatabase !== 'undefined' ? landmarkDatabase : []);
     if (this.landmarkMode && lmDB.length > 0) {
       // ランドマークモード: 中央は常に☆フリーマス、12以外の位置にランドマーク配置
       const lmSeed = stringToSeed([this.roomCode, seedUserId, seedSalt, 'lm'].filter(Boolean).join('-'));
@@ -1731,6 +1734,36 @@ class OsanpoBingo {
       }
       el.textContent = set.description + extra;
     }
+
+    // 観光地エリア選択欄の表示制御
+    const isKanko = selectEl.value === '観光地';
+    const regionGroupId = {
+      topicSetSelectSolo: 'landmarkRegionGroupSolo',
+      topicSetSelectCreate: 'landmarkRegionGroupCreate',
+    }[selectEl.id];
+    const regionSelectId = {
+      topicSetSelectSolo: 'landmarkRegionSelectSolo',
+      topicSetSelectCreate: 'landmarkRegionSelectCreate',
+    }[selectEl.id];
+    const regionGroup = regionGroupId ? document.getElementById(regionGroupId) : null;
+    const regionSel = regionSelectId ? document.getElementById(regionSelectId) : null;
+    if (regionGroup) regionGroup.style.display = isKanko ? '' : 'none';
+    if (regionSel && isKanko) {
+      if (regionSel.options.length === 0) this.populateLandmarkRegionSelect(regionSel);
+      else regionSel.value = this.landmarkRegion || 'all';
+    }
+  }
+
+  populateLandmarkRegionSelect(sel) {
+    const regions = typeof landmarkRegions !== 'undefined' ? landmarkRegions : [{id: 'all', name: 'すべての観光地'}];
+    sel.innerHTML = '';
+    regions.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.name;
+      sel.appendChild(opt);
+    });
+    sel.value = this.landmarkRegion || 'all';
   }
   
   showRoomCodeModal(openToSettings) {
@@ -2034,6 +2067,9 @@ class OsanpoBingo {
         this.gameType = 'normal';
         this.battleCellOwners = {};
         this.landmarkMode = (this.topicSetId === '観光地');
+        this.landmarkRegion = this.landmarkMode
+          ? (document.getElementById('landmarkRegionSelectSolo')?.value || 'all')
+          : 'all';
         const customTopics = this.collectCustomTopics(customTopicInputsSolo);
         this.gameStartTime = Date.now();
         this.roomCode = 'solo';
@@ -2076,6 +2112,9 @@ class OsanpoBingo {
         // バトルモードは常に陣取り
         this.gameType = BATTLE_MODE_ENABLED ? 'battle' : 'normal';
         this.landmarkMode = (this.topicSetId === '観光地');
+        this.landmarkRegion = this.landmarkMode
+          ? (document.getElementById('landmarkRegionSelectCreate')?.value || 'all')
+          : 'all';
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
@@ -2100,6 +2139,7 @@ class OsanpoBingo {
             difficulty: this.difficulty,
             topicSetId: this.topicSetId,
             landmarkMode: this.landmarkMode,
+            landmarkRegion: this.landmarkRegion,
             playMode: this.playMode,
             creatorId: this.battlePlayerId
           });
@@ -2144,6 +2184,7 @@ class OsanpoBingo {
         this.topicSetId = roomSettings?.topicSetId || 'default';
         this.playMode = roomSettings?.playMode || 'photo';
         this.landmarkMode = roomSettings?.landmarkMode || false;
+        this.landmarkRegion = roomSettings?.landmarkRegion || 'all';
 
         this.gameStartTime = Date.now();
         this.battleCellOwners = {};
@@ -2859,7 +2900,8 @@ class OsanpoBingo {
         battleCellOwners: this.battleCellOwners,
         battleBingoOwners: this.battleBingoOwners,
         totalDistance: this.totalDistance,
-        landmarkMode: this.landmarkMode
+        landmarkMode: this.landmarkMode,
+        landmarkRegion: this.landmarkRegion
       };
       localStorage.setItem('osanpoBingo', JSON.stringify(data));
     } catch (error) {
@@ -2941,6 +2983,9 @@ class OsanpoBingo {
       }
       if (typeof data.landmarkMode === 'boolean') {
         this.landmarkMode = data.landmarkMode;
+      }
+      if (typeof data.landmarkRegion === 'string') {
+        this.landmarkRegion = data.landmarkRegion;
       }
 
       return true;
