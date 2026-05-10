@@ -131,7 +131,6 @@ class OsanpoBingo {
     this.battleBingoOwners = {};  // バトル用: {lineIndex: userId} ビンゴ成立権
     this.battlePresencePlayers = new Set(); // バトル用: 参加者全員のplayerIdセット
     this.lastClaimedCellIndex = null; // 直近でクレームしたセルインデックス
-    this.lastSyncNewTopicKeys = new Set(); // 直前のsyncで追加されたtopicKey集合
     this.battlePlayerId = makeBattlePlayerId('', 'blue', getBattleRandomId());
     this.battleBackend = getBattleBackendConfig();
     this.battleTable = 'battle_cell_owners';
@@ -386,7 +385,6 @@ class OsanpoBingo {
         return;
       }
       const rows = await res.json();
-      const prevOwners = { ...this.battleTopicOwners };
       const nextOwners = {};
       const nextBingoOwners = { ...this.battleBingoOwners };
       const nextPresence = new Set();
@@ -399,10 +397,10 @@ class OsanpoBingo {
           nextPresence.add(ownerId);
           return;
         }
-        // ビンゴ成立権レコード
+        // ビンゴ成立権レコード（サーバーが権威ソース・常に上書き）
         if (topicKey.startsWith(BINGO_LINE_PREFIX)) {
           const lineIdx = parseInt(topicKey.slice(BINGO_LINE_PREFIX.length));
-          if (!isNaN(lineIdx) && nextBingoOwners[lineIdx] === undefined) {
+          if (!isNaN(lineIdx)) {
             nextBingoOwners[lineIdx] = ownerId;
           }
           return;
@@ -417,10 +415,6 @@ class OsanpoBingo {
         if (topicKey) nextOwners[topicKey] = ownerId;
       });
       this.battlePresencePlayers = nextPresence;
-      // syncで新たに追加されたtopicKeyを記録（ビンゴ成立者判定に使用）
-      this.lastSyncNewTopicKeys = new Set(
-        Object.keys(nextOwners).filter(k => !prevOwners[k])
-      );
       this.battleTopicOwners = nextOwners;
       this.battleBingoOwners = nextBingoOwners;
       this.checkBingo();
@@ -781,24 +775,16 @@ class OsanpoBingo {
       const markedCount = line.filter(claimChecker).length;
       if (markedCount === 5) {
         newBingoLines.push(line);
-        // バトルビンゴ成立権の帰属判定（未記録の場合のみ）
+        // バトルビンゴ成立権: 自分が最後のマスをクレームした場合のみサーバーへ登録
+        // サーバー側は ignore-duplicates なので早い者勝ち。登録後に即syncして正しい権利者を取得する。
         if (this.gameType === 'battle' && this.battleBingoOwners[lineIndex] === undefined) {
-          let completer = null;
-          // ケース1: 自分が直前にクレームしたセルがこのラインにある → 自分が成立者
           if (this.lastClaimedCellIndex !== null && line.includes(this.lastClaimedCellIndex)) {
-            completer = this.battlePlayerId;
-            this.claimBingoLineOnServer(lineIndex);
-          } else {
-            // ケース2: 直前のsyncで追加されたセルがこのラインにある → そのプレイヤーが成立者
-            for (const idx of line) {
-              const key = this.getTopicKeyByIndex(idx);
-              if (key && this.lastSyncNewTopicKeys.has(key)) {
-                completer = this.battleTopicOwners[key] || null;
-                break;
-              }
-            }
+            // 暫定でローカルに自分を設定（sync後にサーバー値で上書きされる）
+            this.battleBingoOwners[lineIndex] = this.battlePlayerId;
+            this.claimBingoLineOnServer(lineIndex).then(() => this.syncBattleOwnersFromServer());
           }
-          this.battleBingoOwners[lineIndex] = completer;
+          // sync経由でビンゴ検知した場合はサーバーがすでに権利者を持っているため
+          // ローカルには設定せず、次のsyncで battleBingoOwners が正しく更新される
         }
       } else if (markedCount === 4) {
         newReachLines.push(line);
