@@ -438,7 +438,7 @@ class OsanpoBingo {
     this.syncBattleOwnersFromServer();
     this.battleSyncTimer = setInterval(() => {
       this.syncBattleOwnersFromServer();
-    }, 4000);
+    }, 2000);
   }
 
   stopBattleSyncLoop() {
@@ -696,8 +696,13 @@ class OsanpoBingo {
   }
 
   // セルクリック処理
-  handleCellClick(index) {
+  async handleCellClick(index) {
     if (this.board[index]?.isFree) return;
+
+    if (this.gameType === 'battle' && this.battleBackend.enabled && this.roomCode && this.roomCode !== 'solo') {
+      await this.syncBattleOwnersFromServer();
+    }
+
     const ownerId = this.getCellOwnerId(index);
     if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
       showAlert(`このマスは${parseOwnerName(ownerId)}が取得しています。`);

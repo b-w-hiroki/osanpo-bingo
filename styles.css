@@ -666,7 +666,6 @@ h1 {
   color: var(--text-light);
   font-weight: 500;
   text-align: center;
-  white-space: nowrap;
 }
 
 .stat-value {
@@ -1934,21 +1933,26 @@ h1 {
   }
 
   .stats {
-    grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 
   .stat-item {
     min-height: 52px;
-    padding: 8px 4px;
+    padding: 8px 6px;
   }
-  
+
   .stat-label {
-    font-size: 0.6rem;
+    font-size: 0.62rem;
   }
-  
+
   .stat-value {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
+    white-space: normal;
+    word-break: break-all;
+    overflow: visible;
+    text-overflow: unset;
+    text-align: center;
   }
   
   .controls {
