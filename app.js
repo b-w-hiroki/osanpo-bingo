@@ -116,8 +116,11 @@ class OsanpoBingo {
     this.playerCount = 1;         // 参加人数
     
     // Phase 2: 写真機能
-    this.photos = {};             // {index: base64Data}
+    this.photos = {};             // {index: ObjectURL} 表示用（base64ではない）
+    this.photoBlobs = {};         // {index: Blob} IDB保存・グリッド生成用
+    this.photoStorage = new PhotoStorage(); // IndexedDB ラッパー
     this.currentPhotoIndex = null; // 現在写真を撮影中のインデックス
+    this.tempPhotoBlob = null;    // 選択中の写真 Blob（保存前）
     
     // フリー入力マス
     this.customTopics = [];       // ユーザーが入力したカスタムお題 [{text, icon}]
@@ -190,7 +193,13 @@ class OsanpoBingo {
     
     // LocalStorageから読み込み
     const loaded = this.loadFromStorage();
-    
+
+    // IndexedDB 写真ロード（非同期・旧 localStorage 写真は自動マイグレーション）
+    this.photoStorage.init()
+      .then(() => this.initPhotosFromIDB(this._legacyPhotos))
+      .then(() => { delete this._legacyPhotos; })
+      .catch(e => console.warn('PhotoStorage init error:', e));
+
     if (!loaded || this.board.length !== 25) {
       this.showRoomCodeModal();
     } else {
@@ -361,8 +370,12 @@ class OsanpoBingo {
     // マークと写真をクリア
     this.markedCells.clear();
     this.bingoLines = [];
+    this._revokeAllPhotoURLs();
     this.photos = {};
+    this.photoBlobs = {};
     this.battleCellOwners = {};
+    // IDB の写真も非同期クリア（エラーは無視）
+    this.photoStorage.clearAll().catch(() => {});
     
     // 保存
     this.saveToStorage();
@@ -2486,7 +2499,9 @@ class OsanpoBingo {
         if (photoInputCamera) photoInputCamera.value = '';
         if (photoInputGallery) photoInputGallery.value = '';
         photoPreview.style.display = 'none';
+        this._revokeTempPhotoURL();
         this.tempPhotoData = null;
+        this.tempPhotoBlob = null;
         const idx = this.currentPhotoIndex;
         const header = document.getElementById('cellModalHeader');
         if (idx !== null && this.photos[idx]) {
@@ -2537,21 +2552,29 @@ class OsanpoBingo {
     // 写真削除ボタン
     if (deleteCurrentPhotoBtn) {
       deleteCurrentPhotoBtn.addEventListener('click', () => {
-        if (this.currentPhotoIndex !== null && this.photos[this.currentPhotoIndex]) {
-          showConfirm('この写真を削除しますか？').then((ok) => {
+        const delIdx = this.currentPhotoIndex;
+        if (delIdx !== null && this.photos[delIdx]) {
+          showConfirm('この写真を削除しますか？').then(async (ok) => {
             if (!ok) return;
-            delete this.photos[this.currentPhotoIndex];
+            // IDB から削除
+            await this.photoStorage.delete(delIdx).catch(() => {});
+            // ObjectURL を解放
+            if (this.photos[delIdx] && this.photos[delIdx].startsWith('blob:')) {
+              URL.revokeObjectURL(this.photos[delIdx]);
+            }
+            delete this.photos[delIdx];
+            delete this.photoBlobs[delIdx];
             this.renderBoard();
             this.updateStats();
             this.saveToStorage();
-            this.showCellModal(this.currentPhotoIndex);
+            this.showCellModal(delIdx);
           });
         }
       });
     }
   }
   
-  // セル写真選択処理
+  // セル写真選択処理（Blob + ObjectURL に変更）
   handleCellPhotoSelect(file) {
     const preview = document.getElementById('cellPhotoPreview');
     const previewImg = document.getElementById('cellPhotoPreviewImg');
@@ -2561,10 +2584,14 @@ class OsanpoBingo {
 
     if (photoDisplay) photoDisplay.style.display = 'none';
 
-    this.compressImage(file, (compressedData) => {
-      previewImg.src = compressedData;
+    this.compressImage(file, (blob) => {
+      // 旧プレビュー URL を解放
+      this._revokeTempPhotoURL();
+      this.tempPhotoBlob = blob;
+      this.tempPhotoData = URL.createObjectURL(blob);
+
+      previewImg.src = this.tempPhotoData;
       preview.style.display = 'block';
-      this.tempPhotoData = compressedData;
 
       // ヘッダー非表示、プレビュータイトルを設定
       const header = document.getElementById('cellModalHeader');
@@ -2598,18 +2625,20 @@ class OsanpoBingo {
       const modal = document.getElementById('cellModal');
       if (modal) modal.style.display = 'none';
       this.currentPhotoIndex = null;
+      this._revokeTempPhotoURL();
       this.tempPhotoData = null;
+      this.tempPhotoBlob = null;
       const photoInput = document.getElementById('cellPhotoInput');
       if (photoInput) photoInput.value = '';
       const photoPreview = document.getElementById('cellPhotoPreview');
       if (photoPreview) photoPreview.style.display = 'none';
     }
-    
+
     // 再レンダリング
     this.checkBingo();
     this.updateStats();
     this.saveToStorage();
-    
+
     // マークアニメーション
     if (!wasMarked) {
       const cell = this.boardElement?.querySelector(`[data-index="${index}"]`);
@@ -2636,17 +2665,85 @@ class OsanpoBingo {
     const modal = document.getElementById('cellModal');
     if (modal) modal.style.display = 'none';
     this.currentPhotoIndex = null;
+    this._revokeTempPhotoURL(); // 未保存プレビュー URL を解放
     this.tempPhotoData = null;
+    this.tempPhotoBlob = null;
     const photoInput = document.getElementById('cellPhotoInput');
     if (photoInput) photoInput.value = '';
+    const photoInputCamera = document.getElementById('cellPhotoInputCamera');
+    if (photoInputCamera) photoInputCamera.value = '';
+    const photoInputGallery = document.getElementById('cellPhotoInputGallery');
+    if (photoInputGallery) photoInputGallery.value = '';
     const photoPreview = document.getElementById('cellPhotoPreview');
     if (photoPreview) photoPreview.style.display = 'none';
   }
   
-  // 画像圧縮（800px上限 / quality 0.88固定・最低0.78保証 / 目標250KB）
-  // ─ maxSize を下げて「同じquality でファイルを小さく」する方式。
-  //   quality フロアを高く保つことでガビガビを防ぎ、
-  //   かつ localStorage を食いすぎないようにする。
+  // ── IndexedDB 写真ロード（起動時 / 新ゲーム後に呼ぶ）──────────────────
+  // legacyPhotos: 旧 localStorage に残っていた {index: base64} データ（初回のみ非 null）
+  async initPhotosFromIDB(legacyPhotos = null) {
+    // 旧 localStorage 写真を IDB にマイグレーション
+    if (legacyPhotos && Object.keys(legacyPhotos).length > 0) {
+      for (const [idx, base64] of Object.entries(legacyPhotos)) {
+        try {
+          const res  = await fetch(base64);
+          const blob = await res.blob();
+          await this.photoStorage.save(Number(idx), blob);
+        } catch (e) {
+          console.warn('photo migration error, index:', idx, e);
+        }
+      }
+      // マイグレーション完了 → localStorage から写真を除いた状態で保存
+      this.saveToStorage();
+      console.log('✅ 写真を IndexedDB にマイグレーションしました');
+    }
+
+    // IDB から全写真を読み込み ObjectURL を生成
+    let blobs;
+    try {
+      blobs = await this.photoStorage.getAll();
+    } catch (e) {
+      console.warn('PhotoStorage getAll error:', e);
+      return;
+    }
+
+    // 既存 ObjectURL を解放してから再構築
+    this._revokeAllPhotoURLs();
+    this.photos     = {};
+    this.photoBlobs = {};
+
+    for (const [idx, blob] of Object.entries(blobs)) {
+      const key = Number(idx);
+      this.photos[key]     = URL.createObjectURL(blob);
+      this.photoBlobs[key] = blob;
+    }
+
+    // 写真があれば再描画
+    if (Object.keys(this.photos).length > 0) {
+      this.renderBoard();
+      this.updateStats();
+    }
+  }
+
+  // ── ObjectURL 管理ヘルパー ──────────────────────────────────────────
+  /** 未保存プレビュー URL だけ解放 */
+  _revokeTempPhotoURL() {
+    if (this.tempPhotoData && this.tempPhotoData.startsWith('blob:')) {
+      URL.revokeObjectURL(this.tempPhotoData);
+    }
+  }
+
+  /** this.photos に登録済みの全 ObjectURL を解放 */
+  _revokeAllPhotoURLs() {
+    Object.values(this.photos).forEach(url => {
+      if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
+    });
+  }
+
+  // 画像圧縮 → Blob で返却（IndexedDB 保存用）
+  // ・800px 上限: セル表示(~100px)・ライトボックス(~400px)ともに十分
+  // ・quality 0.88 固定: IDB + Blob のため base64 膨張がなく、そのままでも小さい
+  //   （800px × 0.88 = 通常 80〜160KB → 24 マス分でも最大 3.8MB に収まる）
+  // ・callback(blob) で Blob を返す（以前の base64 文字列から変更）
   compressImage(file, callback) {
     const reader = new FileReader();
 
@@ -2657,38 +2754,26 @@ class OsanpoBingo {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        let width = img.width;
-        let height = img.height;
-        // 800px: セル表示(~100px)・ライトボックス(~400px)ともに十分な解像度
+        let { width, height } = img;
         const maxSize = 800;
 
         if (width > height && width > maxSize) {
-          height = Math.round((height * maxSize) / width);
+          height = Math.round(height * maxSize / width);
           width = maxSize;
         } else if (height > maxSize) {
-          width = Math.round((width * maxSize) / height);
+          width = Math.round(width * maxSize / height);
           height = maxSize;
         }
 
         canvas.width = width;
         canvas.height = height;
 
-        // 高品質スムージングで描画
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // 250KB を目標にし、超えた場合のみ quality を微減（0.78 で打ち止め）
-        // 800px × quality 0.88 なら通常 80〜160KB に収まるため
-        // quality が下がることはほぼなく、ガビガビを防ぐ
-        const TARGET_BYTES = 250 * 1024;
-        let quality = 0.88;
-        let compressedData = canvas.toDataURL('image/jpeg', quality);
-        while (compressedData.length * 0.75 > TARGET_BYTES && quality > 0.78) {
-          quality = Math.round((quality - 0.04) * 100) / 100;
-          compressedData = canvas.toDataURL('image/jpeg', quality);
-        }
-        callback(compressedData);
+        // toBlob: base64 変換なし・バイナリ直接取得（約 25% 省スペース）
+        canvas.toBlob((blob) => callback(blob), 'image/jpeg', 0.88);
       };
 
       img.src = e.target.result;
@@ -2843,9 +2928,9 @@ class OsanpoBingo {
     this.savePhotoToDevice(dataUrl, `osanpo-bingo-photos-${date}.jpg`);
   }
 
-  // セル写真を保存
+  // セル写真を保存（IndexedDB に Blob で保存）
   async saveCellPhoto() {
-    if (this.currentPhotoIndex === null || !this.tempPhotoData) return;
+    if (this.currentPhotoIndex === null || !this.tempPhotoBlob) return;
     if (this.gameType === 'battle') {
       const ownerId = this.getCellOwnerId(this.currentPhotoIndex);
       if (ownerId && ownerId !== this.battlePlayerId) {
@@ -2871,26 +2956,44 @@ class OsanpoBingo {
     
     // 振動フィードバック
     if (navigator.vibrate) navigator.vibrate(30);
-    
-    // 写真を保存
-    this.photos[this.currentPhotoIndex] = this.tempPhotoData;
-    
+
+    // IndexedDB に Blob 保存
+    const idx = this.currentPhotoIndex;
+    const blob = this.tempPhotoBlob;
+    try {
+      await this.photoStorage.save(idx, blob);
+    } catch (e) {
+      console.error('IndexedDB save error:', e);
+      showAlert('写真の保存に失敗しました。\nもう一度お試しください。');
+      return;
+    }
+
+    // 旧 ObjectURL を解放してから新しい URL をセット
+    if (this.photos[idx] && this.photos[idx].startsWith('blob:')) {
+      URL.revokeObjectURL(this.photos[idx]);
+    }
+    // tempPhotoData（プレビュー用 URL）はここで転用せず新規作成
+    this._revokeTempPhotoURL();
+    const displayUrl = URL.createObjectURL(blob);
+    this.photos[idx] = displayUrl;
+    this.photoBlobs[idx] = blob;
+
     // バトルモードでは battleCellOwners が唯一のソースのため追加しない
     if (this.gameType !== 'battle') {
-      this.markedCells.add(this.currentPhotoIndex);
+      this.markedCells.add(idx);
     }
-    
+
     // 再レンダリング
     this.checkBingo();
     this.updateStats();
     this.saveToStorage();
-    
+
     // モーダルを閉じる
     this.closeCellModal();
   }
   
   
-  // LocalStorageに保存
+  // LocalStorageに保存（写真は IndexedDB で管理するため含めない）
   saveToStorage() {
     try {
       const data = {
@@ -2901,7 +3004,7 @@ class OsanpoBingo {
         difficulty: this.difficulty,
         topicSetId: this.topicSetId,
         playerCount: this.playerCount,
-        photos: this.photos,
+        // photos は IDB で管理 → localStorage には保存しない
         customTopics: this.customTopics,
         playMode: this.playMode,
         gameStartTime: this.gameStartTime,
@@ -2958,8 +3061,9 @@ class OsanpoBingo {
         this.playerCount = data.playerCount;
       }
       
-      if (data.photos && typeof data.photos === 'object') {
-        this.photos = data.photos;
+      // 旧バージョンの base64 写真 → IDB マイグレーション用に一時保存
+      if (data.photos && typeof data.photos === 'object' && Object.keys(data.photos).length > 0) {
+        this._legacyPhotos = data.photos;
       }
       
       if (data.customTopics && Array.isArray(data.customTopics)) {
