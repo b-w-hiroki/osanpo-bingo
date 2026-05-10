@@ -143,16 +143,15 @@ body {
 }
 
 .hero-content .btn-start {
-  padding: 16px 32px;
-  min-height: 50px;
+  padding: 14px 40px;
+  min-height: 76px;
   border: none;
-  border-radius: 14px;
-  background: #ff7498;
+  border-radius: 999px;
+  background: #ff7aac;
   color: #ffffff;
-  font-weight: 800;
   box-shadow:
-    0 3px 0 #cc3d6a,
-    0 6px 16px rgba(255, 116, 152, 0.25);
+    0 4px 0 #cc3d6a,
+    0 8px 20px rgba(255, 116, 152, 0.30);
   animation: none;
 }
 
@@ -178,25 +177,41 @@ body {
 
 /* ========== CTAボタン（押しやすい・目立つ） ========== */
 .btn-start {
-  display: inline-block;
-  padding: 18px 36px;
-  min-height: 52px;
-  background: #ff7498;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 48px;
+  min-height: 80px;
+  background: #ff7aac;
   color: #ffffff;
-  font-size: 1.15rem;
-  font-weight: 700;
   text-decoration: none;
-  border-radius: 14px;
+  border-radius: 999px;
   border: none;
   box-shadow:
-    0 3px 0 #cc3d6a,
-    0 6px 16px rgba(255, 116, 152, 0.25);
+    0 4px 0 #cc3d6a,
+    0 8px 20px rgba(255, 116, 152, 0.30);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   animation: btn-float 2.5s ease-in-out infinite;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  line-height: 1;
+  gap: 2px;
+}
+
+.btn-sub {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.95;
+}
+
+.btn-main {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
 }
 
 /* キラッと光る演出 */
@@ -410,9 +425,12 @@ body {
 }
 
 .btn-large {
-  padding: 18px 40px;
-  font-size: 1.2rem;
+  padding: 16px 56px;
   animation-delay: 0.5s;
+}
+
+.btn-large .btn-main {
+  font-size: 2.2rem;
 }
 
 /* ========== 広告枠 ========== */
@@ -518,10 +536,9 @@ body {
   .hero-content .btn-start {
     width: 100%;
     max-width: 340px;
-    padding: 14px 22px;
-    min-height: 48px;
-    font-size: 1.05rem;
-    border-radius: 12px;
+    padding: 14px 32px;
+    min-height: 72px;
+    border-radius: 999px;
   }
 
   .hero-content .btn-start:hover {
@@ -588,8 +605,8 @@ body {
   }
 
   .hero-content .btn-start {
-    padding: 13px 18px;
-    font-size: 1rem;
+    padding: 12px 28px;
+    min-height: 68px;
   }
 
   .main-content {

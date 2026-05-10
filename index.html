@@ -117,208 +117,17 @@
       backdrop-filter: blur(4px);
     }
 
-    /* ===== 遊び方バナー画像 ===== */
-    .lp-section-howto-img {
-      padding-bottom: 0;
-      overflow: hidden;
-    }
-    .howto-banner-img {
-      display: block;
-      width: calc(100% + 40px);
-      margin: 0 -20px -0px;
-      border-radius: 0 0 14px 14px;
-      object-fit: cover;
-    }
-
-    /* ===== セクション共通 ===== */
-    .lp-section {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 14px rgba(0,0,0,0.07);
-      border: 1px solid rgba(0,0,0,0.05);
-      padding: 24px 20px;
+    /* ===== 説明画像セクション共通 ===== */
+    .lp-section-img {
       margin-bottom: 16px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.09);
     }
-    .lp-section-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #1e5c3a;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .lp-section-title::after {
-      content: '';
-      flex: 1;
-      height: 2px;
-      background: linear-gradient(to right, #157F1F, transparent);
-      border-radius: 2px;
-    }
-
-    /* ===== 遊び方ステップ ===== */
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .step-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-    }
-    .step-circle {
-      width: 36px;
-      height: 36px;
-      min-width: 36px;
-      background: linear-gradient(145deg, #157F1F, #0e5c16);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 800;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 3px 8px rgba(74,139,106,0.4);
-    }
-    .step-body strong {
+    .lp-img {
       display: block;
-      font-size: 15px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 5px;
-      line-height: 1.4;
-    }
-    .step-body p {
-      margin: 0;
-      font-size: 13px;
-      color: #555;
-      line-height: 1.7;
-    }
-
-    /* ===== 特徴チェックリスト ===== */
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 16px 0;
-      border-bottom: 1px solid #eef2ee;
-    }
-    .feature-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    .feature-item:first-child {
-      padding-top: 0;
-    }
-    .feature-check {
-      width: 26px;
-      height: 26px;
-      min-width: 26px;
-      background: #157F1F;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1px;
-    }
-    .feature-text strong {
-      display: block;
-      font-size: 15px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 4px;
-      line-height: 1.4;
-    }
-    .feature-text p {
-      margin: 0;
-      font-size: 13px;
-      color: #555;
-      line-height: 1.7;
-    }
-
-    /* ===== バトルモード ===== */
-    .battle-box {
-      background: linear-gradient(135deg, #e8f5e9 0%, #e8f0fd 100%);
-      border-radius: 14px;
-      padding: 20px 18px;
-      border: 1.5px solid #a8c8e8;
-    }
-    .battle-box-head {
-      font-size: 16px;
-      font-weight: 800;
-      color: #1a3a7c;
-      margin-bottom: 10px;
-    }
-    .battle-box p {
-      margin: 0;
-      font-size: 14px;
-      color: #333;
-      line-height: 1.75;
-    }
-
-    /* ===== 難易度リスト ===== */
-    .diff-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .diff-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 13px 16px;
-      border-radius: 12px;
-    }
-    .diff-badge {
-      font-size: 14px;
-      font-weight: 800;
-      min-width: 80px;
-      white-space: nowrap;
-    }
-    .diff-row p {
-      margin: 0;
-      font-size: 13px;
-      line-height: 1.5;
-      color: inherit;
-      opacity: 0.85;
-    }
-    .diff-easy   { background: #e8f5e9; border: 1.5px solid #a5d6a7; color: #1b5e20; }
-    .diff-normal { background: #e3f2fd; border: 1.5px solid #90caf9; color: #0d3c78; }
-    .diff-hard   { background: #fff3e0; border: 1.5px solid #ffcc80; color: #bf360c; }
-    .diff-oni    { background: #fce4ec; border: 1.5px solid #f48fb1; color: #6a0030; }
-
-    /* ===== シーンリスト ===== */
-    .scene-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .scene-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #f0f8f0;
-      border-radius: 12px;
-      padding: 13px 14px;
-    }
-    .scene-item .scene-emoji {
-      font-size: 24px;
-      line-height: 1;
-    }
-    .scene-item span {
-      font-size: 13px;
-      font-weight: 600;
-      color: #1e5c3a;
-      line-height: 1.45;
+      width: 100%;
+      height: auto;
     }
   </style>
 </head>
@@ -331,7 +140,7 @@
         <img src="static/osanpo-bingo-battle.png" alt="おさんぽビンゴ ロゴ。ビンゴグリッドに並んだお散歩アイテムと、バトルモードバッジ。" class="hero-logo-img">
       </div>
       <div class="hero-cta-strip-logo">
-        <a href="game.html" class="btn-start">おさんぽビンゴをはじめる</a>
+        <a href="game.html" class="btn-start"><span class="btn-sub">おさんぽビンゴ</span><span class="btn-main">START</span></a>
       </div>
     </section>
 
@@ -339,108 +148,33 @@
     <section class="main-content">
 
       <!-- 遊び方 -->
-      <div class="lp-section lp-section-howto-img">
-        <h2 class="lp-section-title">遊び方</h2>
-        <img
-          src="static/howto-banner.png"
-          alt="遊び方：ゲームをスタートして、お題を見つけて写真で記録、BINGOを目指そう！"
-          class="howto-banner-img"
-        >
-      </div>
-
-      <!-- 特徴 -->
-      <div class="lp-section">
-        <h2 class="lp-section-title">できること</h2>
-        <div class="feature-list">
-          <div class="feature-item">
-            <div class="feature-check">✓</div>
-            <div class="feature-text">
-              <strong>難易度5種類で何度でも楽しめる</strong>
-              <p>かんたん〜ガチおにまで5段階。難易度ごとに出るお題が変わるから、毎回新鮮な体験ができる。</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-check">✓</div>
-            <div class="feature-text">
-              <strong>好きなお題を自分で入れられる</strong>
-              <p>フリー入力マスを最大24個設定して、自分だけのオリジナルBINGOボードに。イベントや授業にも使える。</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-check">✓</div>
-            <div class="feature-text">
-              <strong>アプリ不要、ブラウザだけで動く</strong>
-              <p>インストール不要。スマホのブラウザでURLを開くだけですぐ遊べる。オフラインにも対応。</p>
-            </div>
-          </div>
-        </div>
+      <div class="lp-section-img">
+        <img src="static/howto-banner.png" alt="遊び方：ゲームをスタートして、お題を見つけて写真で記録、BINGOを目指そう！" class="lp-img">
       </div>
 
       <!-- バトルモード -->
-      <div class="lp-section">
-        <h2 class="lp-section-title">みんなで同じボードで遊べる</h2>
-        <div class="battle-box">
-          <p class="battle-box-head">同じお題でバトル！相手より早く探せ！</p>
-          <p>バトルモードで合言葉を決めるだけで、友達・家族全員が同じお題ボードでスタート。誰が先にBINGOできるか楽しみながら歩こう。公園の遠足・家族のおさんぽ・課外活動にも。</p>
-        </div>
+      <div class="lp-section-img">
+        <img src="static/battlemode.png" alt="バトルモード：合言葉で友達・家族と同じボードでバトル！" class="lp-img">
+      </div>
+
+      <!-- カメラで記録 -->
+      <div class="lp-section-img">
+        <img src="static/camera.png" alt="見つけたお題をカメラで記録しよう" class="lp-img">
       </div>
 
       <!-- 難易度 -->
-      <div class="lp-section">
-        <h2 class="lp-section-title">5種類の難易度</h2>
-        <div class="diff-list">
-          <div class="diff-row diff-easy">
-            <span class="diff-badge">かんたん</span>
-            <p>信号機・花・ポストなど見つけやすいお題中心</p>
-          </div>
-          <div class="diff-row diff-normal">
-            <span class="diff-badge">ふつう</span>
-            <p>少し探すお題も混ざってくる、ちょうどいい歯ごたえ</p>
-          </div>
-          <div class="diff-row diff-hard">
-            <span class="diff-badge">むずかしい</span>
-            <p>レアなお題が増える。目を凝らして探そう</p>
-          </div>
-          <div class="diff-row diff-oni">
-            <span class="diff-badge">おに</span>
-            <p>激レアお題だらけ。達成できたら本物の猛者</p>
-          </div>
-          <div class="diff-row diff-oni">
-            <span class="diff-badge">ガチおに</span>
-            <p>全マスが激レアお題。完全制覇はほぼ不可能。挑戦者求む</p>
-          </div>
-        </div>
+      <div class="lp-section-img">
+        <img src="static/Difficultylevel.png" alt="5つの難易度：かんたん・ふつう・むずかしい・おに・ガチおに" class="lp-img">
       </div>
 
-      <!-- シーン -->
-      <div class="lp-section">
-        <h2 class="lp-section-title">こんなシーンで</h2>
-        <div class="scene-list">
-          <div class="scene-item">
-            <span class="scene-emoji">👨‍👩‍👧</span>
-            <span>家族のおさんぽ</span>
-          </div>
-          <div class="scene-item">
-            <span class="scene-emoji">🐕</span>
-            <span>犬のおさんぽ</span>
-          </div>
-          <div class="scene-item">
-            <span class="scene-emoji">🏃</span>
-            <span>ウォーキング・運動</span>
-          </div>
-          <div class="scene-item">
-            <span class="scene-emoji">🌸</span>
-            <span>季節のおでかけ</span>
-          </div>
-          <div class="scene-item">
-            <span class="scene-emoji">🏫</span>
-            <span>遠足・校外学習</span>
-          </div>
-          <div class="scene-item">
-            <span class="scene-emoji">👫</span>
-            <span>友達といっしょに</span>
-          </div>
-        </div>
+      <!-- フィールド -->
+      <div class="lp-section-img">
+        <img src="static/field.png" alt="選べるフィールド：まち・しぜん・こうえんなど" class="lp-img">
+      </div>
+
+      <!-- フリー入力 -->
+      <div class="lp-section-img">
+        <img src="static/FREEMASU.png" alt="フリー入力マスで好きなお題で遊べる" class="lp-img">
       </div>
 
       <!-- 広告枠（インフィード）※PV増加後に表示 -->
@@ -456,7 +190,7 @@
 
       <!-- CTA -->
       <div class="cta-bottom hero-cta-strip-logo">
-        <a href="game.html" class="btn-start btn-large">おさんぽビンゴをはじめる</a>
+        <a href="game.html" class="btn-start btn-large"><span class="btn-sub">おさんぽビンゴ</span><span class="btn-main">START</span></a>
       </div>
     </section>
 
