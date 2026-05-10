@@ -595,7 +595,7 @@
         window.location.href = indexUrl;
       }
       function setupLinks() {
-        document.querySelectorAll('#headerBackToTop, #footerBackToTop, .link-back-top').forEach(function(el) {
+        document.querySelectorAll('#headerBackToTop, .link-back-top').forEach(function(el) {
           if (el && !el.dataset.goToTopBound) {
             el.dataset.goToTopBound = '1';
             el.addEventListener('click', goToTop);

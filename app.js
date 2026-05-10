@@ -247,6 +247,15 @@ class OsanpoBingo {
     if (endGameBtn) {
       endGameBtn.addEventListener('click', () => this.endGame());
     }
+
+    // ← トップボタン：結果（写真保存）画面を経由してからトップへ
+    const backToTopBtn = document.getElementById('footerBackToTop');
+    if (backToTopBtn) {
+      backToTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.endGame();
+      });
+    }
     
     // 結果画面：決定・ダウンロード・共有・戻る
     this.setupResultView();
