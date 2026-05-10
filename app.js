@@ -2100,7 +2100,8 @@ class OsanpoBingo {
             difficulty: this.difficulty,
             topicSetId: this.topicSetId,
             landmarkMode: this.landmarkMode,
-            playMode: this.playMode
+            playMode: this.playMode,
+            creatorId: this.battlePlayerId
           });
         }
         this.registerPlayerPresence();
@@ -2970,15 +2971,20 @@ class OsanpoBingo {
       );
       if (!res.ok) return PLAYER_COLORS[0];
       const rows = await res.json();
-      const takenColors = new Set(
-        (rows || [])
-          .filter(r => {
-            const id = r?.owner_user_id || '';
-            // ルーム設定レコード（__settings__:プレフィックス）を除外
-            return id && !id.startsWith('__settings__:');
-          })
-          .map(r => parseOwnerColor(r.owner_user_id))
-      );
+      const takenColors = new Set();
+      (rows || []).forEach(r => {
+        const id = r?.owner_user_id || '';
+        if (!id) return;
+        if (id.startsWith('__settings__:')) {
+          // 設定レコードからクリエイターIDの色を取得
+          try {
+            const s = JSON.parse(id.slice('__settings__:'.length));
+            if (s.creatorId) takenColors.add(parseOwnerColor(s.creatorId));
+          } catch {}
+        } else {
+          takenColors.add(parseOwnerColor(id));
+        }
+      });
       return PLAYER_COLORS.find(c => !takenColors.has(c)) || PLAYER_COLORS[0];
     } catch {
       return PLAYER_COLORS[0];
