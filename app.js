@@ -386,22 +386,15 @@ class OsanpoBingo {
       }
       const rows = await res.json();
       const nextOwners = {};
-      const nextBingoOwners = { ...this.battleBingoOwners };
       (rows || []).forEach((row) => {
         const idx = Number(row?.cell_index);
         const ownerId = typeof row?.owner_user_id === 'string' ? row.owner_user_id : '';
-        if (!ownerId || !Number.isInteger(idx)) return;
-        if (idx >= 0 && idx < 25) {
-          // 通常セル（cell_index 0-24）
-          nextOwners[idx] = ownerId;
-        } else if (idx >= 100 && idx < 112) {
-          // ビンゴライン（cell_index 100-111 = lineIndex 0-11）
-          nextBingoOwners[idx - 100] = ownerId;
-        }
-        // idx === 99: ルーム設定（owner_user_id は JSON 文字列のためスキップ）
+        if (!ownerId || !Number.isInteger(idx) || idx < 0 || idx > 24) return;
+        // cell_index 12 にルーム設定レコードを格納（__settings__: プレフィックス）→ スキップ
+        if (ownerId.startsWith('__settings__:')) return;
+        nextOwners[idx] = ownerId;
       });
       this.battleCellOwners = nextOwners;
-      this.battleBingoOwners = nextBingoOwners;
       this.checkBingo();
       this.updateBoardOwnership();
       this.updateStats();
@@ -457,8 +450,8 @@ class OsanpoBingo {
         },
         body: JSON.stringify({
           room_code: roomCode,
-          cell_index: 99,
-          owner_user_id: JSON.stringify(settings)
+          cell_index: 12,
+          owner_user_id: '__settings__:' + JSON.stringify(settings)
         })
       });
     } catch (e) {
@@ -472,13 +465,15 @@ class OsanpoBingo {
     const { url, key } = this.battleBackend;
     try {
       const res = await fetch(
-        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&cell_index=eq.99&select=owner_user_id`,
+        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&cell_index=eq.12&select=owner_user_id`,
         { headers: { apikey: key, Authorization: `Bearer ${key}` } }
       );
       if (!res.ok) return null;
       const rows = await res.json();
       if (Array.isArray(rows) && rows.length > 0) {
-        return JSON.parse(rows[0].owner_user_id);
+        const raw = rows[0].owner_user_id || '';
+        const json = raw.startsWith('__settings__:') ? raw.slice('__settings__:'.length) : raw;
+        return JSON.parse(json);
       }
       return null;
     } catch (e) {
@@ -1925,7 +1920,7 @@ class OsanpoBingo {
       try {
         // __room_settings__ の有無でルーム存在を確認（最も確実な方法）
         const sRes = await fetch(
-          `${this.battleBackend.url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(code)}&cell_index=eq.99&select=owner_user_id`,
+          `${this.battleBackend.url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(code)}&cell_index=eq.12&select=owner_user_id`,
           { headers: { apikey: this.battleBackend.key, Authorization: `Bearer ${this.battleBackend.key}` } }
         );
         if (!sRes.ok) throw new Error('fetch failed');
@@ -1938,7 +1933,8 @@ class OsanpoBingo {
             const diffLabel = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', oni: 'おに' };
             let settingsChips = '';
             try {
-              const s = JSON.parse(sRows[0].owner_user_id);
+              const rawOwner = sRows[0].owner_user_id || '';
+              const s = JSON.parse(rawOwner.startsWith('__settings__:') ? rawOwner.slice('__settings__:'.length) : rawOwner);
               const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
               const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
               settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
@@ -2977,9 +2973,9 @@ class OsanpoBingo {
       const takenColors = new Set(
         (rows || [])
           .filter(r => {
-            const ci = Number(r?.cell_index);
-            // ルーム設定(99)を除いた全レコードのプレイヤー色を取得
-            return Number.isInteger(ci) && ci !== 99;
+            const id = r?.owner_user_id || '';
+            // ルーム設定レコード（__settings__:プレフィックス）を除外
+            return id && !id.startsWith('__settings__:');
           })
           .map(r => parseOwnerColor(r.owner_user_id))
       );
@@ -2989,28 +2985,10 @@ class OsanpoBingo {
     }
   }
 
-  // バトルビンゴ成立をサーバーに記録
+  // バトルビンゴ成立をサーバーに記録（cell_index 0-24 のみ許容のためサーバー側記録は廃止）
   async claimBingoLineOnServer(lineIndex) {
-    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
-    const { url, key } = this.battleBackend;
-    try {
-      await fetch(`${url}/rest/v1/${this.battleTable}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: key,
-          Authorization: `Bearer ${key}`,
-          Prefer: 'resolution=ignore-duplicates,return=representation'
-        },
-        body: JSON.stringify({
-          room_code: this.roomCode,
-          cell_index: 100 + lineIndex,
-          owner_user_id: this.battlePlayerId
-        })
-      });
-    } catch (e) {
-      console.warn('claimBingoLineOnServer failed', e);
-    }
+    // Supabase の CHECK 制約 (cell_index 0-24) のためビンゴライン記録は行わない。
+    // ビンゴ判定はローカルの battleCellOwners から各クライアントが個別に計算する。
   }
 
   // スコアボード用: 全プレイヤーのスコアを計算
