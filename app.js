@@ -63,13 +63,25 @@ function getBattleBackendConfig() {
   return { enabled, url, key };
 }
 
-function getBattlePlayerId() {
+function getBattleRandomId() {
   let id = sessionStorage.getItem('osanpo_battle_player_id');
   if (!id) {
     id = 'bp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
     sessionStorage.setItem('osanpo_battle_player_id', id);
   }
   return id;
+}
+
+function makeBattlePlayerId(name, randomId) {
+  const safeName = (name || '').trim() || '名無しさん';
+  return safeName + '::' + randomId;
+}
+
+function parseOwnerName(ownerUserId) {
+  if (!ownerUserId) return '名無しさん';
+  const sep = ownerUserId.indexOf('::');
+  if (sep === -1) return '名無しさん';
+  return ownerUserId.slice(0, sep) || '名無しさん';
 }
 
 class OsanpoBingo {
@@ -100,7 +112,7 @@ class OsanpoBingo {
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.battleTopicOwners = {};  // バトル用: {topicKey: userId}
-    this.battlePlayerId = getBattlePlayerId();
+    this.battlePlayerId = makeBattlePlayerId('', getBattleRandomId());
     this.battleBackend = getBattleBackendConfig();
     this.battleTable = 'battle_cell_owners';
     this.battleSyncTimer = null;
@@ -653,7 +665,7 @@ class OsanpoBingo {
     if (this.board[index]?.isFree) return;
     const ownerId = this.getCellOwnerId(index);
     if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
-      showAlert('このマスはすでに他の人が取得しています。');
+      showAlert(`このマスは${parseOwnerName(ownerId)}が取得しています。`);
       return;
     }
     
@@ -1076,6 +1088,9 @@ class OsanpoBingo {
       const statItem = this.opponentClaimedCountElement.closest('.stat-item');
       if (this.gameType === 'battle') {
         this.opponentClaimedCountElement.textContent = this.getBattleCounts().opponentClaims;
+        const opponentName = this.getOpponentName();
+        const labelEl = statItem?.querySelector('.stat-label');
+        if (labelEl) labelEl.textContent = opponentName ? `${opponentName}` : '相手';
         if (statItem) statItem.style.display = '';
       } else {
         if (statItem) statItem.style.display = 'none';
@@ -1975,6 +1990,8 @@ class OsanpoBingo {
 
         const roomCode = roomCodeInput?.value.trim() || this.generateRoomCode();
         const difficulty = difficultySelect?.value || 'normal';
+        const playerName = document.getElementById('playerNameCreateInput')?.value.trim() || '';
+        this.battlePlayerId = makeBattlePlayerId(playerName, getBattleRandomId());
 
         // フリー入力マスのお題を収集
         const customTopics = this.collectCustomTopics();
@@ -2037,6 +2054,8 @@ class OsanpoBingo {
         if (!this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
+        const joinPlayerName = document.getElementById('playerNameJoinInput')?.value.trim() || '';
+        this.battlePlayerId = makeBattlePlayerId(joinPlayerName, getBattleRandomId());
 
         // ルーム作成者の設定をサーバーから取得して同じボードを生成
         const roomSettings = await this.fetchRoomSettings(roomCode);
@@ -2696,7 +2715,7 @@ class OsanpoBingo {
       const topicKey = this.getTopicKeyByIndex(this.currentPhotoIndex);
       const ownerId = this.getCellOwnerId(this.currentPhotoIndex);
       if (ownerId && ownerId !== this.battlePlayerId) {
-        showAlert('このマスはすでに他の人が取得していました。');
+        showAlert(`このマスは${parseOwnerName(ownerId)}が取得していました。`);
         this.closeCellModal();
         return;
       }
@@ -2752,6 +2771,7 @@ class OsanpoBingo {
         playMode: this.playMode,
         gameStartTime: this.gameStartTime,
         gameType: this.gameType,
+        battlePlayerId: this.battlePlayerId,
         battleTopicOwners: this.battleTopicOwners,
         totalDistance: this.totalDistance,
         landmarkMode: this.landmarkMode
@@ -2820,6 +2840,9 @@ class OsanpoBingo {
       } else if (data.gameType === 'battle' || data.gameType === 'normal') {
         this.gameType = data.gameType;
       }
+      if (typeof data.battlePlayerId === 'string' && data.battlePlayerId.includes('::')) {
+        this.battlePlayerId = data.battlePlayerId;
+      }
       if (data.battleTopicOwners && typeof data.battleTopicOwners === 'object') {
         this.battleTopicOwners = data.battleTopicOwners;
       }
@@ -2837,6 +2860,13 @@ class OsanpoBingo {
       console.error('❌ 読み込みエラー:', error);
       return false;
     }
+  }
+
+  getOpponentName() {
+    for (const ownerId of Object.values(this.battleTopicOwners)) {
+      if (ownerId !== this.battlePlayerId) return parseOwnerName(ownerId);
+    }
+    return null;
   }
 
   normalizeTopicKey(text) {
