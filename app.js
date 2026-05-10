@@ -452,12 +452,13 @@ class OsanpoBingo {
     }
   }
 
-  startBattleSyncLoop() {
+  startBattleSyncLoop(skipInitialSync = false) {
     this.stopBattleSyncLoop();
     if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return;
     }
-    this.syncBattleOwnersFromServer();
+    // skipInitialSync=true のときは初回を省略（呼び出し元が await 済みの場合）
+    if (!skipInitialSync) this.syncBattleOwnersFromServer();
     this.battleSyncTimer = setInterval(() => {
       this.syncBattleOwnersFromServer();
     }, 2000);
@@ -2173,7 +2174,7 @@ class OsanpoBingo {
     
     // ゲーム開始ボタン（みんなで・作成モード）
     if (startGameBtn) {
-      startGameBtn.addEventListener('click', () => {
+      startGameBtn.addEventListener('click', async () => {
         this.stopBattleSyncLoop();
         const difficultySelect = document.getElementById('difficultySelect');
         const modal = document.getElementById('roomCodeModal');
@@ -2229,8 +2230,9 @@ class OsanpoBingo {
           });
         }
         this.registerPlayerPresence();
-        this.syncBattleOwnersFromServer();
-        this.startBattleSyncLoop();
+        // 作成直後もサーバー状態を即時反映するため await
+        await this.syncBattleOwnersFromServer();
+        this.startBattleSyncLoop(/* skipInitialSync= */ true);
 
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
@@ -2284,8 +2286,9 @@ class OsanpoBingo {
         this.startPlayTimer();
         this.updateStats();
         this.registerPlayerPresence();
-        this.syncBattleOwnersFromServer();
-        this.startBattleSyncLoop();
+        // 参加直後に対戦相手の取得済みマスを表示するため await で初回同期を待つ
+        await this.syncBattleOwnersFromServer();
+        this.startBattleSyncLoop(/* skipInitialSync= */ true);
 
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
@@ -2553,6 +2556,18 @@ class OsanpoBingo {
     if (photoInputCamera) photoInputCamera.addEventListener('change', handlePhotoChange);
     if (photoInputGallery) photoInputGallery.addEventListener('change', handlePhotoChange);
 
+    // カメラ・ギャラリーラベルタップ → プライバシー注意ポップアップ → ファイル選択
+    const cameraLabel  = document.getElementById('uploadPhotoLabelCamera');
+    const galleryLabel = document.getElementById('uploadPhotoLabelGallery');
+    const openWithPrivacy = (inputId) => (e) => {
+      e.preventDefault(); // label のデフォルト（input クリック）を抑制
+      this.showPhotoPrivacyModal(() => {
+        document.getElementById(inputId)?.click();
+      });
+    };
+    if (cameraLabel)  cameraLabel.addEventListener('click',  openWithPrivacy('cellPhotoInputCamera'));
+    if (galleryLabel) galleryLabel.addEventListener('click', openWithPrivacy('cellPhotoInputGallery'));
+
     // 保存ボタン
     if (saveCellPhotoBtn) {
       saveCellPhotoBtn.addEventListener('click', () => {
@@ -2728,6 +2743,32 @@ class OsanpoBingo {
     }
   }
   
+  /**
+   * 撮影前プライバシー注意ポップアップ（MHNスタイル）
+   * セッション中に一度見た場合はスキップして callback を直接呼ぶ
+   */
+  showPhotoPrivacyModal(callback) {
+    const SEEN_KEY = 'osanpo_photo_privacy_seen';
+    if (sessionStorage.getItem(SEEN_KEY)) {
+      callback();
+      return;
+    }
+    const modal = document.getElementById('photoPrivacyModal');
+    const okBtn = document.getElementById('photoPrivacyOkBtn');
+    if (!modal || !okBtn) {
+      callback();
+      return;
+    }
+    const done = () => {
+      sessionStorage.setItem(SEEN_KEY, '1');
+      modal.style.display = 'none';
+      okBtn.onclick = null;
+      callback();
+    };
+    okBtn.onclick = done;
+    modal.style.display = 'flex';
+  }
+
   closeCellModal() {
     const modal = document.getElementById('cellModal');
     if (modal) modal.style.display = 'none';
