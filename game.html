@@ -398,8 +398,8 @@
               写真を選ぶ
             </label>
           </div>
-          <button type="button" id="toggleMarkBtn" class="btn btn-secondary btn-large">
-            マークする
+          <button type="button" id="toggleMarkBtn" class="link-btn" style="width:100%; text-align:center;">
+            写真なしでマークする
           </button>
           <p id="battlePhotoRequired" style="display:none; font-size:0.82rem; color:#888; text-align:center; margin-top:4px;">
             バトルモードでは写真のアップロードが必須です
@@ -516,7 +516,7 @@
           <input type="text" id="resultGroupInput" class="input-text" placeholder="例: 家族で散歩、友達3人で" maxlength="50">
         </div>
         <div class="result-edit-actions">
-          <button id="resultCancelBtn" class="btn btn-secondary">← ゲームに戻る</button>
+          <button id="resultCancelBtn" class="btn btn-secondary btn-large">← ゲームに戻る</button>
           <button id="resultConfirmBtn" class="btn btn-primary btn-large">結果を確定する</button>
         </div>
       </div>
@@ -543,10 +543,10 @@
           個人が特定できる写真はSNSに上げないでください。（ナンバープレート・顔など）
         </p>
         <div class="result-share-buttons">
-          <button id="downloadImageBtn" class="btn btn-primary">画像を保存</button>
-          <button type="button" id="shareSnsBtn" class="btn btn-secondary">共有する</button>
+          <button id="downloadImageBtn" class="btn btn-primary btn-large">画像を保存</button>
+          <button type="button" id="shareSnsBtn" class="btn btn-secondary btn-large">共有する</button>
         </div>
-        <button id="saveAllPhotosBtn" class="btn btn-secondary btn-large" style="margin-top:8px">全写真をまとめて保存</button>
+        <button id="saveAllPhotosBtn" class="btn btn-secondary result-sub-btn">全写真をまとめて保存</button>
         <!-- 広告枠（結果画面） -->
         <!-- 広告枠（結果画面）※PV増加後に表示 -->
         <div class="ad-slot ad-slot-result" id="adSlotResult" style="display:none">
@@ -561,7 +561,7 @@
           </div>
         </div>
 
-        <button id="exitScreenshotBtn" class="btn btn-secondary btn-large">トップへ戻る</button>
+        <button id="exitScreenshotBtn" class="link-btn result-exit-btn">← トップへ戻る</button>
       </div>
     </div>
   </div>

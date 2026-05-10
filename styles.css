@@ -1656,13 +1656,9 @@ h1 {
   margin-top: var(--spacing-md);
 }
 
-.result-edit-actions .btn-large {
+.result-edit-actions .btn {
   flex: 1;
-  min-width: 140px;
-}
-
-.result-edit-actions .btn-secondary {
-  flex-shrink: 0;
+  min-width: 0;
 }
 
 @media (max-width: 480px) {
@@ -1752,17 +1748,27 @@ h1 {
 .result-share-buttons {
   display: flex;
   gap: var(--spacing-md);
-  justify-content: center;
 }
 
 .result-share-buttons .btn {
   flex: 1;
   min-width: 0;
-  white-space: nowrap;
 }
 
-.result-share-area .btn-large {
+/* 全写真をまとめて保存：メインボタンより控えめなサイズ */
+.result-sub-btn {
   width: 100%;
+  margin-top: var(--spacing-sm);
+  font-size: 0.9rem;
+  padding: 10px var(--spacing-md);
+}
+
+/* トップへ戻る：リンクスタイル */
+.result-exit-btn {
+  display: block;
+  width: 100%;
+  margin-top: var(--spacing-xs);
+  text-align: center;
 }
 
 @media (max-width: 480px) {
@@ -2042,7 +2048,7 @@ h1 {
   }
 
   .result-share-buttons .btn,
-  .result-share-area .btn-large {
+  .result-sub-btn {
     min-height: 48px;
   }
 
