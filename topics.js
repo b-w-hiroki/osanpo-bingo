@@ -902,9 +902,9 @@ const topicSets = [
     topicIds: []
   },
   {
-    id: '商店街',
-    name: '商店街',
-    description: '商店街や繁華街で見つけやすいお題です。',
+    id: '住宅街',
+    name: '住宅街',
+    description: '住宅街や路地で見つけやすいお題です。',
     monetizationType: 'free',
     topicIds: []
   },
