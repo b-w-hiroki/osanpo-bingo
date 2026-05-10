@@ -1188,15 +1188,17 @@ class OsanpoBingo {
       if (this.gameType === 'battle') {
         const scores = this.getBattleScores();
         const colorLabel = { blue: '青', red: '赤', yellow: '黄', green: '緑' };
-        scoreboardEl.innerHTML = scores.map(p => `
-          <div class="battle-score-row">
+        scoreboardEl.innerHTML = scores.map(p => {
+          const isMe = p.id === this.battlePlayerId;
+          return `
+          <div class="battle-score-row${isMe ? ' battle-score-row--me' : ''}">
             <span class="battle-score-dot battle-color-${p.color}"></span>
-            <span class="battle-score-name">${p.name}</span>
+            <span class="battle-score-name">${p.name}${isMe ? '<span class="battle-score-you">あなた</span>' : ''}</span>
             <span class="battle-score-marks">${p.marks}マス</span>
             <span class="battle-score-bingo">BINGO×${p.bingos}</span>
             <span class="battle-score-total">${p.total}pt</span>
-          </div>
-        `).join('');
+          </div>`;
+        }).join('');
         scoreboardEl.style.display = '';
       } else {
         scoreboardEl.style.display = 'none';
@@ -3063,8 +3065,8 @@ class OsanpoBingo {
       if (ownerId && playerMap.has(ownerId)) playerMap.get(ownerId).bingos++;
     }
 
-    return Array.from(playerMap.values())
-      .map(p => ({ ...p, total: p.marks + p.bingos * 3 }))
+    return Array.from(playerMap.entries())
+      .map(([id, p]) => ({ ...p, id, total: p.marks + p.bingos * 3 }))
       .sort((a, b) => b.total - a.total);
   }
 

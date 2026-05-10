@@ -180,6 +180,10 @@ h1 {
 .main {
   flex: 0 0 auto;
 }
+/* ゲーム画面ではbingo-boardの下マージンを削除（containerのgapで制御） */
+.main .bingo-board {
+  margin-bottom: 0;
+}
 
 /* ==================== ビンゴボード ==================== */
 .bingo-board {
@@ -273,7 +277,7 @@ h1 {
 
 /* ===== バトルスコアボード ===== */
 .battle-scoreboard {
-  margin: 8px 0 4px;
+  margin: -12px 0 4px; /* ボードとの余白を詰める */
   padding: 10px 14px;
   background: #f8faf8;
   border: 1.5px solid #d0e8d0;
@@ -298,7 +302,9 @@ h1 {
 .battle-color-red    { background: #c62828; }
 .battle-color-yellow { background: #f9a825; }
 .battle-color-green  { background: #2e7d32; }
-.battle-score-name   { flex: 1; font-weight: 700; color: #1a1a1a; }
+.battle-score-name   { flex: 1; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 5px; }
+.battle-score-you    { font-size: 10px; font-weight: 600; color: #fff; background: #1e88e5; border-radius: 4px; padding: 1px 5px; line-height: 1.4; }
+.battle-score-row--me { background: rgba(30, 136, 229, 0.06); border-radius: 6px; padding: 2px 4px; margin: -2px -4px; }
 .battle-score-marks  { color: #555; font-size: 12px; }
 .battle-score-bingo  { color: #157F1F; font-weight: 600; font-size: 12px; }
 .battle-score-total  { font-weight: 800; color: #1e5c3a; min-width: 36px; text-align: right; }
