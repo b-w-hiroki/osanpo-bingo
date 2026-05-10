@@ -1868,6 +1868,9 @@ h1 {
   padding-top: var(--spacing-lg);
   color: var(--text-lighter);
   font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .footer a {
