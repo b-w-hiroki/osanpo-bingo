@@ -134,6 +134,7 @@ class OsanpoBingo {
     this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
     this.battleCellOwners = {};  // バトル用: {cellIndex: userId}
     this.battleBingoOwners = {};  // バトル用: {lineIndex: userId} ビンゴ成立権
+    this.battleOpponentPhotos = {}; // バトル用: {cellIndex: base64DataUrl} 相手の写真キャッシュ
     this.battlePresencePlayers = new Set(); // バトル用: 参加者全員のplayerIdセット
     this.lastClaimedCellIndex = null; // 直近でクレームしたセルインデックス
     this.battlePlayerId = makeBattlePlayerId('', 'blue', getBattleRandomId());
@@ -283,6 +284,18 @@ class OsanpoBingo {
     // 写真モーダル
     this.setupPhotoModal();
 
+    // バトル: 相手マス閲覧モーダルを閉じる
+    const closeBattleViewBtn = document.getElementById('closeBattleViewModal');
+    const battleViewModal = document.getElementById('battleViewModal');
+    if (closeBattleViewBtn && battleViewModal) {
+      closeBattleViewBtn.addEventListener('click', () => {
+        battleViewModal.style.display = 'none';
+      });
+      battleViewModal.addEventListener('click', (e) => {
+        if (e.target === battleViewModal) battleViewModal.style.display = 'none';
+      });
+    }
+
     document.addEventListener('visibilitychange', () => {
       if (!BATTLE_MODE_ENABLED) return;
       if (document.visibilityState === 'visible') {
@@ -384,6 +397,7 @@ class OsanpoBingo {
     this.photos = {};
     this.photoBlobs = {};
     this.battleCellOwners = {};
+    this.battleOpponentPhotos = {};
     // IDB の写真も非同期クリア（エラーは無視）
     this.photoStorage.clearAll().catch(() => {});
     
@@ -749,7 +763,8 @@ class OsanpoBingo {
 
     const ownerId = this.getCellOwnerId(index);
     if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
-      showAlert(`このマスは${parseOwnerName(ownerId)}が取得しています。`);
+      // 相手が取得したマス → 写真モーダルを表示
+      this.showBattleOpponentPhotoModal(index, ownerId);
       return;
     }
     
@@ -1183,6 +1198,9 @@ class OsanpoBingo {
       this.playerCountDisplay.textContent = this.playerCount || 1;
     }
     const isBattle = this.gameType === 'battle';
+    // バトルモードでは「作り直す」を非表示
+    const newGameBtn = document.getElementById('newGameBtn');
+    if (newGameBtn) newGameBtn.style.display = isBattle ? 'none' : '';
     // 合言葉：バトルのみ表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
     if (roomCodeStatEl) roomCodeStatEl.style.display = isBattle ? '' : 'none';
@@ -3036,6 +3054,11 @@ class OsanpoBingo {
       this.markedCells.add(idx);
     }
 
+    // バトルモードで写真をサーバーへアップロード（失敗しても続行）
+    if (this.gameType === 'battle' && this.battleBackend.enabled) {
+      this.uploadBattlePhoto(idx, blob).catch(() => {});
+    }
+
     // 再レンダリング
     this.checkBingo();
     this.updateStats();
@@ -3207,6 +3230,123 @@ class OsanpoBingo {
   async claimBingoLineOnServer(lineIndex) {
     // Supabase の CHECK 制約 (cell_index 0-24) のためビンゴライン記録は行わない。
     // ビンゴ判定はローカルの battleCellOwners から各クライアントが個別に計算する。
+  }
+
+  // ========== バトル: 相手マス写真表示 ==========
+
+  /** 相手が取得したセルをタップしたときに写真モーダルを表示 */
+  showBattleOpponentPhotoModal(index, ownerId) {
+    const modal = document.getElementById('battleViewModal');
+    if (!modal) return;
+
+    const titleEl   = document.getElementById('battleViewTitle');
+    const badgeEl   = document.getElementById('battleViewOwnerBadge');
+    const photoWrap = document.getElementById('battleViewPhotoWrap');
+    const photoEl   = document.getElementById('battleViewPhoto');
+    const noPhotoEl = document.getElementById('battleViewNoPhoto');
+
+    // セルのお題テキスト
+    const cell = this.board[index];
+    if (titleEl) titleEl.textContent = cell?.text || '';
+
+    // オーナー名・色バッジ
+    const name  = parseOwnerName(ownerId);
+    const color = parseOwnerColor(ownerId);
+    const colorDot = { blue: '🔵', red: '🔴', yellow: '🟡', green: '🟢' }[color] || '●';
+    if (badgeEl) badgeEl.textContent = `${colorDot} ${name}`;
+
+    // キャッシュ済み写真があれば即時表示、なければサーバーから取得
+    const cached = this.battleOpponentPhotos[index];
+    if (cached) {
+      if (photoEl) photoEl.src = cached;
+      if (photoWrap) photoWrap.style.display = '';
+      if (noPhotoEl) noPhotoEl.style.display = 'none';
+    } else {
+      // ローディング中は「写真なし」表示
+      if (photoWrap) photoWrap.style.display = 'none';
+      if (noPhotoEl) noPhotoEl.style.display = '';
+      // 非同期でサーバーから取得してキャッシュ
+      this.fetchOpponentCellPhoto(index).then(data => {
+        if (data) {
+          this.battleOpponentPhotos[index] = data;
+          // モーダルがまだ開いていれば更新
+          if (modal.style.display !== 'none' && photoEl) {
+            photoEl.src = data;
+            if (photoWrap) photoWrap.style.display = '';
+            if (noPhotoEl) noPhotoEl.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  /** Supabase から特定セルの photo_data を取得（オンデマンド） */
+  async fetchOpponentCellPhoto(cellIndex) {
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return null;
+    try {
+      const url = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
+      url.searchParams.set('select', 'photo_data');
+      url.searchParams.set('room_code', `eq.${this.roomCode}`);
+      url.searchParams.set('cell_index', `eq.${cellIndex}`);
+      const res = await fetch(url.toString(), {
+        headers: {
+          apikey: this.battleBackend.key,
+          Authorization: `Bearer ${this.battleBackend.key}`
+        }
+      });
+      if (!res.ok) return null;
+      const rows = await res.json();
+      return rows?.[0]?.photo_data || null;
+    } catch (e) {
+      console.warn('fetchOpponentCellPhoto failed', e);
+      return null;
+    }
+  }
+
+  /** 画像Blobをリサイズ圧縮してbase64 data URLに変換 */
+  compressToBase64(blob, maxWidth = 640, quality = 0.75) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(blob);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const ratio = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
+      img.src = objectUrl;
+    });
+  }
+
+  /** バトルモード: 写真を圧縮してSupabaseのphoto_dataカラムへアップロード */
+  async uploadBattlePhoto(cellIndex, blob) {
+    // NOTE: Supabaseの battle_cell_owners テーブルに photo_data TEXT カラムの追加が必要
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
+    try {
+      const photoData = await this.compressToBase64(blob, 640, 0.75);
+      if (!photoData) return;
+      const url = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
+      url.searchParams.set('room_code', `eq.${this.roomCode}`);
+      url.searchParams.set('cell_index', `eq.${cellIndex}`);
+      await fetch(url.toString(), {
+        method: 'PATCH',
+        headers: {
+          'apikey': this.battleBackend.key,
+          'Authorization': `Bearer ${this.battleBackend.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ photo_data: photoData })
+      });
+    } catch (e) {
+      console.warn('uploadBattlePhoto failed', e);
+    }
   }
 
   // スコアボード用: 全プレイヤーのスコアを計算

@@ -563,6 +563,21 @@
     </div>
   </div>
   
+  <!-- バトル: 相手マス閲覧モーダル -->
+  <div class="modal" id="battleViewModal" style="display: none;">
+    <div class="modal-content">
+      <button class="modal-close" id="closeBattleViewModal" aria-label="閉じる">✕</button>
+      <div class="cell-photo-header" style="margin-bottom: 12px;">
+        <span class="cell-photo-title" id="battleViewTitle"></span>
+        <span class="cell-marked-badge" id="battleViewOwnerBadge"></span>
+      </div>
+      <div id="battleViewPhotoWrap" style="display: none; margin-bottom: 16px;">
+        <img id="battleViewPhoto" style="width: 100%; border-radius: 12px; display: block;" alt="相手の写真">
+      </div>
+      <p id="battleViewNoPhoto" style="text-align: center; color: #888; font-size: 0.9rem; padding: 24px 0; display: none;">📷 まだ写真がありません</p>
+    </div>
+  </div>
+
   <!-- 確認・通知モーダル -->
   <div id="dialogModal" class="dialog-modal" style="display: none;">
     <div class="dialog-modal-backdrop"></div>
