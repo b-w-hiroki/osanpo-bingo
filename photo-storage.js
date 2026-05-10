@@ -30,6 +30,7 @@ class PhotoStorage {
 
   /** Blob を保存（key = セルインデックス番号） */
   async save(index, blob) {
+    if (!this.db) throw new Error('PhotoStorage not ready');
     return new Promise((resolve, reject) => {
       const req = this.db.transaction(this.STORE, 'readwrite')
                          .objectStore(this.STORE).put(blob, index);
@@ -40,6 +41,7 @@ class PhotoStorage {
 
   /** 1 件取得（なければ null） */
   async get(index) {
+    if (!this.db) return null;
     return new Promise((resolve, reject) => {
       const req = this.db.transaction(this.STORE, 'readonly')
                          .objectStore(this.STORE).get(index);
@@ -50,6 +52,7 @@ class PhotoStorage {
 
   /** 全件取得 → { index(number): Blob } */
   async getAll() {
+    if (!this.db) return {};
     return new Promise((resolve, reject) => {
       const result = {};
       const req = this.db.transaction(this.STORE, 'readonly')
@@ -65,6 +68,7 @@ class PhotoStorage {
 
   /** 1 件削除 */
   async delete(index) {
+    if (!this.db) return;
     return new Promise((resolve, reject) => {
       const req = this.db.transaction(this.STORE, 'readwrite')
                          .objectStore(this.STORE).delete(index);
@@ -75,6 +79,7 @@ class PhotoStorage {
 
   /** 全件削除（新ゲーム開始時） */
   async clearAll() {
+    if (!this.db) return;
     return new Promise((resolve, reject) => {
       const req = this.db.transaction(this.STORE, 'readwrite')
                          .objectStore(this.STORE).clear();

@@ -1630,6 +1630,9 @@ class OsanpoBingo {
     try {
       localStorage.removeItem('osanpoBingo');
     } catch (e) {}
+    // IDB の写真も削除（次セッションに持ち越さない）
+    this._revokeAllPhotoURLs();
+    this.photoStorage.clearAll().catch(() => {});
 
     // キャッシュ削除を試みつつ、確実にナビゲーションする
     const doNavigate = () => {
@@ -2717,8 +2720,9 @@ class OsanpoBingo {
       this.photoBlobs[key] = blob;
     }
 
-    // 写真があれば再描画
-    if (Object.keys(this.photos).length > 0) {
+    // ボードが揃っていて写真があるときのみ再描画
+    // （board が空 = 新ゲーム開始前の状態ではレンダリング不要）
+    if (Object.keys(this.photos).length > 0 && this.board.length === 25) {
       this.renderBoard();
       this.updateStats();
     }
@@ -2972,8 +2976,11 @@ class OsanpoBingo {
     if (this.photos[idx] && this.photos[idx].startsWith('blob:')) {
       URL.revokeObjectURL(this.photos[idx]);
     }
-    // tempPhotoData（プレビュー用 URL）はここで転用せず新規作成
+    // プレビュー URL を解放して null にする
+    // （closeCellModal からの二重 revoke を防ぐため先にクリア）
     this._revokeTempPhotoURL();
+    this.tempPhotoData = null;
+    this.tempPhotoBlob = null;
     const displayUrl = URL.createObjectURL(blob);
     this.photos[idx] = displayUrl;
     this.photoBlobs[idx] = blob;
