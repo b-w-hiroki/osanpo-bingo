@@ -1185,6 +1185,15 @@ class OsanpoBingo {
     if (roomCodeStatEl) {
       roomCodeStatEl.style.display = isBattle ? '' : 'none';
     }
+    // 観光地フィールド選択時のみ地域を表示
+    const regionStatEl = document.getElementById('regionStat');
+    const regionDisplayEl = document.getElementById('regionDisplay');
+    const isKanko = this.topicSetId === '観光地';
+    if (regionStatEl) regionStatEl.style.display = isKanko ? '' : 'none';
+    if (regionDisplayEl && isKanko) {
+      const region = this.landmarkRegion || 'all';
+      regionDisplayEl.textContent = region === 'all' ? 'すべて' : region;
+    }
     if (this.distanceElement) {
       this.distanceElement.textContent = this.formatDistance(this.totalDistance);
     }
