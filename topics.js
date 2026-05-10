@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-10 15:50:12（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-10 15:54:49（walking_bingo_master.xlsx より自動生成）
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -474,6 +474,20 @@ function getLandmarksByRegion(regionId) {
   return filtered.length > 0 ? filtered : landmarkDatabase;
 }
 
+// topicDatabase に region_limit が設定されている地域一覧を返す（ドロップダウン用）
+function getAvailableRegions() {
+  const seen = new Set();
+  for (const tier of ['easy', 'normal', 'hard', 'oni']) {
+    for (const t of topicDatabase[tier] || []) {
+      if (t.region_limit) seen.add(t.region_limit);
+    }
+  }
+  return [
+    {id: 'all', name: 'すべての観光地'},
+    ...Array.from(seen).sort().map(r => ({id: r, name: r})),
+  ];
+}
+
 const topicDatabase = {
   // かんたん（47個）
   easy: [
@@ -613,13 +627,13 @@ const topicDatabase = {
     {id: 654, text: '重機', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
     {id: 667, text: '営業中の看板', icon: '🔍', category: '店舗周辺', diff: 'normal', season: 'all'},
     {id: 668, text: '〇〇ちゃんのお店', icon: '🔍', category: '商業・店舗', diff: 'normal', season: 'all'},
-    {id: 672, text: '白い恋人', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
-    {id: 673, text: '雪ミク', icon: '🔍', category: 'キャラクター掲示物', diff: 'normal', season: 'all'},
-    {id: 676, text: '国際通り', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
-    {id: 679, text: 'たこ焼き', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all'},
-    {id: 680, text: 'かに道楽', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all'},
-    {id: 682, text: 'グリコサイン', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
-    {id: 683, text: 'ニッカのおじさん', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all'},
+    {id: 672, text: '白い恋人', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all', region_limit: '北海道'},
+    {id: 673, text: '雪ミク', icon: '🔍', category: 'キャラクター掲示物', diff: 'normal', season: 'all', region_limit: '北海道'},
+    {id: 676, text: '国際通り', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all', region_limit: '沖縄'},
+    {id: 679, text: 'たこ焼き', icon: '🔍', category: '家庭・食べ物', diff: 'normal', season: 'all', region_limit: '大阪'},
+    {id: 680, text: 'かに道楽', icon: '🔍', category: '街構造・乗り物', diff: 'normal', season: 'all', region_limit: '大阪'},
+    {id: 682, text: 'グリコサイン', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all', region_limit: '大阪'},
+    {id: 683, text: 'ニッカのおじさん', icon: '🔍', category: '街インフラ', diff: 'normal', season: 'all', region_limit: '北海道'},
   ],
   // むずかしい（137個）
   hard: [
@@ -756,10 +770,10 @@ const topicDatabase = {
     {id: 666, text: '赤色のコーン', icon: '🔍', category: '案内・注意表示', diff: 'hard', season: 'all'},
     {id: 669, text: '踏切', icon: '🔍', category: '街構造・乗り物', diff: 'hard', season: 'all'},
     {id: 670, text: '貯水タンク', icon: '🔍', category: '生活・地域設備', diff: 'hard', season: 'all'},
-    {id: 674, text: 'A&W', icon: '🔍', category: '家庭・食べ物', diff: 'hard', season: 'all'},
-    {id: 675, text: 'ハイビスカス', icon: '🔍', category: '自然・生き物', diff: 'hard', season: 'all'},
-    {id: 678, text: '泡盛', icon: '🔍', category: '家庭・食べ物', diff: 'hard', season: 'all'},
-    {id: 681, text: '吉本新喜劇', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all'},
+    {id: 674, text: 'A&W', icon: '🔍', category: '家庭・食べ物', diff: 'hard', season: 'all', region_limit: '沖縄'},
+    {id: 675, text: 'ハイビスカス', icon: '🔍', category: '自然・生き物', diff: 'hard', season: 'all', region_limit: '沖縄'},
+    {id: 678, text: '泡盛', icon: '🔍', category: '家庭・食べ物', diff: 'hard', season: 'all', region_limit: '沖縄'},
+    {id: 681, text: '吉本新喜劇', icon: '🔍', category: '商業・店舗', diff: 'hard', season: 'all', region_limit: '大阪'},
   ],
   // おに（108個）
   oni: [
@@ -829,7 +843,7 @@ const topicDatabase = {
     {id: 425, text: '駐輪禁止マーク', icon: '🔍', category: '案内・注意表示', diff: 'oni', season: 'all'},
     {id: 427, text: '防犯カメラ表示', icon: '🔍', category: '案内・注意表示', diff: 'oni', season: 'all'},
     {id: 442, text: 'グレーチング端', icon: '🔍', category: '舗装・縁石・路面状態', diff: 'oni', season: 'all'},
-    {id: 466, text: 'シーサー', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all'},
+    {id: 466, text: 'シーサー', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all', region_limit: '沖縄'},
     {id: 468, text: '黄色い量販店', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all'},
     {id: 469, text: '住宅街フラッグキャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 'oni', season: 'all'},
     {id: 471, text: '店先ポップスタンドキャラ', icon: '🔍', category: '店舗周辺', diff: 'oni', season: 'all'},
@@ -868,9 +882,9 @@ const topicDatabase = {
     {id: 635, text: '自転車通行止め', icon: '🔍', category: '街インフラ', diff: 'oni', season: 'all'},
     {id: 656, text: 'ブルドーザー', icon: '🔍', category: '街構造・乗り物', diff: 'oni', season: 'all'},
     {id: 657, text: 'ダンプカー', icon: '🔍', category: '街構造・乗り物', diff: 'oni', season: 'all'},
-    {id: 660, text: 'セイコーマート', icon: '🔍', category: '商業・店舗', diff: 'oni', season: 'all'},
+    {id: 660, text: 'セイコーマート', icon: '🔍', category: '商業・店舗', diff: 'oni', season: 'all', region_limit: '北海道'},
     {id: 661, text: 'ロードローラー', icon: '🔍', category: '街構造・乗り物', diff: 'oni', season: 'all'},
-    {id: 677, text: 'カメ入り泡盛', icon: '🔍', category: '家庭・食べ物', diff: 'oni', season: 'all'},
+    {id: 677, text: 'カメ入り泡盛', icon: '🔍', category: '家庭・食べ物', diff: 'oni', season: 'all', region_limit: '沖縄'},
   ],
 };
 
@@ -1066,7 +1080,8 @@ function selectTopicsForGame(
   userId = '',
   shuffleSalt = '',
   topicSetId = 'default',
-  fieldId = 'default'
+  fieldId = 'default',
+  regionId = 'all'
 ) {
   const probs = GAME_DIFFICULTY_PROBS[gameDifficulty] || GAME_DIFFICULTY_PROBS.normal;
   const set = getTopicSetById(topicSetId);
@@ -1092,6 +1107,10 @@ function selectTopicsForGame(
         if (fieldId && fieldId !== 'default') {
           const topicFields = t.fields || ['all'];
           if (!topicFields.includes('all') && !topicFields.includes(fieldId)) return false;
+        }
+        // 地域フィルタ: region_limit がある場合は選択地域のみ出現
+        if (regionId && regionId !== 'all') {
+          if (t.region_limit && t.region_limit !== regionId) return false;
         }
         return true;
       });

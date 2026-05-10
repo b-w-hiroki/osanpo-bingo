@@ -304,7 +304,8 @@ class OsanpoBingo {
       seedUserId,
       seedSalt,
       this.topicSetId || 'default',
-      this.topicSetId || 'default'
+      this.topicSetId || 'default',
+      this.landmarkRegion || 'all'
     ).slice(0, randomCount);
 
     // カスタムお題 + ランダムお題を合わせてシャッフル
@@ -1755,7 +1756,9 @@ class OsanpoBingo {
   }
 
   populateLandmarkRegionSelect(sel) {
-    const regions = typeof landmarkRegions !== 'undefined' ? landmarkRegions : [{id: 'all', name: 'すべての観光地'}];
+    const regions = typeof getAvailableRegions === 'function'
+      ? getAvailableRegions()
+      : [{id: 'all', name: 'すべての観光地'}];
     sel.innerHTML = '';
     regions.forEach(r => {
       const opt = document.createElement('option');
