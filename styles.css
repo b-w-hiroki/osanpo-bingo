@@ -1902,6 +1902,12 @@ h1 {
   }
 }
 
+@media (max-width: 600px) {
+  .bingo-board {
+    margin-bottom: 6px;
+  }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));

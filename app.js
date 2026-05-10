@@ -418,6 +418,7 @@ class OsanpoBingo {
       this.battleTopicOwners = nextOwners;
       this.battleBingoOwners = nextBingoOwners;
       this.checkBingo();
+      this.updateBoardOwnership();
       this.updateStats();
       this.saveToStorage();
       this.lastBattleSyncAt = Date.now();
@@ -469,6 +470,7 @@ class OsanpoBingo {
         body: JSON.stringify({
           room_code: this.roomCode,
           topic_key: presenceKey,
+          cell_index: -2,
           owner_user_id: this.battlePlayerId
         })
       });
@@ -695,6 +697,39 @@ class OsanpoBingo {
       this.boardElement.querySelectorAll('.bingo-cell').forEach(c => {
         this.fitCellText(c);
       });
+    });
+  }
+
+  // バトル同期後にセルの所有者CSS状態だけを更新（DOM再構築なし）
+  updateBoardOwnership() {
+    if (!this.boardElement) return;
+    this.boardElement.querySelectorAll('.bingo-cell').forEach(cell => {
+      const index = parseInt(cell.dataset.index, 10);
+      if (isNaN(index)) return;
+      const topic = this.board[index];
+      if (!topic) return;
+      const ownerId = this.getCellOwnerId(index);
+      const isInBingoLine = this.bingoLines.some(line => line.includes(index));
+      const isMarked = topic.isFree || (ownerId === this.battlePlayerId);
+      const isUnclaimedReach = !isInBingoLine && !this.isCellClaimed(index) &&
+        this.reachLines.some(line => line.includes(index));
+
+      cell.classList.toggle('marked', isMarked);
+      cell.classList.toggle('bingo', isInBingoLine);
+      cell.classList.toggle('reach', isUnclaimedReach);
+
+      // 所有者色クラスをリセットしてから付与
+      ['claimed', 'claimed-self', 'locked',
+       'claimed-green', 'claimed-blue', 'claimed-red', 'claimed-yellow'].forEach(c => cell.classList.remove(c));
+      if (ownerId) {
+        const color = parseOwnerColor(ownerId);
+        cell.classList.add('claimed', `claimed-${color}`);
+        if (ownerId !== this.battlePlayerId) {
+          cell.classList.add('locked');
+        } else {
+          cell.classList.add('claimed-self');
+        }
+      }
     });
   }
 
@@ -2610,7 +2645,7 @@ class OsanpoBingo {
     if (photoPreview) photoPreview.style.display = 'none';
   }
   
-  // 画像圧縮（高品質版: 最大800px / quality 0.82 からスタート、300KB超なら自動縮小）
+  // 画像圧縮（高品質版: 最大1200px / quality 0.88 からスタート、500KB超なら自動縮小）
   compressImage(file, callback) {
     const reader = new FileReader();
 
@@ -2623,7 +2658,7 @@ class OsanpoBingo {
 
         let width = img.width;
         let height = img.height;
-        const maxSize = 800;
+        const maxSize = 1200;
 
         if (width > height && width > maxSize) {
           height = Math.round((height * maxSize) / width);
@@ -2641,13 +2676,13 @@ class OsanpoBingo {
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // quality 0.82 から開始し、300KB を超えたら段階的に下げる
+        // quality 0.88 から開始し、500KB を超えたら段階的に下げる
         // base64 文字数 × 3/4 ≈ バイト数
-        const TARGET_BYTES = 300 * 1024;
-        let quality = 0.82;
+        const TARGET_BYTES = 500 * 1024;
+        let quality = 0.88;
         let compressedData = canvas.toDataURL('image/jpeg', quality);
-        while (compressedData.length * 0.75 > TARGET_BYTES && quality > 0.5) {
-          quality = Math.round((quality - 0.08) * 100) / 100;
+        while (compressedData.length * 0.75 > TARGET_BYTES && quality > 0.65) {
+          quality = Math.round((quality - 0.06) * 100) / 100;
           compressedData = canvas.toDataURL('image/jpeg', quality);
         }
         callback(compressedData);
