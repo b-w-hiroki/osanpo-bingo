@@ -1262,8 +1262,9 @@ h1 {
 }
 
 .cell-modal-icon .cell-icon-img {
-  width: min(100px, 36vw);
-  height: min(100px, 36vw);
+  width: 100%;
+  max-width: 512px;
+  height: auto;
   object-fit: contain;
 }
 
