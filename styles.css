@@ -261,6 +261,48 @@ h1 {
 .bingo-cell.locked.marked { background: #cfd8dc; }
 .bingo-cell.claimed-self  { background: #157F1F; }
 
+/* ===== バトルモード: プレイヤー4色 ===== */
+.bingo-cell.claimed-blue.claimed-self   { background: #1565c0; border-color: #0d47a1; color: #fff; }
+.bingo-cell.claimed-red.claimed-self    { background: #c62828; border-color: #7f0000; color: #fff; }
+.bingo-cell.claimed-yellow.claimed-self { background: #f9a825; border-color: #e65100; color: #333; }
+.bingo-cell.claimed-green.claimed-self  { background: #2e7d32; border-color: #1b5e20; color: #fff; }
+.bingo-cell.claimed-blue.locked        { background: #bbdefb; border-color: #90caf9; color: #0d47a1; }
+.bingo-cell.claimed-red.locked         { background: #ffcdd2; border-color: #ef9a9a; color: #7f0000; }
+.bingo-cell.claimed-yellow.locked      { background: #fff9c4; border-color: #fff176; color: #e65100; }
+.bingo-cell.claimed-green.locked       { background: #c8e6c9; border-color: #a5d6a7; color: #1b5e20; }
+
+/* ===== バトルスコアボード ===== */
+.battle-scoreboard {
+  margin: 8px 0 4px;
+  padding: 10px 14px;
+  background: #f8faf8;
+  border: 1.5px solid #d0e8d0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.battle-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.battle-score-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.battle-color-blue   { background: #1565c0; }
+.battle-color-red    { background: #c62828; }
+.battle-color-yellow { background: #f9a825; }
+.battle-color-green  { background: #2e7d32; }
+.battle-score-name   { flex: 1; font-weight: 700; color: #1a1a1a; }
+.battle-score-marks  { color: #555; font-size: 12px; }
+.battle-score-bingo  { color: #157F1F; font-weight: 600; font-size: 12px; }
+.battle-score-total  { font-weight: 800; color: #1e5c3a; min-width: 36px; text-align: right; }
+
 /* ホバー効果 */
 .bingo-cell:hover {
   background: var(--cell-hover);
