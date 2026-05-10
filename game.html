@@ -71,8 +71,8 @@
 </head>
 <body class="page-game">
   <div class="container">
-    <!-- ページヘッダー -->
-    <header class="header">
+    <!-- ページヘッダー（ゲーム画面では非表示） -->
+    <header class="header" style="display:none">
       <h1>おさんぽビンゴ</h1>
     </header>
     
@@ -382,9 +382,14 @@
           <p class="cell-modal-notice" aria-hidden="true">
             撮影・アップロード時は、ナンバープレートや顔など個人が特定できる写り込みにご注意ください。
           </p>
-          <label for="cellPhotoInput" class="btn btn-primary btn-large" id="uploadPhotoLabel">
-            写真を撮る・選ぶ
-          </label>
+          <div style="display:flex; gap:8px; width:100%;">
+            <label for="cellPhotoInputCamera" class="btn btn-primary btn-large" id="uploadPhotoLabelCamera" style="flex:1;">
+              写真を撮る
+            </label>
+            <label for="cellPhotoInputGallery" class="btn btn-secondary btn-large" id="uploadPhotoLabelGallery" style="flex:1;">
+              写真を選ぶ
+            </label>
+          </div>
           <button type="button" id="toggleMarkBtn" class="btn btn-secondary btn-large">
             マークする
           </button>
@@ -393,13 +398,8 @@
           </p>
         </div>
 
-        <input
-          type="file"
-          id="cellPhotoInput"
-          accept="image/*"
-          capture="environment"
-          style="display: none;"
-        >
+        <input type="file" id="cellPhotoInputCamera" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="cellPhotoInputGallery" accept="image/*" style="display:none;">
       </div>
     </div>
     
@@ -428,15 +428,15 @@
         <span class="stat-label">難易度</span>
         <span class="stat-value" id="difficultyDisplay">-</span>
       </div>
-      <div class="stat-item">
+      <div class="stat-item" id="bingoStat">
         <span class="stat-label">BINGO</span>
         <span class="stat-value" id="bingoCount">0</span>
       </div>
-      <div class="stat-item">
+      <div class="stat-item" id="markedStat">
         <span class="stat-label">マーク</span>
         <span class="stat-value" id="markedCount">0</span>
       </div>
-      <div class="stat-item" style="display:none">
+      <div class="stat-item" id="opponentStat" style="display:none">
         <span class="stat-label">相手取得</span>
         <span class="stat-value" id="opponentClaimedCount">0</span>
       </div>

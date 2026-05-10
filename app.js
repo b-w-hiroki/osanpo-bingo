@@ -129,6 +129,7 @@ class OsanpoBingo {
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.battleTopicOwners = {};  // バトル用: {topicKey: userId}
     this.battleBingoOwners = {};  // バトル用: {lineIndex: userId} ビンゴ成立権
+    this.battlePresencePlayers = new Set(); // バトル用: 参加者全員のplayerIdセット
     this.lastClaimedCellIndex = null; // 直近でクレームしたセルインデックス
     this.lastSyncNewTopicKeys = new Set(); // 直前のsyncで追加されたtopicKey集合
     this.battlePlayerId = makeBattlePlayerId('', 'blue', getBattleRandomId());
@@ -388,10 +389,16 @@ class OsanpoBingo {
       const prevOwners = { ...this.battleTopicOwners };
       const nextOwners = {};
       const nextBingoOwners = { ...this.battleBingoOwners };
+      const nextPresence = new Set();
       (rows || []).forEach((row) => {
         let topicKey = typeof row?.topic_key === 'string' ? row.topic_key : '';
         const ownerId = typeof row?.owner_user_id === 'string' ? row.owner_user_id : '';
         if (!topicKey || !ownerId) return;
+        // プレゼンスレコード（参加者情報）
+        if (topicKey.startsWith('__presence_')) {
+          nextPresence.add(ownerId);
+          return;
+        }
         // ビンゴ成立権レコード
         if (topicKey.startsWith(BINGO_LINE_PREFIX)) {
           const lineIdx = parseInt(topicKey.slice(BINGO_LINE_PREFIX.length));
@@ -409,6 +416,7 @@ class OsanpoBingo {
         }
         if (topicKey) nextOwners[topicKey] = ownerId;
       });
+      this.battlePresencePlayers = nextPresence;
       // syncで新たに追加されたtopicKeyを記録（ビンゴ成立者判定に使用）
       this.lastSyncNewTopicKeys = new Set(
         Object.keys(nextOwners).filter(k => !prevOwners[k])
@@ -445,6 +453,33 @@ class OsanpoBingo {
     if (this.battleSyncTimer) {
       clearInterval(this.battleSyncTimer);
       this.battleSyncTimer = null;
+    }
+  }
+
+  /** 参加者としてプレゼンスレコードをサーバーに登録 */
+  async registerPlayerPresence() {
+    if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
+    const parts = this.battlePlayerId.split('::');
+    const randomPart = parts[parts.length - 1];
+    const presenceKey = `__presence_${randomPart}__`;
+    const { url, key } = this.battleBackend;
+    try {
+      await fetch(`${url}/rest/v1/${this.battleTable}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          Prefer: 'resolution=merge-duplicates,return=minimal'
+        },
+        body: JSON.stringify({
+          room_code: this.roomCode,
+          topic_key: presenceKey,
+          owner_user_id: this.battlePlayerId
+        })
+      });
+    } catch (e) {
+      console.warn('presence register failed', e);
     }
   }
 
@@ -1148,22 +1183,18 @@ class OsanpoBingo {
     if (this.playerCountDisplay) {
       this.playerCountDisplay.textContent = this.playerCount || 1;
     }
-    if (this.opponentClaimedCountElement) {
-      const statItem = this.opponentClaimedCountElement.closest('.stat-item');
-      if (this.gameType === 'battle') {
-        this.opponentClaimedCountElement.textContent = this.getBattleCounts().opponentClaims;
-        const opponentName = this.getOpponentName();
-        const labelEl = statItem?.querySelector('.stat-label');
-        if (labelEl) labelEl.textContent = opponentName ? `${opponentName}` : '相手';
-        if (statItem) statItem.style.display = '';
-      } else {
-        if (statItem) statItem.style.display = 'none';
-      }
-    }
+    // バトルモードではスコアボードがBINGO/マーク/相手を表示するためstatsから非表示
+    const isBattle = this.gameType === 'battle';
+    const bingoStatEl = document.getElementById('bingoStat');
+    const markedStatEl = document.getElementById('markedStat');
+    const opponentStatEl = document.getElementById('opponentStat');
+    if (bingoStatEl) bingoStatEl.style.display = isBattle ? 'none' : '';
+    if (markedStatEl) markedStatEl.style.display = isBattle ? 'none' : '';
+    if (opponentStatEl) opponentStatEl.style.display = 'none'; // スコアボードに統合したため常時非表示
     // スタンダードモードでは合言葉を非表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
     if (roomCodeStatEl) {
-      roomCodeStatEl.style.display = this.gameType === 'battle' ? '' : 'none';
+      roomCodeStatEl.style.display = isBattle ? '' : 'none';
     }
     if (this.distanceElement) {
       this.distanceElement.textContent = this.formatDistance(this.totalDistance);
@@ -2116,6 +2147,7 @@ class OsanpoBingo {
             playMode: this.playMode
           });
         }
+        this.registerPlayerPresence();
         this.syncBattleOwnersFromServer();
         this.startBattleSyncLoop();
 
@@ -2168,6 +2200,7 @@ class OsanpoBingo {
         this.stopLocationTracking();
         this.startLocationTracking();
         this.updateStats();
+        this.registerPlayerPresence();
         this.syncBattleOwnersFromServer();
         this.startBattleSyncLoop();
 
@@ -2176,7 +2209,7 @@ class OsanpoBingo {
       });
     }
   }
-  
+
   // フリー入力マスの入力欄を動的に生成
   renderCustomTopicInputs(count, container) {
     if (!container) return;
@@ -2411,31 +2444,32 @@ class OsanpoBingo {
   setupPhotoModal() {
     const modal = document.getElementById('cellModal');
     const closeBtn = document.getElementById('closeCellModal');
-    const photoInput = document.getElementById('cellPhotoInput');
+    const photoInputCamera = document.getElementById('cellPhotoInputCamera');
+    const photoInputGallery = document.getElementById('cellPhotoInputGallery');
     const photoPreview = document.getElementById('cellPhotoPreview');
     const photoPreviewImg = document.getElementById('cellPhotoPreviewImg');
     const saveCellPhotoBtn = document.getElementById('saveCellPhotoBtn');
     const retakeCellPhotoBtn = document.getElementById('retakeCellPhotoBtn');
     const toggleMarkBtn = document.getElementById('toggleMarkBtn');
     const deleteCurrentPhotoBtn = document.getElementById('deleteCurrentPhotoBtn');
-    
+
+    const handlePhotoChange = (e) => {
+      const file = e.target.files?.[0];
+      if (file) this.handleCellPhotoSelect(file);
+      e.target.value = '';
+    };
+
     // 閉じるボタン
     if (closeBtn && modal) {
       closeBtn.addEventListener('click', () => {
         this.closeCellModal();
       });
     }
-    
-    // 写真選択
-    if (photoInput) {
-      photoInput.addEventListener('change', (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          this.handleCellPhotoSelect(file);
-        }
-      });
-    }
-    
+
+    // 写真選択（カメラ・ギャラリー両方）
+    if (photoInputCamera) photoInputCamera.addEventListener('change', handlePhotoChange);
+    if (photoInputGallery) photoInputGallery.addEventListener('change', handlePhotoChange);
+
     // 保存ボタン
     if (saveCellPhotoBtn) {
       saveCellPhotoBtn.addEventListener('click', () => {
@@ -2444,9 +2478,10 @@ class OsanpoBingo {
     }
     
     // 撮り直しボタン（プレビューを消して適切な状態に戻す）
-    if (retakeCellPhotoBtn && photoInput && photoPreview) {
+    if (retakeCellPhotoBtn && photoPreview) {
       retakeCellPhotoBtn.addEventListener('click', () => {
-        photoInput.value = '';
+        if (photoInputCamera) photoInputCamera.value = '';
+        if (photoInputGallery) photoInputGallery.value = '';
         photoPreview.style.display = 'none';
         this.tempPhotoData = null;
         const idx = this.currentPhotoIndex;
@@ -3026,6 +3061,7 @@ class OsanpoBingo {
       playerMap.set(id, { name: parseOwnerName(id), color: parseOwnerColor(id), marks: 0, bingos: 0 });
     };
     addPlayer(this.battlePlayerId);
+    this.battlePresencePlayers.forEach(id => addPlayer(id));
     Object.values(this.battleTopicOwners).forEach(id => addPlayer(id));
     Object.values(this.battleBingoOwners).forEach(id => { if (id) addPlayer(id); });
 
