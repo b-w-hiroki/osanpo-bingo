@@ -128,6 +128,7 @@ class OsanpoBingo {
     // 遊び方（写真で記録 / マークだけ）
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
+    this.playTimerInterval = null; // プレイ時間更新タイマー
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
@@ -1172,19 +1173,10 @@ class OsanpoBingo {
     if (this.playerCountDisplay) {
       this.playerCountDisplay.textContent = this.playerCount || 1;
     }
-    // バトルモードではスコアボードがBINGO/マーク/相手を表示するためstatsから非表示
     const isBattle = this.gameType === 'battle';
-    const bingoStatEl = document.getElementById('bingoStat');
-    const markedStatEl = document.getElementById('markedStat');
-    const opponentStatEl = document.getElementById('opponentStat');
-    if (bingoStatEl) bingoStatEl.style.display = isBattle ? 'none' : '';
-    if (markedStatEl) markedStatEl.style.display = isBattle ? 'none' : '';
-    if (opponentStatEl) opponentStatEl.style.display = 'none'; // スコアボードに統合したため常時非表示
-    // スタンダードモードでは合言葉を非表示
+    // 合言葉：バトルのみ表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
-    if (roomCodeStatEl) {
-      roomCodeStatEl.style.display = isBattle ? '' : 'none';
-    }
+    if (roomCodeStatEl) roomCodeStatEl.style.display = isBattle ? '' : 'none';
     // 観光地フィールド選択時のみ地域を表示
     const regionStatEl = document.getElementById('regionStat');
     const regionDisplayEl = document.getElementById('regionDisplay');
@@ -1194,22 +1186,33 @@ class OsanpoBingo {
       const region = this.landmarkRegion || 'all';
       regionDisplayEl.textContent = region === 'all' ? 'すべて' : region;
     }
+    // 移動距離
     if (this.distanceElement) {
       this.distanceElement.textContent = this.formatDistance(this.totalDistance);
     }
-    // 計測中でない場合はタップ可能スタイルを付与
     const distanceStat = document.getElementById('distanceStat');
     if (distanceStat) {
       const tappable = this.locationState !== 'active';
       distanceStat.classList.toggle('stat-item-clickable', tappable);
       distanceStat.title = tappable ? 'タップして位置情報を再取得' : '';
     }
-    // バトルスコアボード更新
+    // プレイ時間
+    const playTimeEl = document.getElementById('playTimeDisplay');
+    if (playTimeEl) {
+      if (this.gameStartTime) {
+        const elapsed = Math.floor((Date.now() - this.gameStartTime) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        playTimeEl.textContent = m > 0 ? `${m}分${String(s).padStart(2, '0')}秒` : `${s}秒`;
+      } else {
+        playTimeEl.textContent = '-';
+      }
+    }
+    // スコアボード（バトル／スタンダード共通）
     const scoreboardEl = document.getElementById('battleScoreboard');
     if (scoreboardEl) {
-      if (this.gameType === 'battle') {
+      if (isBattle) {
         const scores = this.getBattleScores();
-        const colorLabel = { blue: '青', red: '赤', yellow: '黄', green: '緑' };
         scoreboardEl.innerHTML = scores.map(p => {
           const isMe = p.id === this.battlePlayerId;
           return `
@@ -1223,10 +1226,31 @@ class OsanpoBingo {
         }).join('');
         scoreboardEl.style.display = '';
       } else {
-        scoreboardEl.style.display = 'none';
+        // スタンダードモード：マーク数とBINGO本数を表示
+        const markedNonFree = [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
+        const bingoCount = this.bingoLines.length;
+        scoreboardEl.innerHTML = `
+          <div class="battle-score-row">
+            <span class="battle-score-name">記録</span>
+            <span class="battle-score-marks">${markedNonFree}マス</span>
+            <span class="battle-score-bingo">BINGO×${bingoCount}</span>
+          </div>`;
+        scoreboardEl.style.display = '';
       }
     }
     this.updateDebugPanel();
+  }
+
+  startPlayTimer() {
+    if (this.playTimerInterval) clearInterval(this.playTimerInterval);
+    this.playTimerInterval = setInterval(() => this.updateStats(), 1000);
+  }
+
+  stopPlayTimer() {
+    if (this.playTimerInterval) {
+      clearInterval(this.playTimerInterval);
+      this.playTimerInterval = null;
+    }
   }
 
   getBattleCounts() {
@@ -1279,13 +1303,14 @@ class OsanpoBingo {
   
   // 結果画面を表示（編集モード）
   showResultView() {
+    this.stopPlayTimer();
     const view = document.getElementById('screenshotView');
     const container = document.querySelector('.container');
     const editArea = document.getElementById('resultEditArea');
     const shareArea = document.getElementById('resultShareArea');
-    
+
     if (!view || !container) return;
-    
+
     container.style.display = 'none';
     
     // 編集エリアを表示、共有エリアを非表示
@@ -2112,6 +2137,7 @@ class OsanpoBingo {
         this.lastPosition = null;
         this.stopLocationTracking();
         this.startLocationTracking();
+        this.startPlayTimer();
         this.updateStats();
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
@@ -2162,6 +2188,7 @@ class OsanpoBingo {
         this.lastPosition = null;
         this.stopLocationTracking();
         this.startLocationTracking();
+        this.startPlayTimer();
         this.updateStats();
         // バトルモードの場合、ルーム設定をサーバーに保存（参加者が同じボードを作れるよう）
         if (this.gameType === 'battle') {
@@ -2227,6 +2254,7 @@ class OsanpoBingo {
         this.lastPosition = null;
         this.stopLocationTracking();
         this.startLocationTracking();
+        this.startPlayTimer();
         this.updateStats();
         this.registerPlayerPresence();
         this.syncBattleOwnersFromServer();
