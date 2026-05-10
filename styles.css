@@ -792,6 +792,22 @@ h1 {
   border-color: var(--primary-dark);
 }
 
+.btn-ghost {
+  background: transparent;
+  color: var(--text-light);
+  border: 1.5px solid var(--cell-border);
+  font-size: 0.88rem;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: var(--cell-hover);
+  color: var(--primary-dark);
+  border-color: var(--primary-light);
+  box-shadow: none;
+}
+
 /* ==================== 説明エリア ==================== */
 .info {
   background: var(--card-bg);
