@@ -135,7 +135,7 @@ body.page-game {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 /* ==================== ヘッダー ==================== */
@@ -659,12 +659,12 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  
+
   background: var(--card-bg);
-  padding: var(--spacing-sm) 4px;
+  padding: 6px 4px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  min-height: 60px;
+  min-height: 48px;
 }
 
 .stat-label {
@@ -729,7 +729,7 @@ h1 {
 }
 
 .btn {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 10px var(--spacing-lg);
   border: none;
   border-radius: var(--radius-md);
   font-size: 1rem;
