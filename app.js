@@ -1947,44 +1947,28 @@ class OsanpoBingo {
       }
 
       try {
-        const ep = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
-        ep.searchParams.set('select', 'owner_user_id');
-        ep.searchParams.set('room_code', `eq.${code}`);
-        const res = await fetch(ep.toString(), {
-          headers: {
-            apikey: this.battleBackend.key,
-            Authorization: `Bearer ${this.battleBackend.key}`
-          }
-        });
-        if (!res.ok) throw new Error('fetch failed');
-        const data = await res.json();
-        const players = new Set(data.map(d => d.owner_user_id));
-        if (players.size > 0) {
-          joinStatusEl.textContent = `ルームが見つかりました`;
+        // __room_settings__ の有無でルーム存在を確認（最も確実な方法）
+        const sRes = await fetch(
+          `${this.battleBackend.url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(code)}&topic_key=eq.__room_settings__&select=owner_user_id`,
+          { headers: { apikey: this.battleBackend.key, Authorization: `Bearer ${this.battleBackend.key}` } }
+        );
+        if (!sRes.ok) throw new Error('fetch failed');
+        const sRows = await sRes.json();
+        if (sRows.length > 0) {
+          joinStatusEl.textContent = 'ルームが見つかりました';
           joinStatusEl.className = 'join-room-status status-found';
           // 設定サマリー表示
           if (joinInfoEl && joinInfoContent) {
             const diffLabel = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', oni: 'おに' };
-            // ルーム設定を取得して表示
             let settingsChips = '';
             try {
-              const sRes = await fetch(
-                `${this.battleBackend.url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(code)}&topic_key=eq.__room_settings__&select=owner_user_id`,
-                { headers: { apikey: this.battleBackend.key, Authorization: `Bearer ${this.battleBackend.key}` } }
-              );
-              if (sRes.ok) {
-                const sRows = await sRes.json();
-                if (sRows.length > 0) {
-                  const s = JSON.parse(sRows[0].owner_user_id);
-                  const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
-                  const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
-                  settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
-                }
-              }
+              const s = JSON.parse(sRows[0].owner_user_id);
+              const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
+              const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
+              settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
             } catch (_) {}
             joinInfoContent.innerHTML =
               `<span class="join-room-info-chip">バトルモード</span>` +
-              `<span class="join-room-info-chip">${players.size}人参加中</span>` +
               settingsChips;
             joinInfoEl.style.display = 'block';
           }
