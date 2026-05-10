@@ -2643,7 +2643,10 @@ class OsanpoBingo {
     if (photoPreview) photoPreview.style.display = 'none';
   }
   
-  // 画像圧縮（高品質版: 最大1200px / quality 0.88 からスタート、500KB超なら自動縮小）
+  // 画像圧縮（800px上限 / quality 0.88固定・最低0.78保証 / 目標250KB）
+  // ─ maxSize を下げて「同じquality でファイルを小さく」する方式。
+  //   quality フロアを高く保つことでガビガビを防ぎ、
+  //   かつ localStorage を食いすぎないようにする。
   compressImage(file, callback) {
     const reader = new FileReader();
 
@@ -2656,7 +2659,8 @@ class OsanpoBingo {
 
         let width = img.width;
         let height = img.height;
-        const maxSize = 1200;
+        // 800px: セル表示(~100px)・ライトボックス(~400px)ともに十分な解像度
+        const maxSize = 800;
 
         if (width > height && width > maxSize) {
           height = Math.round((height * maxSize) / width);
@@ -2674,13 +2678,14 @@ class OsanpoBingo {
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // quality 0.88 から開始し、500KB を超えたら段階的に下げる
-        // base64 文字数 × 3/4 ≈ バイト数
-        const TARGET_BYTES = 500 * 1024;
+        // 250KB を目標にし、超えた場合のみ quality を微減（0.78 で打ち止め）
+        // 800px × quality 0.88 なら通常 80〜160KB に収まるため
+        // quality が下がることはほぼなく、ガビガビを防ぐ
+        const TARGET_BYTES = 250 * 1024;
         let quality = 0.88;
         let compressedData = canvas.toDataURL('image/jpeg', quality);
-        while (compressedData.length * 0.75 > TARGET_BYTES && quality > 0.65) {
-          quality = Math.round((quality - 0.06) * 100) / 100;
+        while (compressedData.length * 0.75 > TARGET_BYTES && quality > 0.78) {
+          quality = Math.round((quality - 0.04) * 100) / 100;
           compressedData = canvas.toDataURL('image/jpeg', quality);
         }
         callback(compressedData);
@@ -2688,7 +2693,7 @@ class OsanpoBingo {
 
       img.src = e.target.result;
     };
-    
+
     reader.readAsDataURL(file);
   }
   

@@ -1486,7 +1486,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  padding-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
 }
 
 /* 編集モード：結果カード */
@@ -1495,7 +1495,7 @@ h1 {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
 }
 
 .result-card {
@@ -1747,7 +1747,7 @@ h1 {
 .result-notice {
   font-size: 0.8rem;
   color: var(--text-light);
-  margin: 0 0 var(--spacing-sm) 0;
+  margin: var(--spacing-sm) 0 0 0;
   line-height: 1.4;
   text-align: center;
 }
@@ -1765,7 +1765,7 @@ h1 {
 /* 全写真をまとめて保存：メインボタンより控えめなサイズ */
 .result-sub-btn {
   width: 100%;
-  margin-top: var(--spacing-sm);
+  margin-top: 0;
   font-size: 0.9rem;
   padding: 10px var(--spacing-md);
 }
@@ -1774,7 +1774,7 @@ h1 {
 .result-exit-btn {
   display: block;
   width: 100%;
-  margin-top: var(--spacing-xs);
+  margin-top: 0;
   text-align: center;
 }
 
