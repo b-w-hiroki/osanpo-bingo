@@ -286,7 +286,7 @@ body {
 /* ========== メインコンテンツ（1ブロック） ========== */
 .main-content {
   flex: 1;
-  padding: clamp(28px, 5vw, 44px) clamp(18px, 5vw, 40px) 44px;
+  padding: clamp(28px, 5vw, 44px) clamp(18px, 5vw, 40px) 12px;
 }
 
 .content-grid {
@@ -442,11 +442,11 @@ body {
 }
 
 .ad-slot-infeed {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .ad-slot-footer {
-  padding: 12px 24px;
+  padding: 8px 24px;
   background: var(--bg);
 }
 
