@@ -62,64 +62,6 @@
       pointer-events: none;
     }
 
-    /* ===== 撮影前プライバシーポップアップ（MHNスタイル） ===== */
-    .photo-privacy-content {
-      position: relative;
-      z-index: 1;
-      background: linear-gradient(160deg, #1a4d2e 0%, #0e2d1a 100%);
-      border: 2px solid #4aaf54;
-      border-radius: 20px;
-      padding: 28px 24px 24px;
-      max-width: 320px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(74,175,84,0.25);
-      animation: fadeInUp 0.25s ease;
-    }
-    .photo-privacy-icon {
-      display: block;
-      font-size: 3.5rem;
-      margin-bottom: 10px;
-      line-height: 1;
-    }
-    .photo-privacy-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 0 0 14px;
-      letter-spacing: 0.03em;
-    }
-    .photo-privacy-body {
-      font-size: 0.97rem;
-      color: rgba(255,255,255,0.88);
-      line-height: 1.85;
-      margin-bottom: 22px;
-    }
-    .photo-privacy-body p { margin: 0; }
-    .photo-privacy-body strong {
-      color: #ffd600;
-      font-weight: 800;
-    }
-    .photo-privacy-ok-btn {
-      display: block;
-      width: 100%;
-      background: #4aaf54;
-      border: none;
-      color: #fff;
-      font-size: 1.05rem;
-      font-weight: 800;
-      padding: 14px 0;
-      border-radius: 999px;
-      letter-spacing: 0.05em;
-      box-shadow: 0 4px 0 #157F1F, 0 6px 20px rgba(74,175,84,0.35);
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .photo-privacy-ok-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #157F1F, 0 3px 10px rgba(74,175,84,0.2);
-    }
   </style>
   
   <!-- PWA Manifest -->
@@ -614,18 +556,17 @@
     </div>
   </div>
   
-  <!-- 撮影前プライバシー注意ポップアップ -->
-  <div id="photoPrivacyModal" class="dialog-modal" style="display:none; z-index:2200;">
-    <div class="dialog-modal-backdrop"></div>
-    <div class="photo-privacy-content">
-      <span class="photo-privacy-icon">📷</span>
-      <h3 class="photo-privacy-title">写真を撮る前に</h3>
-      <div class="photo-privacy-body">
-        <p>ナンバープレートや顔など</p>
-        <p><strong>個人が特定できる写り込み</strong>に</p>
-        <p>ご注意ください</p>
-      </div>
-      <button id="photoPrivacyOkBtn" class="photo-privacy-ok-btn">📸 わかった！</button>
+  <!-- 撮影前プライバシー注意モーダル -->
+  <div id="photoPrivacyModal" class="modal" style="display:none; z-index:2200;">
+    <div class="modal-content" style="text-align:center;">
+      <span style="font-size:2.5rem; display:block; margin-bottom:8px;">📷</span>
+      <h2 style="margin-bottom:12px;">写真を撮る前に</h2>
+      <p class="modal-description">
+        ナンバープレートや顔など<br>
+        <strong>個人が特定できる写り込み</strong>に<br>
+        ご注意ください
+      </p>
+      <button id="photoPrivacyOkBtn" class="btn btn-primary btn-large" style="width:100%;">わかった！</button>
     </div>
   </div>
 
