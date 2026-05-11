@@ -212,13 +212,64 @@
   </div>
 
   <script>
-    if ('serviceWorker' in navigator) {
+    // ===== Service Worker 登録 + 自動更新トースト =====
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+
+      // 新バージョン検知時にトーストを表示
+      function showUpdateToast(worker) {
+        if (document.getElementById('swUpdateToast')) return;
+        const toast = document.createElement('div');
+        toast.id = 'swUpdateToast';
+        toast.style.cssText = [
+          'position:fixed',
+          'bottom:max(24px, env(safe-area-inset-bottom, 24px))',
+          'left:50%', 'transform:translateX(-50%)',
+          'background:#157F1F', 'color:#fff',
+          'padding:10px 16px 10px 18px',
+          'border-radius:999px',
+          'font-size:0.88rem', 'font-weight:700',
+          'box-shadow:0 4px 20px rgba(0,0,0,0.35)',
+          'z-index:99999',
+          'display:flex', 'align-items:center', 'gap:10px',
+          'white-space:nowrap',
+        ].join(';');
+        const label = document.createElement('span');
+        label.textContent = '🎉 新バージョンが利用可能';
+        const btn = document.createElement('button');
+        btn.textContent = '今すぐ更新';
+        btn.style.cssText = 'background:#fff;color:#157F1F;border:none;border-radius:999px;padding:5px 14px;font-weight:800;cursor:pointer;font-size:0.82rem;';
+        btn.addEventListener('click', () => worker.postMessage('skipWaiting'));
+        toast.appendChild(label);
+        toast.appendChild(btn);
+        document.body.appendChild(toast);
+      }
+
+      // skipWaiting 後にページをリロード
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!reloading) { reloading = true; window.location.reload(); }
+      });
+
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
-          .then(reg => console.log('✅ Service Worker登録成功:', reg.scope))
+          .then(reg => {
+            console.log('✅ Service Worker登録成功:', reg.scope);
+            // すでに待機中の新SWがある場合
+            if (reg.waiting) showUpdateToast(reg.waiting);
+            // 新SWがインストールされたとき
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdateToast(newWorker);
+                }
+              });
+            });
+          })
           .catch(err => console.log('❌ Service Worker登録失敗:', err));
       });
-    }
+    })();
   </script>
 </body>
 </html>

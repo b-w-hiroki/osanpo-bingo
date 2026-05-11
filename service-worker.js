@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osanpo-bingo-v76';
+const CACHE_NAME = 'osanpo-bingo-v77';
 const urlsToCache = [
   'index.html',
   'game.html',
@@ -23,12 +23,17 @@ const urlsToCache = [
 ];
 
 // インストール時にキャッシュを作成
+// skipWaiting() はここでは呼ばない → ページ側の「今すぐ更新」ボタンで発動
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(urlsToCache).catch(() => {}))
-      .then(() => self.skipWaiting())
   );
+});
+
+// ページからの skipWaiting 要求を受け付ける
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') self.skipWaiting();
 });
 
 // フェッチ時にキャッシュから取得
