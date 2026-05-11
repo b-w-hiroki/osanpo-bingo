@@ -124,6 +124,10 @@
       overflow: hidden;
       box-shadow: 0 2px 14px rgba(0,0,0,0.09);
     }
+    /* 遊び方は独立して大きめの余白 */
+    .lp-section-img--howto {
+      margin-bottom: 24px;
+    }
     .lp-img {
       display: block;
       width: 100%;
@@ -147,34 +151,29 @@
     <!-- メインコンテンツ -->
     <section class="main-content">
 
-      <!-- 遊び方 -->
-      <div class="lp-section-img">
+      <!-- 遊び方（独立表示） -->
+      <div class="lp-section-img lp-section-img--howto">
         <img src="static/howto-banner.png" alt="遊び方：ゲームをスタートして、お題を見つけて写真で記録、BINGOを目指そう！" class="lp-img">
       </div>
 
-      <!-- バトルモード -->
-      <div class="lp-section-img">
-        <img src="static/battlemode.png" alt="バトルモード：合言葉で友達・家族と同じボードでバトル！" class="lp-img">
-      </div>
-
-      <!-- カメラで記録 -->
-      <div class="lp-section-img">
-        <img src="static/camera.png" alt="見つけたお題をカメラで記録しよう" class="lp-img">
-      </div>
-
-      <!-- 難易度 -->
-      <div class="lp-section-img">
-        <img src="static/Difficultylevel.png" alt="5つの難易度：かんたん・ふつう・むずかしい・おに・ガチおに" class="lp-img">
-      </div>
-
-      <!-- フィールド -->
-      <div class="lp-section-img">
-        <img src="static/field.png" alt="選べるフィールド：まち・しぜん・こうえんなど" class="lp-img">
-      </div>
-
-      <!-- フリー入力 -->
-      <div class="lp-section-img">
-        <img src="static/FREEMASU.png" alt="フリー入力マスで好きなお題で遊べる" class="lp-img">
+      <!-- その他バナー（隙間を詰めてまとめて表示） -->
+      <div class="lp-banner-group">
+        <div class="lp-section-img">
+          <img src="static/battlemode.png" alt="バトルモード：合言葉で友達・家族と同じボードでバトル！" class="lp-img">
+        </div>
+        <div class="lp-section-img">
+          <img src="static/Difficultylevel.png" alt="5つの難易度：かんたん・ふつう・むずかしい・おに・ガチおに" class="lp-img">
+        </div>
+        <div class="lp-section-img">
+          <img src="static/field.png" alt="選べるフィールド：まち・しぜん・こうえんなど" class="lp-img">
+        </div>
+        <div class="lp-section-img">
+          <img src="static/FREEMASU.png" alt="フリー入力マスで好きなお題で遊べる" class="lp-img">
+        </div>
+        <!-- カメラは最後 -->
+        <div class="lp-section-img">
+          <img src="static/camera.png" alt="見つけたお題をカメラで記録しよう" class="lp-img">
+        </div>
       </div>
 
       <!-- 広告枠（インフィード）※PV増加後に表示 -->

@@ -61,6 +61,65 @@
       padding: 12px 4px;
       pointer-events: none;
     }
+
+    /* ===== 撮影前プライバシーポップアップ（MHNスタイル） ===== */
+    .photo-privacy-content {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(160deg, #1a4d2e 0%, #0e2d1a 100%);
+      border: 2px solid #4aaf54;
+      border-radius: 20px;
+      padding: 28px 24px 24px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(74,175,84,0.25);
+      animation: fadeInUp 0.25s ease;
+    }
+    .photo-privacy-icon {
+      display: block;
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+    .photo-privacy-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 14px;
+      letter-spacing: 0.03em;
+    }
+    .photo-privacy-body {
+      font-size: 0.97rem;
+      color: rgba(255,255,255,0.88);
+      line-height: 1.85;
+      margin-bottom: 22px;
+    }
+    .photo-privacy-body p { margin: 0; }
+    .photo-privacy-body strong {
+      color: #ffd600;
+      font-weight: 800;
+    }
+    .photo-privacy-ok-btn {
+      display: block;
+      width: 100%;
+      background: #4aaf54;
+      border: none;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      padding: 14px 0;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 0 #157F1F, 0 6px 20px rgba(74,175,84,0.35);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .photo-privacy-ok-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #157F1F, 0 3px 10px rgba(74,175,84,0.2);
+    }
   </style>
   
   <!-- PWA Manifest -->
@@ -387,9 +446,6 @@
 
         <!-- State C: 写真なし -->
         <div id="cellModalNoPhoto" class="cell-modal-no-photo" style="display: none;">
-          <p class="cell-modal-notice" aria-hidden="true">
-            撮影・アップロード時は、ナンバープレートや顔など個人が特定できる写り込みにご注意ください。
-          </p>
           <div style="display:flex; gap:8px; width:100%;">
             <label for="cellPhotoInputCamera" class="btn btn-primary btn-large" id="uploadPhotoLabelCamera" style="flex:1;">
               写真を撮る
@@ -563,6 +619,36 @@
     </div>
   </div>
   
+  <!-- 撮影前プライバシー注意ポップアップ -->
+  <div id="photoPrivacyModal" class="dialog-modal" style="display:none; z-index:2200;">
+    <div class="dialog-modal-backdrop"></div>
+    <div class="photo-privacy-content">
+      <span class="photo-privacy-icon">📷</span>
+      <h3 class="photo-privacy-title">写真を撮る前に</h3>
+      <div class="photo-privacy-body">
+        <p>ナンバープレートや顔など</p>
+        <p><strong>個人が特定できる写り込み</strong>に</p>
+        <p>ご注意ください</p>
+      </div>
+      <button id="photoPrivacyOkBtn" class="photo-privacy-ok-btn">📸 わかった！</button>
+    </div>
+  </div>
+
+  <!-- バトル: 相手マス閲覧モーダル -->
+  <div class="modal" id="battleViewModal" style="display: none;">
+    <div class="modal-content">
+      <button class="modal-close" id="closeBattleViewModal" aria-label="閉じる">✕</button>
+      <div class="cell-photo-header" style="margin-bottom: 12px;">
+        <span class="cell-photo-title" id="battleViewTitle"></span>
+        <span class="cell-marked-badge" id="battleViewOwnerBadge"></span>
+      </div>
+      <div id="battleViewPhotoWrap" style="display: none; margin-bottom: 16px;">
+        <img id="battleViewPhoto" style="width: 100%; border-radius: 12px; display: block;" alt="相手の写真">
+      </div>
+      <p id="battleViewNoPhoto" style="text-align: center; color: #888; font-size: 0.9rem; padding: 24px 0; display: none;">📷 まだ写真がありません</p>
+    </div>
+  </div>
+
   <!-- 確認・通知モーダル -->
   <div id="dialogModal" class="dialog-modal" style="display: none;">
     <div class="dialog-modal-backdrop"></div>

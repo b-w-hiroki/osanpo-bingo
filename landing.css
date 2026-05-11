@@ -497,6 +497,22 @@ body {
   color: #ccc;
 }
 
+/* ===== バナーグループ（遊び方独立・他は隙間を詰める） ===== */
+.lp-section-img--howto {
+  margin-bottom: 24px;
+}
+
+.lp-banner-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* バナーグループ内は既定のmargin-bottomをリセット（gapで制御） */
+.lp-banner-group .lp-section-img {
+  margin-bottom: 0;
+}
+
 /* フッター */
 .footer {
   padding: 16px 24px;
