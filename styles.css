@@ -1772,20 +1772,12 @@ h1 {
 
 .result-share-buttons {
   display: flex;
-  gap: var(--spacing-md);
+  flex-direction: column;
+  gap: 8px;
 }
 
 .result-share-buttons .btn {
-  flex: 1;
-  min-width: 0;
-}
-
-/* 全写真をまとめて保存：メインボタンより控えめなサイズ */
-.result-sub-btn {
   width: 100%;
-  margin-top: 0;
-  font-size: 0.9rem;
-  padding: 10px var(--spacing-md);
 }
 
 /* トップへ戻る：リンクスタイル */
@@ -1807,12 +1799,6 @@ h1 {
   .result-board-wrap,
   .result-capture-board {
     padding: var(--spacing-xs);
-  }
-  .result-share-buttons {
-    flex-direction: column;
-  }
-  .result-share-buttons .btn {
-    width: 100%;
   }
 }
 
@@ -2074,8 +2060,7 @@ h1 {
     padding: 8px 0;
   }
 
-  .result-share-buttons .btn,
-  .result-sub-btn {
+  .result-share-buttons .btn {
     min-height: 48px;
   }
 
