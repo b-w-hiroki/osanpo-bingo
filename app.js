@@ -3303,18 +3303,26 @@ class OsanpoBingo {
       if (photoWrap) photoWrap.style.display = '';
       if (noPhotoEl) noPhotoEl.style.display = 'none';
     } else {
-      // ローディング中は「写真なし」表示
+      // 取得中は「読み込み中」を表示
       if (photoWrap) photoWrap.style.display = 'none';
-      if (noPhotoEl) noPhotoEl.style.display = '';
+      if (noPhotoEl) {
+        noPhotoEl.style.display = '';
+        noPhotoEl.textContent = '📡 読み込み中...';
+      }
       // 非同期でサーバーから取得してキャッシュ
       this.fetchOpponentCellPhoto(index).then(data => {
         if (data) {
           this.battleOpponentPhotos[index] = data;
-          // モーダルがまだ開いていれば更新
+          // モーダルがまだ開いていれば写真に切り替え
           if (modal.style.display !== 'none' && photoEl) {
             photoEl.src = data;
             if (photoWrap) photoWrap.style.display = '';
             if (noPhotoEl) noPhotoEl.style.display = 'none';
+          }
+        } else {
+          // 取得失敗 or 写真なし → 「まだ写真がありません」に切り替え
+          if (modal.style.display !== 'none' && noPhotoEl) {
+            noPhotoEl.textContent = '📷 まだ写真がありません';
           }
         }
       });
