@@ -1570,14 +1570,14 @@ class OsanpoBingo {
     shareArea.style.display = 'flex';
   }
   
-  // 画像をダウンロード
+  // ビンゴカード画像を保存（share API → ライブラリへ / フォールバック: ダウンロード）
   downloadResultImage() {
     const area = document.getElementById('resultCaptureArea');
     if (!area || typeof html2canvas === 'undefined') {
       showAlert('画像の準備ができませんでした。\nもう一度お試しください。');
       return;
     }
-    
+
     const opts = {
       scale: 2,
       useCORS: true,
@@ -1586,23 +1586,37 @@ class OsanpoBingo {
       backgroundColor: '#ffffff',
       imageTimeout: 15000
     };
-    
+
     html2canvas(area, opts).then((canvas) => {
-      canvas.toBlob((blob) => {
+      canvas.toBlob(async (blob) => {
         if (!blob) {
           showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
           return;
         }
+        const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
+        const file = new File([blob], filename, { type: 'image/png' });
+
+        // share API 対応端末（iOS Safariなど）→ ネイティブ共有シートでライブラリ保存
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'おさんぽビンゴ' });
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return; // キャンセル
+            // share失敗時はダウンロードにフォールバック
+          }
+        }
+
+        // フォールバック: ファイルダウンロード
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
+        link.download = filename;
         link.href = url;
         link.rel = 'noopener';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        showAlert('画像を保存しました。');
       }, 'image/png', 1);
     }).catch((err) => {
       console.error('html2canvas error:', err);
