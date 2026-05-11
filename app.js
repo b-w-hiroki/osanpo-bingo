@@ -1259,7 +1259,7 @@ class OsanpoBingo {
         const bingoCount = this.bingoLines.length;
         scoreboardEl.innerHTML = `
           <div class="battle-score-row">
-            <span class="battle-score-name">記録</span>
+            <span class="battle-score-name">あなた</span>
             <span class="battle-score-marks">${markedNonFree}マス</span>
             <span class="battle-score-bingo">BINGO×${bingoCount}</span>
           </div>`;
