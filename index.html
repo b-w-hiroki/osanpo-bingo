@@ -212,11 +212,21 @@
   </div>
 
   <script>
-    // ===== Service Worker 登録 + 自動更新トースト =====
+    // ===== Service Worker 登録 + 自動更新 =====
     (function () {
       if (!('serviceWorker' in navigator)) return;
 
-      // 新バージョン検知時にトーストを表示
+      const pageLoadTime = Date.now();
+
+      // ロード直後（5秒以内）→ 自動更新、それ以降 → トースト
+      function handleUpdate(worker) {
+        if (Date.now() - pageLoadTime < 5000) {
+          worker.postMessage('skipWaiting'); // 透過的に自動更新
+        } else {
+          showUpdateToast(worker);
+        }
+      }
+
       function showUpdateToast(worker) {
         if (document.getElementById('swUpdateToast')) return;
         const toast = document.createElement('div');
@@ -245,7 +255,7 @@
         document.body.appendChild(toast);
       }
 
-      // skipWaiting 後にページをリロード
+      // skipWaiting 後にリロード
       let reloading = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!reloading) { reloading = true; window.location.reload(); }
@@ -255,14 +265,14 @@
         navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
           .then(reg => {
             console.log('✅ Service Worker登録成功:', reg.scope);
-            // すでに待機中の新SWがある場合
-            if (reg.waiting) showUpdateToast(reg.waiting);
-            // 新SWがインストールされたとき
+            // ページロード時点で待機中のSWがあれば即自動更新
+            if (reg.waiting) handleUpdate(reg.waiting);
+            // インストール中のSWを監視
             reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  showUpdateToast(newWorker);
+                  handleUpdate(newWorker);
                 }
               });
             });

@@ -658,6 +658,17 @@
     (function () {
       if (!('serviceWorker' in navigator)) return;
 
+      const pageLoadTime = Date.now();
+
+      // ロード直後（5秒以内）→ 自動更新、それ以降 → トースト
+      function handleUpdate(worker) {
+        if (Date.now() - pageLoadTime < 5000) {
+          worker.postMessage('skipWaiting'); // 透過的に自動更新
+        } else {
+          showUpdateToast(worker);
+        }
+      }
+
       function showUpdateToast(worker) {
         if (document.getElementById('swUpdateToast')) return;
         const toast = document.createElement('div');
@@ -695,12 +706,12 @@
         navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
           .then(reg => {
             console.log('✅ Service Worker登録成功:', reg.scope);
-            if (reg.waiting) showUpdateToast(reg.waiting);
+            if (reg.waiting) handleUpdate(reg.waiting);
             reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  showUpdateToast(newWorker);
+                  handleUpdate(newWorker);
                 }
               });
             });
