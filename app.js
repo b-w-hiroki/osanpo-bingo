@@ -3394,11 +3394,16 @@ class OsanpoBingo {
       const objectUrl = URL.createObjectURL(blob);
       img.onload = () => {
         URL.revokeObjectURL(objectUrl);
-        const ratio = Math.min(1, maxWidth / img.width);
+        const nw = img.naturalWidth  || img.width;
+        const nh = img.naturalHeight || img.height;
+        const ratio = Math.min(1, maxWidth / nw);
         const canvas = document.createElement('canvas');
-        canvas.width  = Math.round(img.width  * ratio);
-        canvas.height = Math.round(img.height * ratio);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.width  = Math.round(nw * ratio);
+        canvas.height = Math.round(nh * ratio);
+        const ctx2 = canvas.getContext('2d');
+        ctx2.imageSmoothingEnabled = true;
+        ctx2.imageSmoothingQuality = 'high';
+        ctx2.drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL('image/jpeg', quality));
       };
       img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
@@ -3408,15 +3413,18 @@ class OsanpoBingo {
 
   /** バトルモード: 写真を圧縮してSupabaseのphoto_dataカラムへアップロード */
   async uploadBattlePhoto(cellIndex, blob) {
-    // NOTE: Supabaseの battle_cell_owners テーブルに photo_data TEXT カラムの追加が必要
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
     try {
       const photoData = await this.compressToBase64(blob, 640, 0.75);
-      if (!photoData) return;
+      if (!photoData || photoData === 'data:,') {
+        console.warn('uploadBattlePhoto: compressToBase64 returned empty');
+        return;
+      }
       const url = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
       url.searchParams.set('room_code', `eq.${this.roomCode}`);
       url.searchParams.set('cell_index', `eq.${cellIndex}`);
-      await fetch(url.toString(), {
+      url.searchParams.set('owner_user_id', `eq.${this.battlePlayerId}`);
+      const res = await fetch(url.toString(), {
         method: 'PATCH',
         headers: {
           'apikey': this.battleBackend.key,
@@ -3426,6 +3434,10 @@ class OsanpoBingo {
         },
         body: JSON.stringify({ photo_data: photoData })
       });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        console.warn(`uploadBattlePhoto PATCH failed: ${res.status}`, errText);
+      }
     } catch (e) {
       console.warn('uploadBattlePhoto failed', e);
     }
