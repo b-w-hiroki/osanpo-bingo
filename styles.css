@@ -922,6 +922,44 @@ h1 {
   max-width: 700px;
 }
 
+/* ===== コンパクトモーダル（バトル設定画面） ===== */
+.modal-content.modal-compact {
+  padding: 20px;
+}
+.modal-compact h2 {
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+}
+.modal-compact .modal-description {
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+}
+.modal-compact .form-group {
+  margin-bottom: 10px;
+}
+.modal-compact .form-group label {
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+.modal-compact .form-help {
+  font-size: 0.76rem;
+  margin-top: 2px;
+}
+.modal-compact .modal-step-back {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+.modal-compact .stepper {
+  border-radius: 10px;
+}
+.modal-compact .stepper-btn {
+  flex: 0 0 40px;
+  padding: 10px 0;
+}
+.modal-compact .stepper-value {
+  padding: 10px 0;
+}
+
 .modal-close {
   position: absolute;
   top: var(--spacing-md);

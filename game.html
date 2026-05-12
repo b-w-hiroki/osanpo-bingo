@@ -79,7 +79,7 @@
     
     <!-- 合言葉モーダル -->
     <div class="modal" id="roomCodeModal" style="display: none;">
-      <div class="modal-content">
+      <div class="modal-content modal-compact">
         
         <!-- ステップ1: スタンダードモード / バトルモード -->
         <div id="modeSelectStep" class="modal-step">
@@ -188,9 +188,6 @@
         <!-- ステップ3: ゲーム設定（作成モード・合言葉あり） -->
         <div id="createGameStep" class="modal-step" style="display: none;">
           <h2>ゲームを作る</h2>
-          <p class="modal-description">
-            同じ合言葉で参加すると、みんな同じお題のBINGOで遊べます。友達に合言葉をシェアして一緒に遊ぼう！
-          </p>
 
           <div class="form-group">
             <label for="playerNameCreateInput">あなたの名前（任意）</label>
@@ -198,11 +195,10 @@
               type="text"
               id="playerNameCreateInput"
               class="input-text"
-              placeholder="例: たろう"
+              placeholder="例: たろう（未入力→名無しさん）"
               maxlength="10"
               autocomplete="off"
             >
-            <p class="form-help">入力なしは「名無しさん」になります</p>
           </div>
 
           <div class="form-group">
@@ -219,9 +215,7 @@
                 自動
               </button>
             </div>
-            <p class="form-help">
-              友達に合言葉を教えてあげよう
-            </p>
+            <p class="form-help">友達に合言葉を教えてあげよう</p>
           </div>
 
           <div class="form-group">
@@ -274,9 +268,6 @@
               <option value="20">20マス</option>
               <option value="24">24マス</option>
             </select>
-            <p class="form-help">
-              自分だけのお題を設定できます
-            </p>
             <div id="customTopicInputs" class="custom-topic-inputs" style="display: none;">
               <!-- JSで動的に生成 -->
             </div>
@@ -293,9 +284,6 @@
         <!-- ステップ3: ゲーム設定（参加モード） -->
         <div id="joinGameStep" class="modal-step" style="display: none;">
           <h2>ゲームに参加</h2>
-          <p class="modal-description">
-            ゲームを作った人に合言葉を教えてもらって入力しよう。
-          </p>
 
           <div class="form-group">
             <label for="playerNameJoinInput">あなたの名前（任意）</label>
@@ -303,11 +291,10 @@
               type="text"
               id="playerNameJoinInput"
               class="input-text"
-              placeholder="例: はなこ"
+              placeholder="例: はなこ（未入力→名無しさん）"
               maxlength="10"
               autocomplete="off"
             >
-            <p class="form-help">入力なしは「名無しさん」になります</p>
           </div>
 
           <div class="form-group">
