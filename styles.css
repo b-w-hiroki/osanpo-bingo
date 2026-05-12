@@ -382,27 +382,28 @@ h1 {
   min-height: 0;
 }
 
-/* 画像アイコンのラッパー：フレックス残余高さを使い正方形に収める */
+/* 画像アイコンのラッパー：セル内の残余高さをすべて使う */
 .cell-icon-img-wrap {
   font-size: 0;
   flex: 1 1 0;
   min-height: 0;
   min-width: 0;
-  width: auto;
-  max-width: 96%;
-  aspect-ratio: 1;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 画像はラッパーいっぱいに表示 */
+/* 画像：高さ基準でスケール（正方形アイコン前提）。整数ピクセルに丸めてシャープに */
 .cell-icon-img {
-  width: 100%;
   height: 100%;
+  width: auto;
+  max-width: 100%;
   object-fit: contain;
   object-position: center;
   display: block;
+  image-rendering: -webkit-optimize-contrast; /* Safari: 高品質ダウンスケール */
+  image-rendering: smooth;
 }
 
 .bingo-cell:hover .cell-icon {
