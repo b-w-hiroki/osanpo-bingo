@@ -1108,11 +1108,11 @@ function selectTopicsForGame(
           const topicFields = t.fields || ['all'];
           if (!topicFields.includes('all') && !topicFields.includes(fieldId)) return false;
         }
-        // 地域フィルタ: region_limit 付きアイテムは観光地モード（topicSetId==='観光地'）でのみ出現
-        // 通常モードでは地域限定アイテムを完全除外
+        // 地域フィルタ: region_limit 付きアイテムは地域が明示指定されかつ一致する場合のみ出現
+        // 通常モード・観光地allどちらも region_limit なしの中から抽選
         if (t.region_limit) {
-          if (topicSetId !== '観光地') return false;           // 非観光地モードは除外
-          if (regionId && regionId !== 'all' && t.region_limit !== regionId) return false; // 地域不一致を除外
+          if (!regionId || regionId === 'all') return false;          // 地域未指定なら除外
+          if (t.region_limit !== regionId) return false;              // 地域不一致なら除外
         }
         return true;
       });
