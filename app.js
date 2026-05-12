@@ -1259,7 +1259,7 @@ class OsanpoBingo {
         const bingoCount = this.bingoLines.length;
         scoreboardEl.innerHTML = `
           <div class="battle-score-row">
-            <span class="battle-score-name">記録</span>
+            <span class="battle-score-name">あなた</span>
             <span class="battle-score-marks">${markedNonFree}マス</span>
             <span class="battle-score-bingo">BINGO×${bingoCount}</span>
           </div>`;
@@ -1570,14 +1570,14 @@ class OsanpoBingo {
     shareArea.style.display = 'flex';
   }
   
-  // 画像をダウンロード
+  // ビンゴカード画像を保存（share API → ライブラリへ / フォールバック: ダウンロード）
   downloadResultImage() {
     const area = document.getElementById('resultCaptureArea');
     if (!area || typeof html2canvas === 'undefined') {
       showAlert('画像の準備ができませんでした。\nもう一度お試しください。');
       return;
     }
-    
+
     const opts = {
       scale: 2,
       useCORS: true,
@@ -1586,23 +1586,37 @@ class OsanpoBingo {
       backgroundColor: '#ffffff',
       imageTimeout: 15000
     };
-    
+
     html2canvas(area, opts).then((canvas) => {
-      canvas.toBlob((blob) => {
+      canvas.toBlob(async (blob) => {
         if (!blob) {
           showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
           return;
         }
+        const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
+        const file = new File([blob], filename, { type: 'image/png' });
+
+        // share API 対応端末（iOS Safariなど）→ ネイティブ共有シートでライブラリ保存
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'おさんぽビンゴ' });
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return; // キャンセル
+            // share失敗時はダウンロードにフォールバック
+          }
+        }
+
+        // フォールバック: ファイルダウンロード
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
+        link.download = filename;
         link.href = url;
         link.rel = 'noopener';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        showAlert('画像を保存しました。');
       }, 'image/png', 1);
     }).catch((err) => {
       console.error('html2canvas error:', err);
@@ -3303,18 +3317,26 @@ class OsanpoBingo {
       if (photoWrap) photoWrap.style.display = '';
       if (noPhotoEl) noPhotoEl.style.display = 'none';
     } else {
-      // ローディング中は「写真なし」表示
+      // 取得中は「読み込み中」を表示
       if (photoWrap) photoWrap.style.display = 'none';
-      if (noPhotoEl) noPhotoEl.style.display = '';
+      if (noPhotoEl) {
+        noPhotoEl.style.display = '';
+        noPhotoEl.textContent = '📡 読み込み中...';
+      }
       // 非同期でサーバーから取得してキャッシュ
       this.fetchOpponentCellPhoto(index).then(data => {
         if (data) {
           this.battleOpponentPhotos[index] = data;
-          // モーダルがまだ開いていれば更新
+          // モーダルがまだ開いていれば写真に切り替え
           if (modal.style.display !== 'none' && photoEl) {
             photoEl.src = data;
             if (photoWrap) photoWrap.style.display = '';
             if (noPhotoEl) noPhotoEl.style.display = 'none';
+          }
+        } else {
+          // 取得失敗 or 写真なし → 「まだ写真がありません」に切り替え
+          if (modal.style.display !== 'none' && noPhotoEl) {
+            noPhotoEl.textContent = '📷 まだ写真がありません';
           }
         }
       });

@@ -62,64 +62,6 @@
       pointer-events: none;
     }
 
-    /* ===== 撮影前プライバシーポップアップ（MHNスタイル） ===== */
-    .photo-privacy-content {
-      position: relative;
-      z-index: 1;
-      background: linear-gradient(160deg, #1a4d2e 0%, #0e2d1a 100%);
-      border: 2px solid #4aaf54;
-      border-radius: 20px;
-      padding: 28px 24px 24px;
-      max-width: 320px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(74,175,84,0.25);
-      animation: fadeInUp 0.25s ease;
-    }
-    .photo-privacy-icon {
-      display: block;
-      font-size: 3.5rem;
-      margin-bottom: 10px;
-      line-height: 1;
-    }
-    .photo-privacy-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 0 0 14px;
-      letter-spacing: 0.03em;
-    }
-    .photo-privacy-body {
-      font-size: 0.97rem;
-      color: rgba(255,255,255,0.88);
-      line-height: 1.85;
-      margin-bottom: 22px;
-    }
-    .photo-privacy-body p { margin: 0; }
-    .photo-privacy-body strong {
-      color: #ffd600;
-      font-weight: 800;
-    }
-    .photo-privacy-ok-btn {
-      display: block;
-      width: 100%;
-      background: #4aaf54;
-      border: none;
-      color: #fff;
-      font-size: 1.05rem;
-      font-weight: 800;
-      padding: 14px 0;
-      border-radius: 999px;
-      letter-spacing: 0.05em;
-      box-shadow: 0 4px 0 #157F1F, 0 6px 20px rgba(74,175,84,0.35);
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .photo-privacy-ok-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #157F1F, 0 3px 10px rgba(74,175,84,0.2);
-    }
   </style>
   
   <!-- PWA Manifest -->
@@ -446,14 +388,9 @@
 
         <!-- State C: 写真なし -->
         <div id="cellModalNoPhoto" class="cell-modal-no-photo" style="display: none;">
-          <div style="display:flex; gap:8px; width:100%;">
-            <label for="cellPhotoInputCamera" class="btn btn-primary btn-large" id="uploadPhotoLabelCamera" style="flex:1;">
-              写真を撮る
-            </label>
-            <label for="cellPhotoInputGallery" class="btn btn-secondary btn-large" id="uploadPhotoLabelGallery" style="flex:1;">
-              写真を選ぶ
-            </label>
-          </div>
+          <label for="cellPhotoInputCamera" class="btn btn-primary btn-large" id="uploadPhotoLabelCamera" style="width:100%;">
+            写真を撮る
+          </label>
           <button type="button" id="toggleMarkBtn" class="link-btn" style="width:100%; text-align:center;">
             写真なしでマークする
           </button>
@@ -596,10 +533,10 @@
           個人が特定できる写真はSNSに上げないでください。（ナンバープレート・顔など）
         </p>
         <div class="result-share-buttons">
-          <button id="downloadImageBtn" class="btn btn-primary btn-large">画像を保存</button>
-          <button type="button" id="shareSnsBtn" class="btn btn-secondary btn-large">共有する</button>
+          <button type="button" id="shareSnsBtn" class="btn btn-primary btn-large">シェアする</button>
+          <button id="downloadImageBtn" class="btn btn-secondary btn-large">ビンゴカードを保存</button>
+          <button id="saveAllPhotosBtn" class="btn btn-secondary btn-large">アップした写真を全部保存</button>
         </div>
-        <button id="saveAllPhotosBtn" class="btn btn-secondary result-sub-btn">全部まとめて写真を保存</button>
         <!-- 広告枠（結果画面） -->
         <!-- 広告枠（結果画面）※PV増加後に表示 -->
         <div class="ad-slot ad-slot-result" id="adSlotResult" style="display:none">
@@ -619,18 +556,17 @@
     </div>
   </div>
   
-  <!-- 撮影前プライバシー注意ポップアップ -->
-  <div id="photoPrivacyModal" class="dialog-modal" style="display:none; z-index:2200;">
-    <div class="dialog-modal-backdrop"></div>
-    <div class="photo-privacy-content">
-      <span class="photo-privacy-icon">📷</span>
-      <h3 class="photo-privacy-title">写真を撮る前に</h3>
-      <div class="photo-privacy-body">
-        <p>ナンバープレートや顔など</p>
-        <p><strong>個人が特定できる写り込み</strong>に</p>
-        <p>ご注意ください</p>
-      </div>
-      <button id="photoPrivacyOkBtn" class="photo-privacy-ok-btn">📸 わかった！</button>
+  <!-- 撮影前プライバシー注意モーダル -->
+  <div id="photoPrivacyModal" class="modal" style="display:none; z-index:2200;">
+    <div class="modal-content" style="text-align:center;">
+      <span style="font-size:2.5rem; display:block; margin-bottom:8px;">📷</span>
+      <h2 style="margin-bottom:12px;">写真を撮る前に</h2>
+      <p class="modal-description">
+        ナンバープレートや顔など<br>
+        <strong>個人が特定できる写り込み</strong>に<br>
+        ご注意ください
+      </p>
+      <button id="photoPrivacyOkBtn" class="btn btn-primary btn-large" style="width:100%;">わかった！</button>
     </div>
   </div>
 
@@ -717,15 +653,72 @@
     });
   </script>
 
-  <!-- Service Worker登録 -->
+  <!-- Service Worker登録 + 自動更新トースト -->
   <script>
-    if ('serviceWorker' in navigator) {
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+
+      const pageLoadTime = Date.now();
+
+      // ロード直後（5秒以内）→ 自動更新、それ以降 → トースト
+      function handleUpdate(worker) {
+        if (Date.now() - pageLoadTime < 5000) {
+          worker.postMessage('skipWaiting'); // 透過的に自動更新
+        } else {
+          showUpdateToast(worker);
+        }
+      }
+
+      function showUpdateToast(worker) {
+        if (document.getElementById('swUpdateToast')) return;
+        const toast = document.createElement('div');
+        toast.id = 'swUpdateToast';
+        toast.style.cssText = [
+          'position:fixed',
+          'bottom:max(24px, env(safe-area-inset-bottom, 24px))',
+          'left:50%', 'transform:translateX(-50%)',
+          'background:#157F1F', 'color:#fff',
+          'padding:10px 16px 10px 18px',
+          'border-radius:999px',
+          'font-size:0.88rem', 'font-weight:700',
+          'box-shadow:0 4px 20px rgba(0,0,0,0.35)',
+          'z-index:99999',
+          'display:flex', 'align-items:center', 'gap:10px',
+          'white-space:nowrap',
+        ].join(';');
+        const label = document.createElement('span');
+        label.textContent = '🎉 新バージョンが利用可能';
+        const btn = document.createElement('button');
+        btn.textContent = '今すぐ更新';
+        btn.style.cssText = 'background:#fff;color:#157F1F;border:none;border-radius:999px;padding:5px 14px;font-weight:800;cursor:pointer;font-size:0.82rem;';
+        btn.addEventListener('click', () => worker.postMessage('skipWaiting'));
+        toast.appendChild(label);
+        toast.appendChild(btn);
+        document.body.appendChild(toast);
+      }
+
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!reloading) { reloading = true; window.location.reload(); }
+      });
+
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' })
-          .then(reg => console.log('✅ Service Worker登録成功:', reg.scope))
+          .then(reg => {
+            console.log('✅ Service Worker登録成功:', reg.scope);
+            if (reg.waiting) handleUpdate(reg.waiting);
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  handleUpdate(newWorker);
+                }
+              });
+            });
+          })
           .catch(err => console.log('❌ Service Worker登録失敗:', err));
       });
-    }
+    })();
   </script>
 </body>
 </html>
