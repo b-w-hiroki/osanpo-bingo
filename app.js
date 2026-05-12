@@ -1579,7 +1579,7 @@ class OsanpoBingo {
     }
 
     const opts = {
-      scale: 2,
+      scale: Math.max(2, window.devicePixelRatio || 2), // iPhoneなどの高DPR端末で高解像度保存
       useCORS: true,
       allowTaint: true,
       logging: false,
