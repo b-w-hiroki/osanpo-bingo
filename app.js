@@ -2863,10 +2863,11 @@ class OsanpoBingo {
   }
 
   // 画像圧縮 → Blob で返却（IndexedDB 保存用）
-  // ・800px 上限: セル表示(~100px)・ライトボックス(~400px)ともに十分
-  // ・quality 0.88 固定: IDB + Blob のため base64 膨張がなく、そのままでも小さい
-  //   （800px × 0.88 = 通常 80〜160KB → 24 マス分でも最大 3.8MB に収まる）
-  // ・callback(blob) で Blob を返す（以前の base64 文字列から変更）
+  // ・1200px 上限: ライトボックス表示でも十分な解像度を確保
+  // ・quality 0.92: ガビガビ防止のため品質を引き上げ
+  // ・ステップダウンスケーリング: iPhone の 4000px 超を一気に縮小すると
+  //   iOS Safari の canvas が低品質ダウンサンプリングになるため、
+  //   半分ずつ段階的に縮小して高品質を維持
   compressImage(file, callback) {
     const reader = new FileReader();
 
@@ -2874,12 +2875,9 @@ class OsanpoBingo {
       const img = new Image();
 
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const maxSize = 1200;
 
         let { width, height } = img;
-        const maxSize = 800;
-
         if (width > height && width > maxSize) {
           height = Math.round(height * maxSize / width);
           width = maxSize;
@@ -2888,15 +2886,36 @@ class OsanpoBingo {
           height = maxSize;
         }
 
+        // ステップダウンスケーリング（iOS Safari対策）
+        // 一気に縮小すると粗くなるため、目標サイズの2倍を超えている間は半分ずつ縮小
+        let current = img;
+        let curW = img.naturalWidth;
+        let curH = img.naturalHeight;
+
+        while (curW / 2 > width || curH / 2 > height) {
+          const stepW = Math.max(width, Math.floor(curW / 2));
+          const stepH = Math.max(height, Math.floor(curH / 2));
+          const step = document.createElement('canvas');
+          step.width = stepW;
+          step.height = stepH;
+          const sCtx = step.getContext('2d');
+          sCtx.imageSmoothingEnabled = true;
+          sCtx.imageSmoothingQuality = 'high';
+          sCtx.drawImage(current, 0, 0, stepW, stepH);
+          current = step;
+          curW = stepW;
+          curH = stepH;
+        }
+
+        const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-
+        const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(current, 0, 0, width, height);
 
-        // toBlob: base64 変換なし・バイナリ直接取得（約 25% 省スペース）
-        canvas.toBlob((blob) => callback(blob), 'image/jpeg', 0.88);
+        canvas.toBlob((blob) => callback(blob), 'image/jpeg', 0.92);
       };
 
       img.src = e.target.result;
