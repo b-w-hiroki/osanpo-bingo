@@ -1485,6 +1485,9 @@ h1 {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  image-rendering: -webkit-optimize-contrast; /* Safari: 高品質ダウンスケール */
+  image-rendering: smooth;
+  transform: translateZ(0); /* GPU合成でiOSのレンダリング品質を向上 */
 }
 
 .bingo-cell.has-photo .cell-text {

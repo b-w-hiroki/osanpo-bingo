@@ -2875,7 +2875,7 @@ class OsanpoBingo {
       const img = new Image();
 
       img.onload = () => {
-        const maxSize = 1200;
+        const maxSize = 1600;
 
         let { width, height } = img;
         if (width > height && width > maxSize) {
