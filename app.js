@@ -142,6 +142,7 @@ class OsanpoBingo {
     this.battleTable = 'battle_cell_owners';
     this.battleSyncTimer = null;
     this.debugBattle = new URLSearchParams(window.location.search).get('debugBattle') === '1';
+    this._resultImageBlob = null; // 結果画面用キャッシュ済みblob（ライブラリ保存の事前生成）
     this.lastBattleSyncAt = 0;
     this.lastBattleSyncStatus = 'idle';
     this.lastBattleSyncError = '';
@@ -435,11 +436,14 @@ class OsanpoBingo {
         if (ownerId.startsWith('__settings__:')) return;
         nextOwners[idx] = ownerId;
       });
+      // 差分チェック: owners が変わっていなければ DOM 更新をスキップして点滅を防ぐ
+      const changed = JSON.stringify(nextOwners) !== JSON.stringify(this.battleCellOwners);
       this.battleCellOwners = nextOwners;
-      this.checkBingo();
-      this.updateBoardOwnership();
-      this.updateStats();
-      this.saveToStorage();
+      if (changed) {
+        this.checkBingo();   // updateBoardOwnership() + bingo celebration
+        this.updateStats();
+        this.saveToStorage();
+      }
       this.lastBattleSyncAt = Date.now();
       this.lastBattleSyncStatus = 'ok';
       this.lastBattleSyncError = '';
@@ -827,7 +831,9 @@ class OsanpoBingo {
     this.reachLines = newReachLines;
     const newBingoCount = this.bingoLines.length;
 
-    this.renderBoard();
+    // DOMがある場合はクラス差分更新のみ（innerHTML 全破棄を避けて点滅防止）
+    // 初回描画は renderBoard() 側が担当するためここは updateBoardOwnership() で十分
+    this.updateBoardOwnership();
     this.updateStats();
 
     if (newBingoCount > oldBingoCount) {
@@ -1568,62 +1574,100 @@ class OsanpoBingo {
     
     editArea.style.display = 'none';
     shareArea.style.display = 'flex';
+
+    // iOS Share API のユーザージェスチャー制約を回避するため、
+    // 確定ボタン押下時点でcanvasを事前生成してblobをキャッシュしておく
+    this._resultImageBlob = null;
+    const downloadBtn = document.getElementById('downloadImageBtn');
+    if (downloadBtn) {
+      downloadBtn.disabled = true;
+      downloadBtn.dataset.originalText = downloadBtn.textContent;
+      downloadBtn.textContent = '準備中...';
+    }
+    // rAF×2 でDOM描画が落ち着いてから html2canvas を実行
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const area = document.getElementById('resultCaptureArea');
+      if (!area || typeof html2canvas === 'undefined') {
+        if (downloadBtn) { downloadBtn.disabled = false; downloadBtn.textContent = downloadBtn.dataset.originalText || 'ビンゴカードを保存'; }
+        return;
+      }
+      html2canvas(area, {
+        scale: Math.max(2, window.devicePixelRatio || 2),
+        useCORS: true, allowTaint: true, logging: false,
+        backgroundColor: '#ffffff', imageTimeout: 15000
+      }).then((canvas) => {
+        canvas.toBlob((blob) => {
+          this._resultImageBlob = blob;
+          if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = downloadBtn.dataset.originalText || 'ビンゴカードを保存';
+          }
+        }, 'image/png', 1);
+      }).catch(() => {
+        if (downloadBtn) { downloadBtn.disabled = false; downloadBtn.textContent = downloadBtn.dataset.originalText || 'ビンゴカードを保存'; }
+      });
+    }));
   }
-  
+
   // ビンゴカード画像を保存（share API → ライブラリへ / フォールバック: ダウンロード）
   downloadResultImage() {
+    // confirmResult() で事前生成したblobを使う（iOS Share APIのユーザージェスチャー制約対策）
+    // ユーザーのタップ → 即 navigator.share() の同期的な流れを維持するため
+    const doShare = async (blob) => {
+      if (!blob) {
+        showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
+        return;
+      }
+      const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
+      const file = new File([blob], filename, { type: 'image/png' });
+
+      // share API 対応端末（iOS Safariなど）→ ネイティブ共有シートでライブラリ保存
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'おさんぽビンゴ' });
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return; // キャンセル
+          // share失敗時はダウンロードにフォールバック
+        }
+      }
+
+      // フォールバック: ファイルダウンロード
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = url;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+
+    if (this._resultImageBlob) {
+      // 事前生成済み → ユーザージェスチャー文脈で即 share 呼び出し可能（iOS対応）
+      doShare(this._resultImageBlob);
+      return;
+    }
+
+    // フォールバック: その場で生成（非同期になるため iOS では share できない場合あり）
     const area = document.getElementById('resultCaptureArea');
     if (!area || typeof html2canvas === 'undefined') {
       showAlert('画像の準備ができませんでした。\nもう一度お試しください。');
       return;
     }
-
-    const opts = {
-      scale: Math.max(2, window.devicePixelRatio || 2), // iPhoneなどの高DPR端末で高解像度保存
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      imageTimeout: 15000
-    };
-
-    html2canvas(area, opts).then((canvas) => {
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
-          return;
-        }
-        const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
-        const file = new File([blob], filename, { type: 'image/png' });
-
-        // share API 対応端末（iOS Safariなど）→ ネイティブ共有シートでライブラリ保存
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({ files: [file], title: 'おさんぽビンゴ' });
-            return;
-          } catch (e) {
-            if (e.name === 'AbortError') return; // キャンセル
-            // share失敗時はダウンロードにフォールバック
-          }
-        }
-
-        // フォールバック: ファイルダウンロード
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = url;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 'image/png', 1);
+    html2canvas(area, {
+      scale: Math.max(2, window.devicePixelRatio || 2),
+      useCORS: true, allowTaint: true, logging: false,
+      backgroundColor: '#ffffff', imageTimeout: 15000
+    }).then((canvas) => {
+      canvas.toBlob((blob) => doShare(blob), 'image/png', 1);
     }).catch((err) => {
       console.error('html2canvas error:', err);
       showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
     });
   }
-  
+
   // SNSで共有（テキストを優先＝ユーザー操作直後に実行で確実に動作）
   shareToSns() {
     const text = this.getShareText();
