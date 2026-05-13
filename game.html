@@ -432,7 +432,7 @@
     
     <!-- コントロール -->
     <section class="controls">
-      <a href="index.html" id="footerBackToTop" class="btn btn-ghost link-back-top">← トップ</a>
+      <a href="index.html" id="footerBackToTop" class="btn btn-ghost">← トップ</a>
       <button id="newGameBtn" class="btn btn-primary">
         作り直す
       </button>
@@ -596,11 +596,7 @@
   <script>
     (function() {
       var indexUrl = 'index.html';
-      var navigating = false;
       function goToTop(e) {
-        if (e) e.preventDefault();
-        if (navigating) return;
-        navigating = true;
         window.location.href = indexUrl;
       }
       function setupLinks() {
