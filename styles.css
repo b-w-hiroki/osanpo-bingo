@@ -2224,9 +2224,20 @@ h1 {
   color: #ccc;
 }
 
-/* 結果画面の広告枠 */
+/* 結果共有画面の広告枠 */
 .ad-slot-result {
   margin: 16px 0 8px;
+}
+
+/* ゲーム画面（遊び方の下）の広告枠 */
+.ad-slot-game {
+  margin: 8px 0 0;
+  padding: 0 12px;
+}
+
+/* 結果記録画面（確定ボタンの下）の広告枠 */
+.ad-slot-result-edit {
+  margin: 16px 0 0;
 }
 
 @media (max-width: 600px) {
