@@ -408,7 +408,10 @@ class OsanpoBingo {
     this.battleOpponentPhotos = {};
     // IDB の写真も非同期クリア（エラーは無視）
     this.photoStorage.clearAll().catch(() => {});
-    
+
+    // ボードを初回描画（checkBingo は updateBoardOwnership のみなので明示的に呼ぶ）
+    this.renderBoard();
+
     // 保存
     this.saveToStorage();
   }
