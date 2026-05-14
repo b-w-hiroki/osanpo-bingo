@@ -710,7 +710,8 @@ class OsanpoBingo {
     });
   }
 
-  // バトル同期後にセルの所有者CSS状態だけを更新（DOM再構築なし）
+  // セルの状態（写真・マーク・ビンゴライン・所有者色）を差分更新
+  // DOM再構築なし。写真の追加/削除は単一セルだけ DOM パッチで対応（flicker防止）
   updateBoardOwnership() {
     if (!this.boardElement) return;
     this.boardElement.querySelectorAll('.bingo-cell').forEach(cell => {
@@ -720,9 +721,39 @@ class OsanpoBingo {
       if (!topic) return;
       const ownerId = this.getCellOwnerId(index);
       const isInBingoLine = this.bingoLines.some(line => line.includes(index));
-      const isMarked = topic.isFree || (ownerId === this.battlePlayerId);
+      // バトル: 自分の所有か / 非バトル: markedCells に存在するか
+      const isMarked = topic.isFree || (
+        this.gameType === 'battle'
+          ? ownerId === this.battlePlayerId
+          : this.markedCells.has(index)
+      );
       const isUnclaimedReach = !isInBingoLine && !this.isCellClaimed(index) &&
         this.reachLines.some(line => line.includes(index));
+
+      // 写真DOMの同期：this.photos[index] と DOM の状態が乖離していたら修正
+      const photoUrl = this.photos[index] || '';
+      const cellHasPhotoClass = cell.classList.contains('has-photo');
+      if (photoUrl && !cellHasPhotoClass) {
+        // 写真が新規追加 → 先頭に <div.cell-photo-wrap><img.cell-photo-img></div> を挿入
+        const wrap = document.createElement('div');
+        wrap.className = 'cell-photo-wrap';
+        const img = document.createElement('img');
+        img.className = 'cell-photo-img';
+        img.src = photoUrl;
+        img.alt = '';
+        wrap.appendChild(img);
+        cell.insertBefore(wrap, cell.firstChild);
+        cell.classList.add('has-photo');
+      } else if (!photoUrl && cellHasPhotoClass) {
+        // 写真が削除された
+        const wrap = cell.querySelector('.cell-photo-wrap');
+        if (wrap) wrap.remove();
+        cell.classList.remove('has-photo');
+      } else if (photoUrl) {
+        // 写真URLが差し替わっていれば src を更新
+        const img = cell.querySelector('.cell-photo-img');
+        if (img && img.src !== photoUrl) img.src = photoUrl;
+      }
 
       cell.classList.toggle('marked', isMarked);
       cell.classList.toggle('bingo', isInBingoLine);
