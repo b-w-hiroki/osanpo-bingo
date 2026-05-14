@@ -216,6 +216,7 @@ class OsanpoBingo {
       // 既存データを使用（モーダルを確実に非表示にしてボードを操作可能に）
       const roomModal = document.getElementById('roomCodeModal');
       if (roomModal) roomModal.style.display = 'none';
+      this.renderBoard(); // localStorage 復元時の初回描画
       this.checkBingo();
       this.updateStats();
       if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
