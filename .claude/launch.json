@@ -4,8 +4,8 @@
     {
       "name": "お散歩ビンゴ 静的サーバー",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["--yes", "serve", "-l", "3000"],
-      "port": 3000
+      "runtimeArgs": ["--yes", "serve", "C:\\Users\\kojac\\Desktop\\AITEST\\osanpo bingo", "-l", "8080"],
+      "port": 8080
     }
   ]
 }
