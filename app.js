@@ -734,7 +734,10 @@ class OsanpoBingo {
       const photoUrl = this.photos[index] || '';
       const cellHasPhotoClass = cell.classList.contains('has-photo');
       if (photoUrl && !cellHasPhotoClass) {
-        // 写真が新規追加 → 先頭に <div.cell-photo-wrap><img.cell-photo-img></div> を挿入
+        // 写真が新規追加 → 既存アイコンを除去してから先頭に photo-wrap を挿入
+        // （renderBoard と同じ構成にする：cell-icon が残ると写真と半々になるバグを防ぐ）
+        const existingIcon = cell.querySelector('.cell-icon');
+        if (existingIcon) existingIcon.remove();
         const wrap = document.createElement('div');
         wrap.className = 'cell-photo-wrap';
         const img = document.createElement('img');
