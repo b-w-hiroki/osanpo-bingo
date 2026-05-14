@@ -1640,17 +1640,26 @@ class OsanpoBingo {
     // iOS Share API のユーザージェスチャー制約を回避するため、
     // 確定ボタン押下時点でcanvasを事前生成してblobをキャッシュしておく
     this._resultImageBlob = null;
+    const shareBtn    = document.getElementById('shareSnsBtn');
     const downloadBtn = document.getElementById('downloadImageBtn');
-    if (downloadBtn) {
-      downloadBtn.disabled = true;
-      downloadBtn.dataset.originalText = downloadBtn.textContent;
-      downloadBtn.textContent = '準備中...';
-    }
+    const setBusy = (btn, label) => {
+      if (!btn) return;
+      btn.disabled = true;
+      btn.dataset.originalText = btn.dataset.originalText || btn.textContent;
+      btn.textContent = label;
+    };
+    const setReady = (btn) => {
+      if (!btn) return;
+      btn.disabled = false;
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+    };
+    setBusy(shareBtn,    '準備中...');
+    setBusy(downloadBtn, '準備中...');
     // rAF×2 でDOM描画が落ち着いてから html2canvas を実行
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const area = document.getElementById('resultCaptureArea');
       if (!area || typeof html2canvas === 'undefined') {
-        if (downloadBtn) { downloadBtn.disabled = false; downloadBtn.textContent = downloadBtn.dataset.originalText || 'ビンゴカードを保存'; }
+        setReady(shareBtn); setReady(downloadBtn);
         return;
       }
       html2canvas(area, {
@@ -1660,22 +1669,19 @@ class OsanpoBingo {
       }).then((canvas) => {
         canvas.toBlob((blob) => {
           this._resultImageBlob = blob;
-          if (downloadBtn) {
-            downloadBtn.disabled = false;
-            downloadBtn.textContent = downloadBtn.dataset.originalText || 'ビンゴカードを保存';
-          }
+          setReady(shareBtn); setReady(downloadBtn);
         }, 'image/png', 1);
       }).catch(() => {
-        if (downloadBtn) { downloadBtn.disabled = false; downloadBtn.textContent = downloadBtn.dataset.originalText || 'ビンゴカードを保存'; }
+        setReady(shareBtn); setReady(downloadBtn);
       });
     }));
   }
 
-  // ビンゴカード画像を保存（share API → ライブラリへ / フォールバック: ダウンロード）
+  // ビンゴカード画像を端末に保存
+  //  - iOS: 写真ライブラリ保存のため共有シート経由（"写真に保存"を含む）
+  //  - Android / PC: <a download> で直接ダウンロード
   downloadResultImage() {
-    // confirmResult() で事前生成したblobを使う（iOS Share APIのユーザージェスチャー制約対策）
-    // ユーザーのタップ → 即 navigator.share() の同期的な流れを維持するため
-    const doShare = async (blob) => {
+    const doSave = async (blob) => {
       if (!blob) {
         showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
         return;
@@ -1690,18 +1696,19 @@ class OsanpoBingo {
       const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
       const file = new File([blob], filename, { type: 'image/png' });
 
-      // share API 対応端末（iOS Safariなど）→ ネイティブ共有シートでライブラリ保存
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      // iOS: Safari は <a download> で写真ライブラリ保存ができないため共有シート経由
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: 'おさんぽビンゴ' });
+          await navigator.share({ files: [file] });
           return;
         } catch (e) {
-          if (e.name === 'AbortError') return; // キャンセル
-          // share失敗時はダウンロードにフォールバック
+          if (e.name === 'AbortError') return;
+          // 失敗時はダウンロードにフォールバック
         }
       }
 
-      // フォールバック: ファイルダウンロード
+      // 直接ダウンロード（Android / PC / iOSフォールバック）
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = filename;
@@ -1714,12 +1721,11 @@ class OsanpoBingo {
     };
 
     if (this._resultImageBlob) {
-      // 事前生成済み → ユーザージェスチャー文脈で即 share 呼び出し可能（iOS対応）
-      doShare(this._resultImageBlob);
+      doSave(this._resultImageBlob);
       return;
     }
 
-    // フォールバック: その場で生成（非同期になるため iOS では share できない場合あり）
+    // フォールバック: その場で生成
     const area = document.getElementById('resultCaptureArea');
     if (!area || typeof html2canvas === 'undefined') {
       showAlert('画像の準備ができませんでした。\nもう一度お試しください。');
@@ -1730,52 +1736,67 @@ class OsanpoBingo {
       useCORS: true, allowTaint: true, logging: false,
       backgroundColor: '#ffffff', imageTimeout: 15000
     }).then((canvas) => {
-      canvas.toBlob((blob) => doShare(blob), 'image/png', 1);
+      canvas.toBlob((blob) => doSave(blob), 'image/png', 1);
     }).catch((err) => {
       console.error('html2canvas error:', err);
       showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
     });
   }
 
-  // SNSで共有（テキストを優先＝ユーザー操作直後に実行で確実に動作）
+  // SNSで共有（画像＋テキスト＋URL を1セットで共有）
   shareToSns() {
     const text = this.getShareText();
-    const shareUrl = window.location.href.replace(/game\.html.*$/, '') || window.location.origin + '/';
-    
-    if (navigator.share) {
-      navigator.share({
-        title: 'おさんぽビンゴ',
-        text: text,
-        url: shareUrl
-      }).then(() => {
-        showAlert('共有しました！\nお疲れさまでした。');
-      }).catch((err) => {
-        if (err.name === 'AbortError') return;
-        this.copyShareText(text);
+    const shareUrl = this.getShareUrl();
+
+    const doShare = async (blob) => {
+      // GA: シェア
+      sendGA('shared_to_sns', {
+        difficulty:    this.difficulty,
+        game_type:     this._gaGameType(),
+        bingo_count:   this.bingoLines.length,
+        has_image:     blob ? 1 : 0,
       });
-      return;
-    }
-    
-    this.copyShareText(text);
+
+      // 画像付き共有を試行（iOS/Android のネイティブ共有シート対応）
+      if (blob && navigator.canShare) {
+        const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'おさんぽビンゴ', text, url: shareUrl });
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return;
+            // 失敗時はテキスト共有にフォールバック
+          }
+        }
+      }
+
+      // 画像なし or files非対応 → テキスト共有
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'おさんぽビンゴ', text, url: shareUrl });
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+
+      // 最終フォールバック: X Web Intent（PC Firefox など Web Share 未対応環境）
+      const intent = 'https://x.com/intent/post?text=' +
+        encodeURIComponent(text + '\n') + '&url=' + encodeURIComponent(shareUrl);
+      window.open(intent, '_blank', 'noopener');
+    };
+
+    doShare(this._resultImageBlob);
   }
   
   getShareText() {
-    let groupText = document.getElementById('resultCaptureGroup')?.textContent || '';
-    if (groupText === '-') groupText = '';
-    const dateEl = document.getElementById('resultCaptureDate');
-    const playTimeEl = document.getElementById('resultCapturePlayTime')?.textContent || '';
-    const bingo = this.bingoLines.length;
-    const marked = (BATTLE_MODE_ENABLED && this.gameType === 'battle')
-      ? this.getBattleCounts().selfClaims
-      : [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
-    return [
-      'おさんぽビンゴで遊んだ！',
-      dateEl?.textContent || '',
-      playTimeEl ? playTimeEl + ' ' : '',
-      groupText ? groupText + ' ' : '',
-      'BINGO' + bingo + '本・マーク' + marked + 'マス' + (this.totalDistance > 0 ? '・' + this.formatDistance(this.totalDistance) + '歩いた' : ''),
-      '#おさんぽビンゴ #散歩 #ビンゴ'
-    ].filter(Boolean).join('\n');
+    return 'おさんぽビンゴで遊んだよ～！\n#お散歩ビンゴ #散歩 #ビンゴ';
+  }
+
+  getShareUrl() {
+    return window.location.origin + '/';
   }
   
   // 共有テキストをクリップボードにコピー
