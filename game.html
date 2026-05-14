@@ -681,8 +681,23 @@
       }
 
       let reloading = false;
+      let userNavigating = false;
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a[href]');
+        if (a && !a.target && !e.defaultPrevented) {
+          try {
+            const url = new URL(a.href, location.href);
+            if (url.origin === location.origin && url.pathname !== location.pathname) {
+              userNavigating = true;
+            }
+          } catch (_) {}
+        }
+      }, true);
+      window.addEventListener('beforeunload', () => { userNavigating = true; });
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!reloading) { reloading = true; window.location.reload(); }
+        if (reloading || userNavigating) return;
+        reloading = true;
+        window.location.reload();
       });
 
       window.addEventListener('load', () => {
