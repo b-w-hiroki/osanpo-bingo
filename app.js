@@ -100,6 +100,13 @@ function parseOwnerColor(ownerUserId) {
   return PLAYER_COLORS[hash % 4];
 }
 
+// ── Google Analytics カスタムイベント送信ヘルパー ──────────────────────────
+function sendGA(eventName, params) {
+  if (typeof gtag === 'function') {
+    try { gtag('event', eventName, params); } catch (e) {}
+  }
+}
+
 class OsanpoBingo {
   constructor() {
     this.boardSize = 5;
@@ -794,6 +801,24 @@ class OsanpoBingo {
     return this.markedCells.has(index);
   }
 
+  // GA用ゲームタイプ文字列
+  _gaGameType() {
+    if (this.gameType === 'battle') return 'battle';
+    return this.roomCode === 'solo' ? 'solo' : 'group';
+  }
+
+  // GA用 tier別マス集計
+  _gaTierCounts() {
+    const nonFree = this.board.map((c, i) => ({...c, idx: i})).filter(c => !c.isFree);
+    const f = {1:0,2:0,3:0,4:0};
+    const e = {1:0,2:0,3:0,4:0};
+    nonFree.forEach(cell => {
+      const t = Math.min(4, Math.max(1, cell.diff || 2));
+      if (this.markedCells.has(cell.idx)) f[t]++; else e[t]++;
+    });
+    return { filled: f, empty: e };
+  }
+
   checkBingo() {
     const lines = this.getAllLines();
     const newBingoLines = [];
@@ -837,6 +862,15 @@ class OsanpoBingo {
     this.updateStats();
 
     if (newBingoCount > oldBingoCount) {
+      // GA: ビンゴ達成
+      const _gaFilledOnBingo = [...this.markedCells].filter(i => !this.board[i]?.isFree).length;
+      sendGA('bingo_achieved', {
+        bingo_count:  newBingoCount,
+        cells_filled: _gaFilledOnBingo,
+        difficulty:   this.difficulty,
+        game_type:    this._gaGameType(),
+        play_mode:    this.playMode,
+      });
       this.showBingoMessage(newBingoCount);
       if (newBingoCount === 12 && oldBingoCount < 12) {
         this.showFullClearCelebration();
@@ -1412,6 +1446,30 @@ class OsanpoBingo {
     // 結果確定時にトラッキング停止
     this.stopLocationTracking();
 
+    // GA: ゲーム終了
+    {
+      const _gaNonFree = this.board.map((c, i) => ({...c, idx: i})).filter(c => !c.isFree);
+      const _gaFilled  = _gaNonFree.filter(c => this.markedCells.has(c.idx)).length;
+      const _gaEmpty   = _gaNonFree.length - _gaFilled;
+      const _gaDurMin  = this.gameStartTime ? Math.round((Date.now() - this.gameStartTime) / 60000) : 0;
+      const _gaTier    = this._gaTierCounts();
+      sendGA('game_end', {
+        difficulty:   this.difficulty,
+        game_type:    this._gaGameType(),
+        play_mode:    this.playMode,
+        cells_filled: _gaFilled,
+        cells_empty:  _gaEmpty,
+        bingo_count:  this.bingoLines.length,
+        photo_count:  Object.keys(this.photoBlobs).length,
+        duration_min: _gaDurMin,
+        distance_m:   Math.round(this.totalDistance),
+        tier1_filled: _gaTier.filled[1], tier1_empty: _gaTier.empty[1],
+        tier2_filled: _gaTier.filled[2], tier2_empty: _gaTier.empty[2],
+        tier3_filled: _gaTier.filled[3], tier3_empty: _gaTier.empty[3],
+        tier4_filled: _gaTier.filled[4], tier4_empty: _gaTier.empty[4],
+      });
+    }
+
     // グループ入力欄をクリア
     const groupInput = document.getElementById('resultGroupInput');
     if (groupInput) groupInput.value = '';
@@ -1618,6 +1676,13 @@ class OsanpoBingo {
         showAlert('画像の保存に失敗しました。\nもう一度お試しください。');
         return;
       }
+      // GA: カード保存
+      sendGA('card_saved', {
+        difficulty:   this.difficulty,
+        game_type:    this._gaGameType(),
+        cells_filled: [...this.markedCells].filter(i => !this.board[i]?.isFree).length,
+        bingo_count:  this.bingoLines.length,
+      });
       const filename = 'osanpo-bingo-' + new Date().toISOString().slice(0, 10) + '.png';
       const file = new File([blob], filename, { type: 'image/png' });
 
@@ -2215,6 +2280,15 @@ class OsanpoBingo {
         this.gameStartTime = Date.now();
         this.roomCode = 'solo';
         this.playerCount = 1;
+        // GA: ゲーム開始（ソロ）
+        sendGA('game_start', {
+          difficulty:          this.difficulty,
+          game_type:           'solo',
+          play_mode:           this.playMode,
+          topic_set:           this.topicSetId || 'default',
+          landmark_mode:       this.landmarkMode ? 1 : 0,
+          custom_topic_count:  customTopics.length,
+        });
         const soloSalt = Date.now().toString();
         this.createBoard('solo', this.difficulty, soloSalt, customTopics);
         if (this.board[12]?.isFree) this.markCell(12);
@@ -2262,6 +2336,15 @@ class OsanpoBingo {
         }
         this.gameStartTime = Date.now();
         this.battleCellOwners = {};
+        // GA: ゲーム開始（作成）
+        sendGA('game_start', {
+          difficulty:          difficulty,
+          game_type:           this.gameType === 'battle' ? 'battle' : 'group',
+          play_mode:           this.playMode,
+          topic_set:           this.topicSetId || 'default',
+          landmark_mode:       this.landmarkMode ? 1 : 0,
+          custom_topic_count:  this.customTopics.length,
+        });
 
         // 合言葉あり or バトル → salt なし（全員同じボード）、ソロ → Date.now() でランダム
         const initialSalt = (roomCode && roomCode !== 'solo') || this.gameType === 'battle'
@@ -2333,6 +2416,15 @@ class OsanpoBingo {
         this.gameStartTime = Date.now();
         this.battleCellOwners = {};
         this.playerCount = 1;
+        // GA: ゲーム開始（参加）
+        sendGA('game_start', {
+          difficulty:    difficulty,
+          game_type:     'battle',
+          play_mode:     this.playMode,
+          topic_set:     this.topicSetId || 'default',
+          landmark_mode: this.landmarkMode ? 1 : 0,
+          custom_topic_count: 0,
+        });
 
         this.createBoard(roomCode, difficulty, '', []);
         if (this.board[12]?.isFree) this.markCell(12);
@@ -3166,6 +3258,15 @@ class OsanpoBingo {
     const displayUrl = URL.createObjectURL(blob);
     this.photos[idx] = displayUrl;
     this.photoBlobs[idx] = blob;
+
+    // GA: 写真保存
+    sendGA('photo_saved', {
+      difficulty:        this.difficulty,
+      game_type:         this._gaGameType(),
+      photo_count_total: Object.keys(this.photoBlobs).length,
+      topic_tier:        this.board[idx]?.diff || 0,
+      topic_category:    (this.board[idx]?.category || '').slice(0, 50),
+    });
 
     // バトルモードでは battleCellOwners が唯一のソースのため追加しない
     if (this.gameType !== 'battle') {
