@@ -1376,6 +1376,10 @@ class OsanpoBingo {
   // 結果画面を表示（編集モード）
   showResultView() {
     this.stopPlayTimer();
+    // SW 更新トースト：ゲーム中保留していたものを結果画面で表示
+    if (typeof window.flushPendingWorker === 'function') {
+      try { window.flushPendingWorker(); } catch (_) {}
+    }
     const view = document.getElementById('screenshotView');
     const container = document.querySelector('.container');
     const editArea = document.getElementById('resultEditArea');

@@ -643,10 +643,31 @@
 
       const pageLoadTime = Date.now();
 
-      // ロード直後（5秒以内）→ 自動更新、それ以降 → トースト
+      // ゲーム中（ボードがあり結果画面表示前）はトーストを抑止して保留
+      let pendingWorker = null;
+      function isGameInProgress() {
+        try {
+          const view = document.getElementById('screenshotView');
+          const board = document.getElementById('bingoBoard');
+          const inResult = view && view.style.display && view.style.display !== 'none';
+          const hasBoard = board && board.children.length > 0;
+          return hasBoard && !inResult;
+        } catch (_) { return false; }
+      }
+      function flushPendingWorker() {
+        if (pendingWorker) {
+          showUpdateToast(pendingWorker);
+          pendingWorker = null;
+        }
+      }
+      window.flushPendingWorker = flushPendingWorker;
+
+      // ロード直後（5秒以内）→ 自動更新、それ以降 → トースト（ゲーム中は保留）
       function handleUpdate(worker) {
         if (Date.now() - pageLoadTime < 5000) {
           worker.postMessage('skipWaiting'); // 透過的に自動更新
+        } else if (isGameInProgress()) {
+          pendingWorker = worker; // ゲーム中は保留
         } else {
           showUpdateToast(worker);
         }
