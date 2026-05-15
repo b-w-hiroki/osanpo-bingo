@@ -1826,11 +1826,12 @@ class OsanpoBingo {
   }
   
   getShareText() {
-    return 'おさんぽビンゴで遊んだよ～！\n#お散歩ビンゴ #散歩 #ビンゴ';
+    const url = this.getShareUrl();
+    return `おさんぽビンゴで遊んだよ～！\n#お散歩ビンゴ #散歩 #ビンゴ\n${url}`;
   }
 
   getShareUrl() {
-    return window.location.origin + '/';
+    return 'https://osanpobingo-battle.com/';
   }
   
   // 共有テキストをクリップボードにコピー
