@@ -3121,23 +3121,30 @@ class OsanpoBingo {
   }
   
   // 写真をデバイスライブラリに保存
+  //  - iOS: <a download> はカメラロール保存不可のため共有シート経由
+  //  - Android / PC: <a download> で直接ダウンロード
   async savePhotoToDevice(photoData, filename) {
     try {
       const response = await fetch(photoData);
       const blob = await response.blob();
-      const file = new File([blob], filename, { type: blob.type });
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'おさんぽビンゴ写真' });
-          return;
-        } catch (e) {
-          if (e.name === 'AbortError') return;
-          // Share失敗時はダウンロードにフォールバック
+      if (isIOS) {
+        const file = new File([blob], filename, { type: blob.type });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          // iOSはライブラリに直接保存できないため共有シート経由、操作方法を先に案内
+          await showAlert('共有シートが開きます。\n「写真に保存」をタップするとカメラロールに保存されます 📸');
+          try {
+            await navigator.share({ files: [file], title: 'おさんぽビンゴ写真' });
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') return;
+            // Share失敗時はダウンロードにフォールバック
+          }
         }
       }
 
-      // フォールバック: ダウンロードリンク
+      // Android / PC: 直接ダウンロード（iOS フォールバックも）
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -3263,7 +3270,7 @@ class OsanpoBingo {
 
     const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    this.savePhotoToDevice(dataUrl, `osanpo-bingo-photos-${date}.jpg`);
+    await this.savePhotoToDevice(dataUrl, `osanpo-bingo-photos-${date}.jpg`);
   }
 
   // セル写真を保存（IndexedDB に Blob で保存）
