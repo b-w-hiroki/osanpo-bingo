@@ -1842,6 +1842,17 @@ h1 {
   width: 100%;
 }
 
+/* 保存ボタン2つを横並びに */
+.save-btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn-row .btn {
+  flex: 1;
+  font-size: 0.82rem;
+}
+
 /* トップへ戻る：アウトラインボタン */
 .result-exit-btn {
   display: block;
