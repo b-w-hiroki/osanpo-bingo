@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osanpo-bingo-v96';
+const CACHE_NAME = 'osanpo-bingo-v97';
 const urlsToCache = [
   'index.html',
   'game.html',
@@ -36,13 +36,22 @@ self.addEventListener('message', (event) => {
   if (event.data === 'skipWaiting') self.skipWaiting();
 });
 
-// フェッチ時にキャッシュから取得
+// フェッチ時にキャッシュから取得（キャッシュにない場合はネットワーク取得 → 自動キャッシュ保存）
 self.addEventListener('fetch', (event) => {
   // ナビゲーション（ページ遷移）はSWを通さずブラウザに任せる（リンクエラー回避）
   if (event.request.mode === 'navigate') return;
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => response || fetch(event.request))
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((networkRes) => {
+        // GET リクエストのみ動的キャッシュに保存（アイコン等の初回取得を記録）
+        if (event.request.method === 'GET' && networkRes.ok) {
+          const resClone = networkRes.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+        }
+        return networkRes;
+      }).catch(() => cached); // ネットワークもキャッシュも失敗した場合は空レスポンス
+    })
   );
 });
 
