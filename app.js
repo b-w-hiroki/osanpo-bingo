@@ -681,14 +681,13 @@ class OsanpoBingo {
     }
     // skipInitialSync=true のときは初回を省略（呼び出し元が await 済みの場合）
     if (!skipInitialSync) this.syncBattleOwnersFromServer();
-    // Realtime WebSocket を起動（冪等）→ 相手のクレームを即時受信して sync 呼び出し
+    // Realtime WebSocket を起動（冪等）→ Supabase で Realtime が有効なら即時通知される
+    // 無効・未対応でも 2s ポーリングが全量をカバーする（退行なし）
     this._startBattleRealtime();
-    // ポーリングは Realtime の保険として継続（切断時フォールバック）
-    // Realtime が生きていれば 10s、未接続なら 2s で補完
-    const interval = this._realtimeClient ? 10000 : 2000;
+    // ポーリングは常に 2s（Realtime が機能しているかに関わらず安定基盤として維持）
     this.battleSyncTimer = setInterval(() => {
       this.syncBattleOwnersFromServer();
-    }, interval);
+    }, 2000);
   }
 
   stopBattleSyncLoop() {
