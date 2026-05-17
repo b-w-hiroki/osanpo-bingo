@@ -138,7 +138,7 @@ class OsanpoBingo {
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
     this.playTimerInterval = null; // プレイ時間更新タイマー
-    this._longPlayWarned = false;  // 3時間超えの確認モーダルを出したか
+    this._nextLongPlayCheckMs = null; // 長時間プレイ確認の次回チェック時刻（null=未初期化）
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
@@ -151,6 +151,7 @@ class OsanpoBingo {
     this.battleBackend = getBattleBackendConfig();
     this.battleTable = 'battle_cell_owners';
     this.battleSyncTimer = null;
+    this._battlePaused = false; // true=一時保存済み（退出時にサーバーデータを残す）
     this.debugBattle = new URLSearchParams(window.location.search).get('debugBattle') === '1';
     this._resultImageBlob = null; // 結果画面用キャッシュ済みblob（ライブラリ保存の事前生成）
     this.lastBattleSyncAt = 0;
@@ -259,6 +260,20 @@ class OsanpoBingo {
     const endGameBtn = document.getElementById('endGameBtn');
     if (endGameBtn) {
       endGameBtn.addEventListener('click', () => this.endGame());
+    }
+
+    // 途中保存ボタン（バトル：作成者のみ表示 / スタンダード：常に表示）
+    const pauseGameBtn = document.getElementById('pauseGameBtn');
+    if (pauseGameBtn) {
+      pauseGameBtn.addEventListener('click', async () => {
+        const ok = await showConfirm(
+          this.gameType === 'battle'
+            ? `ゲームを一時保存して中断しますか？\n\n同じ合言葉「${this.roomCode}」で再入室すれば続きから遊べます。`
+            : 'ゲームを一時保存して中断しますか？\n\n次回同じデバイスで game.html を開くと続きから遊べます。'
+        );
+        if (!ok) return;
+        await this.pauseAndGoToTop();
+      });
     }
 
     // ← トップボタン：結果（写真保存）画面を経由してからトップへ
@@ -523,13 +538,14 @@ class OsanpoBingo {
     if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo') return;
     const { url, key } = this.battleBackend;
     try {
+      // UPSERT: 設定レコードを上書きできるよう resolution=merge-duplicates を使用
       await fetch(`${url}/rest/v1/${this.battleTable}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           apikey: key,
           Authorization: `Bearer ${key}`,
-          Prefer: 'resolution=ignore-duplicates,return=minimal'
+          Prefer: 'resolution=merge-duplicates,return=minimal'
         },
         body: JSON.stringify({
           room_code: roomCode,
@@ -540,6 +556,20 @@ class OsanpoBingo {
     } catch (e) {
       console.warn('saveRoomSettings failed', e);
     }
+  }
+
+  /**
+   * バトルルームを「一時保存（ポーズ）」状態にする。
+   * ゲーム終了時にサーバーデータを削除せず、次回同じ合言葉で再入室すると再開できる。
+   * ルーム作成者のみが呼び出し可能。
+   */
+  async pauseBattleGame() {
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
+    const settings = await this.fetchRoomSettings(this.roomCode) || {};
+    settings.paused    = true;
+    settings.pauseTime = Date.now();
+    await this.saveRoomSettingsToServer(this.roomCode, settings);
+    this._battlePaused = true;
   }
 
   /** バトルルームの設定をサーバーから取得 */
@@ -1298,6 +1328,17 @@ class OsanpoBingo {
     // バトルモードでは「作り直す」を非表示
     const newGameBtn = document.getElementById('newGameBtn');
     if (newGameBtn) newGameBtn.style.display = isBattle ? 'none' : '';
+    // 「一時保存」ボタン: バトルは作成者のみ表示、スタンダードは常に表示
+    const pauseGameBtn = document.getElementById('pauseGameBtn');
+    if (pauseGameBtn) {
+      if (isBattle) {
+        // 作成者かどうか: battlePlayerId の色が 'blue'（作成者は常に blue）
+        const isCreator = parseOwnerColor(this.battlePlayerId) === 'blue';
+        pauseGameBtn.style.display = isCreator ? '' : 'none';
+      } else {
+        pauseGameBtn.style.display = '';
+      }
+    }
     // 合言葉：バトルのみ表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
     if (roomCodeStatEl) roomCodeStatEl.style.display = isBattle ? '' : 'none';
@@ -1367,25 +1408,51 @@ class OsanpoBingo {
 
   startPlayTimer() {
     if (this.playTimerInterval) clearInterval(this.playTimerInterval);
-    this._longPlayWarned = false;
-    const LONG_PLAY_MS = 3 * 60 * 60 * 1000; // 3時間
+    this._nextLongPlayCheckMs = null; // null = まだ初期化していない（3時間後に初回チェック）
+    const FIRST_WARNING_MS    = 3  * 60 * 60 * 1000; // 最初の警告: 3時間後
+    const RECHECK_INTERVAL_MS = 1  * 60 * 60 * 1000; // 「続ける」後: 1時間ごと
+    const AUTO_DISCARD_MS     = 24 * 60 * 60 * 1000; // 24時間放置で自動破棄
+
     this.playTimerInterval = setInterval(() => {
       this.updateStats();
-      // 3時間超えチェック（初回のみ）
-      if (
-        !this._longPlayWarned &&
-        this.gameStartTime &&
-        Date.now() - this.gameStartTime >= LONG_PLAY_MS
-      ) {
-        this._longPlayWarned = true;
+      if (!this.gameStartTime) return;
+
+      const now     = Date.now();
+      const elapsed = now - this.gameStartTime;
+
+      // ① 24時間超えで自動破棄
+      if (elapsed >= AUTO_DISCARD_MS) {
+        clearInterval(this.playTimerInterval);
+        this.playTimerInterval = null;
+        showAlert('24時間が経過したため、ゲームデータを自動的にリセットします。\n大変お疲れさまでした！');
+        this.resetAndGoToTop();
+        return;
+      }
+
+      // ② 3時間未満はスキップ
+      if (elapsed < FIRST_WARNING_MS) return;
+
+      // 初回到達時にチェック時刻を初期化
+      if (this._nextLongPlayCheckMs === null) {
+        this._nextLongPlayCheckMs = this.gameStartTime + FIRST_WARNING_MS;
+      }
+
+      // ダイアログ表示中（Infinity）はスキップ
+      if (this._nextLongPlayCheckMs === Infinity) return;
+
+      if (now >= this._nextLongPlayCheckMs) {
+        this._nextLongPlayCheckMs = Infinity; // 表示中は再トリガーしない
+        const h = Math.floor(elapsed / 3_600_000);
         showConfirm(
-          '🕐 3時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？'
+          `🕐 ${h}時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？`
         ).then((ok) => {
           if (ok) {
             this.stopBattleSyncLoop();
-            this.showEndScreen();
+            this.showResultView(); // showEndScreen は存在しないため正しいメソッドを使用
+          } else {
+            // 「続ける」→ 1時間後に再確認
+            this._nextLongPlayCheckMs = Date.now() + RECHECK_INTERVAL_MS;
           }
-          // 「続ける」を選んでも以後はダイアログを出さない（_longPlayWarned = true のまま）
         });
       }
     }, 1000);
@@ -1441,6 +1508,20 @@ class OsanpoBingo {
       showAlert('まずはゲームを始めてみましょう！');
       return;
     }
+
+    // バトルモードで未保存の場合：復帰不可の警告を表示
+    const isBattleRoom = this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo';
+    if (isBattleRoom && !this._battlePaused) {
+      const isCreator = parseOwnerColor(this.battlePlayerId) === 'blue';
+      const msg = isCreator
+        ? '⚠️ ゲームを保存せずに終了しようとしています。\n\nルームデータが削除され、復帰できなくなります。\n本当に終了しますか？\n\n（「一時保存」ボタンを使うと後で再開できます）'
+        : '⚠️ ゲームから退出しようとしています。\n\n退出後も合言葉を再入力すれば同じルームに再参加できます。\n本当に退出しますか？';
+      showConfirm(msg).then((ok) => {
+        if (ok) this.showResultView();
+      });
+      return;
+    }
+
     showConfirm('おさんぽビンゴを終了しますか？\n結果を記録・共有できます。').then((ok) => {
       if (ok) this.showResultView();
     });
@@ -1911,12 +1992,13 @@ class OsanpoBingo {
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
-    // バトルモード退出時はサーバー側のルームデータを削除
-    // （ログ蓄積防止 & 合言葉の再利用を可能にする）
-    const roomCodeToDelete = (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo')
-      ? this.roomCode : null;
-    if (roomCodeToDelete) {
-      this.deleteRoomData(roomCodeToDelete).catch(() => {});
+    // バトルモード退出時: 作成者（blue）かつ未保存の場合のみルームデータを削除
+    // ・参加者が退出してもルームは残す（作成者が続けられるように）
+    // ・一時保存済み（_battlePaused = true）なら残す → 再入室で再開できる
+    const isBattleRoom = this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo';
+    const isCreator    = parseOwnerColor(this.battlePlayerId) === 'blue';
+    if (isBattleRoom && isCreator && !this._battlePaused) {
+      this.deleteRoomData(this.roomCode).catch(() => {});
     }
     try {
       localStorage.removeItem(this._storageKey);
@@ -1951,6 +2033,26 @@ class OsanpoBingo {
     }
   }
   
+  /**
+   * ゲームを中断して保存し、トップページへ遷移する。
+   * resetAndGoToTop() と違い localStorage を削除しないため、
+   * 次回 game.html を開いたときに「前回の続きから」で再開できる。
+   *
+   * バトルモードでは pauseBattleGame() を呼び出してサーバーにポーズ状態を保存してから遷移する。
+   */
+  async pauseAndGoToTop() {
+    this.stopBattleSyncLoop();
+    if (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo') {
+      await this.pauseBattleGame();
+    } else {
+      // ソロ：現在の状態を明示的に保存（auto-save で既に保存済みのはずだが念のため）
+      this.saveToStorage();
+    }
+    // localStorage を削除しないでトップへ遷移
+    this.stopPlayTimer();
+    window.location.href = 'index.html';
+  }
+
   // 作り直す（お題をランダムシャッフル）
   newGame() {
     showConfirm('お題をシャッフルして\n新しいビンゴを作りますか？').then((ok) => {
@@ -2276,13 +2378,16 @@ class OsanpoBingo {
         if (sRows.length > 0) {
           // 参加人数チェック（最大3人）
           let memberCount = 0;
+          const _savedRoomCode = this.roomCode; // 必ず復元するために事前退避
           try {
-            const tmpRoomCode = this.roomCode;
             this.roomCode = code;
             const colors = await this._fetchRoomPlayerColors();
-            this.roomCode = tmpRoomCode;
             memberCount = colors.size;
-          } catch {}
+          } catch {
+            // ネットワークエラー等は0人として扱う（参加ボタン側で再チェック）
+          } finally {
+            this.roomCode = _savedRoomCode; // 例外が発生しても必ず元に戻す
+          }
 
           if (memberCount >= MAX_BATTLE_PLAYERS) {
             joinStatusEl.textContent = `このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません`;
@@ -2442,6 +2547,37 @@ class OsanpoBingo {
           showAlert('合言葉を入力してください。\n自動生成する場合は「ランダム生成」ボタンを押してください。');
           return;
         }
+
+        // 同じ合言葉のルームがポーズ済みの場合は再開確認
+        if (this.battleBackend.enabled) {
+          this.roomCode = roomCode;
+          const existingSettings = await this.fetchRoomSettings(roomCode);
+          if (existingSettings?.paused && existingSettings?.pauseTime) {
+            const pauseAge = Date.now() - existingSettings.pauseTime;
+            if (pauseAge < 24 * 60 * 60 * 1000) {
+              const h = Math.floor(pauseAge / 3_600_000);
+              const m = Math.floor((pauseAge % 3_600_000) / 60_000);
+              const ageText = h > 0 ? `${h}時間${m}分` : `${m}分`;
+              const resume = await showConfirm(
+                `この合言葉には${ageText}前に保存された途中データがあります。\n\n前回の続きから再開しますか？`
+              );
+              if (!resume) {
+                await this.deleteRoomData(roomCode);
+              } else {
+                // 再開: ポーズフラグを解除
+                const updatedSettings = { ...existingSettings, paused: false, pauseTime: null };
+                await this.saveRoomSettingsToServer(roomCode, updatedSettings);
+              }
+            } else {
+              // 期限切れは黙って削除
+              await this.deleteRoomData(roomCode);
+            }
+          }
+        }
+
+        // 新しいゲーム開始時は一時保存フラグをリセット
+        this._battlePaused = false;
+
         const difficulty = difficultySelect?.value || 'normal';
         const playerName = document.getElementById('playerNameCreateInput')?.value.trim() || '';
         // ゲーム作成者は常にblue（最初の参加者）
@@ -2528,8 +2664,40 @@ class OsanpoBingo {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
         const joinPlayerName = document.getElementById('playerNameJoinInput')?.value.trim() || '';
-        // 参加者はルームの空き色を取得してから参加（最大3人制限チェック含む）
-        this.roomCode = roomCode; // pickAvailableColorで使うため先にセット
+        // 新しいゲーム開始時は一時保存フラグをリセット
+        this._battlePaused = false;
+        this.roomCode = roomCode; // 以降のAPIコールで使うため先にセット
+
+        // ① ポーズ状態チェックを pickAvailableColor より先に行う
+        //    （ポーズ中→削除した場合に3人制限カウントが正しく反映されるよう）
+        const roomSettings = await this.fetchRoomSettings(roomCode);
+        if (roomSettings?.paused && roomSettings?.pauseTime) {
+          const pauseAge = Date.now() - roomSettings.pauseTime;
+          if (pauseAge >= 24 * 60 * 60 * 1000) {
+            showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
+            await this.deleteRoomData(roomCode);
+            this.roomCode = '';
+            return;
+          }
+          const h = Math.floor(pauseAge / 3_600_000);
+          const m = Math.floor((pauseAge % 3_600_000) / 60_000);
+          const ageText = h > 0 ? `${h}時間${m}分` : `${m}分`;
+          const resume = await showConfirm(
+            `このルームには${ageText}前に保存された途中データがあります。\n\n前回の続きから再開しますか？`
+          );
+          if (!resume) {
+            // 新しくスタート → サーバーデータを削除し参加も中止
+            await this.deleteRoomData(roomCode);
+            this.roomCode = '';
+            showAlert('ルームデータを削除しました。\n新しいゲームを作成してください。');
+            return;
+          }
+          // 再開：ポーズフラグをクリア
+          const updatedSettings = { ...roomSettings, paused: false, pauseTime: null };
+          await this.saveRoomSettingsToServer(roomCode, updatedSettings);
+        }
+
+        // ② ポーズ処理後に3人制限チェック（削除済みルームには引っかからない）
         const joinColor = await this.pickAvailableColor();
         if (joinColor === null) {
           showAlert(`このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません。`);
@@ -2540,8 +2708,6 @@ class OsanpoBingo {
         this.battleBingoOwners = {};
         this.lastClaimedCellIndex = null;
 
-        // ルーム作成者の設定をサーバーから取得して同じボードを生成
-        const roomSettings = await this.fetchRoomSettings(roomCode);
         const difficulty = roomSettings?.difficulty || 'normal';
         this.topicSetId = roomSettings?.topicSetId || 'default';
         this.playMode = roomSettings?.playMode || 'photo';
@@ -3564,6 +3730,10 @@ class OsanpoBingo {
 
   /** ルーム内の参加済みプレイヤー色セットを取得するユーティリティ */
   async _fetchRoomPlayerColors() {
+    // 未設定・solo の場合は空セットを返す（バックエンド未設定時も同様）
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
+      return new Set();
+    }
     const { url, key } = this.battleBackend;
     const res = await fetch(
       `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&select=cell_index,owner_user_id&limit=200`,
@@ -3628,9 +3798,10 @@ class OsanpoBingo {
         if (owner) counts[owner] = (counts[owner] || 0) + 1;
       });
       // 最多取得者をビンゴオーナーに（同数は ID 昇順でタイブレーク）
+      // bestOwner が null の初回は必ず更新し、null との比較を避ける
       let bestOwner = null, bestCount = -1;
       for (const [id, count] of Object.entries(counts)) {
-        if (count > bestCount || (count === bestCount && id < bestOwner)) {
+        if (count > bestCount || (count === bestCount && bestOwner !== null && id < bestOwner)) {
           bestOwner = id;
           bestCount = count;
         }

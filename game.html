@@ -436,11 +436,14 @@
       <button id="newGameBtn" class="btn btn-primary">
         作り直す
       </button>
+      <button id="pauseGameBtn" class="btn btn-pause" style="display:none">
+        一時保存
+      </button>
       <button id="endGameBtn" class="btn btn-secondary">
         終わる
       </button>
     </section>
-    
+
     <!-- 説明 -->
     <section class="info">
       <h2>遊び方</h2>
@@ -449,14 +452,27 @@
         <li>見つけたらマスをタップしてマーク</li>
         <li>縦・横・斜めで5つ揃ったらBINGO！</li>
       </ol>
-      
+
       <details class="info-details">
         <summary>詳しい説明</summary>
         <ul>
           <li><strong>終わる</strong>: ゲームを終了し、結果を記録・SNS共有できます</li>
           <li><strong>作り直す</strong>: お題をシャッフルして新しいボードを作ります</li>
+          <li><strong>一時保存</strong>: ゲームを中断して保存します。次回また続きから遊べます</li>
           <li><strong>中央のマス</strong>: 最初からマーク済みです</li>
           <li><strong>✏️マス</strong>: 自分でお題を決められるマスです</li>
+        </ul>
+      </details>
+
+      <details class="info-details">
+        <summary>🏆 バトルモードについて</summary>
+        <ul>
+          <li><strong>合言葉</strong>: 友だちと同じ合言葉を入力して同じボードを共有します</li>
+          <li><strong>陣取り</strong>: 写真をアップロードしたマスが自分の色で染まります</li>
+          <li><strong>BINGO判定</strong>: ライン上に自分のマスが一番多いプレイヤーがBINGOを獲得</li>
+          <li><strong>最大3人</strong>: 1つのルームに参加できるのは作成者含め3人まで</li>
+          <li><strong>一時保存（作成者のみ）</strong>: ゲームを保存して中断できます。同じ合言葉で再入室すると続きから再開できます</li>
+          <li><strong>ルームの有効期限</strong>: 一時保存後24時間以内に再開しないとデータが削除されます</li>
         </ul>
       </details>
     </section>
