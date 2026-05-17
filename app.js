@@ -76,7 +76,6 @@ function getBattleRandomId() {
 const PLAYER_COLORS = ['blue', 'red', 'yellow', 'green'];
 /** 1ルームに参加できる最大人数（作成者含む） */
 const MAX_BATTLE_PLAYERS = 3;
-const BINGO_LINE_PREFIX = '__bingo_line_';
 
 function makeBattlePlayerId(name, color, randomId) {
   const safeName = (name || '').trim() || '名無しさん';
@@ -2171,10 +2170,11 @@ class OsanpoBingo {
     this._battlePaused = true;
     if (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo') {
       await this.pauseBattleGame();
-    } else {
-      // ソロ：現在の状態を明示的に保存（auto-save で既に保存済みのはずだが念のため）
-      this.saveToStorage();
     }
+    // _battlePaused=true を localStorage に永続化（バトル・ソロ共通）
+    // ここで保存しないと再起動後に _battlePaused が false に戻り、
+    // resetAndGoToTop() でルームデータが誤削除される
+    this.saveToStorage();
     // localStorage を削除しないでトップへ遷移
     this.stopPlayTimer();
     window.location.href = 'index.html';
@@ -3330,8 +3330,6 @@ class OsanpoBingo {
       this._revokeTempPhotoURL();
       this.tempPhotoData = null;
       this.tempPhotoBlob = null;
-      const photoInput = document.getElementById('cellPhotoInput');
-      if (photoInput) photoInput.value = '';
       const photoPreview = document.getElementById('cellPhotoPreview');
       if (photoPreview) photoPreview.style.display = 'none';
     }
@@ -3396,8 +3394,6 @@ class OsanpoBingo {
     this._revokeTempPhotoURL(); // 未保存プレビュー URL を解放
     this.tempPhotoData = null;
     this.tempPhotoBlob = null;
-    const photoInput = document.getElementById('cellPhotoInput');
-    if (photoInput) photoInput.value = '';
     const photoInputCamera = document.getElementById('cellPhotoInputCamera');
     if (photoInputCamera) photoInputCamera.value = '';
     const photoInputGallery = document.getElementById('cellPhotoInputGallery');
