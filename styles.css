@@ -687,6 +687,7 @@ h1 {
   color: var(--text-light);
   font-weight: 500;
   text-align: center;
+  white-space: nowrap;
 }
 
 .stat-value {
@@ -1117,6 +1118,8 @@ h1 {
   font-weight: 600;
   min-height: 1.4em;
   transition: color 0.2s;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 .join-room-status.status-checking { color: #888; }
 .join-room-status.status-found    { color: #2e7d52; }
@@ -1152,6 +1155,7 @@ h1 {
   font-size: 0.82rem;
   font-weight: 600;
   color: #2e6648;
+  white-space: nowrap;
 }
 
 .link-btn {
@@ -1768,6 +1772,7 @@ h1 {
 .result-edit-actions .btn {
   flex: 1;
   min-width: 0;
+  white-space: nowrap;
 }
 
 @media (max-width: 480px) {
@@ -1873,6 +1878,7 @@ h1 {
 .save-btn-row .btn {
   flex: 1;
   font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 /* トップへ戻る：アウトラインボタン */
@@ -1974,6 +1980,7 @@ h1 {
   padding: 12px 20px;
   font-size: 0.95rem;
   border-radius: var(--radius-md);
+  white-space: nowrap;
 }
 
 /* ==================== データ復元確認モーダル ==================== */
@@ -2026,6 +2033,8 @@ h1 {
   color: var(--text-light);
   margin: 0 0 20px;
   min-height: 72px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 .tutorial-dots {
   display: flex;
@@ -2178,6 +2187,7 @@ h1 {
     min-height: 48px;
     padding: 14px 8px;
     font-size: 0.95rem;
+    white-space: nowrap;
   }
   
   .modal {
