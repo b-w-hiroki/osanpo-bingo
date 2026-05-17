@@ -138,7 +138,7 @@ class OsanpoBingo {
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
     this.playTimerInterval = null; // プレイ時間更新タイマー
-    this._longPlayWarned = false;  // 3時間超えの確認モーダルを出したか
+    this._nextLongPlayCheckMs = null; // 長時間プレイ確認の次回チェック時刻（null=未初期化）
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
@@ -1408,25 +1408,51 @@ class OsanpoBingo {
 
   startPlayTimer() {
     if (this.playTimerInterval) clearInterval(this.playTimerInterval);
-    this._longPlayWarned = false;
-    const LONG_PLAY_MS = 3 * 60 * 60 * 1000; // 3時間
+    this._nextLongPlayCheckMs = null; // null = まだ初期化していない（3時間後に初回チェック）
+    const FIRST_WARNING_MS    = 3  * 60 * 60 * 1000; // 最初の警告: 3時間後
+    const RECHECK_INTERVAL_MS = 1  * 60 * 60 * 1000; // 「続ける」後: 1時間ごと
+    const AUTO_DISCARD_MS     = 24 * 60 * 60 * 1000; // 24時間放置で自動破棄
+
     this.playTimerInterval = setInterval(() => {
       this.updateStats();
-      // 3時間超えチェック（初回のみ）
-      if (
-        !this._longPlayWarned &&
-        this.gameStartTime &&
-        Date.now() - this.gameStartTime >= LONG_PLAY_MS
-      ) {
-        this._longPlayWarned = true;
+      if (!this.gameStartTime) return;
+
+      const now     = Date.now();
+      const elapsed = now - this.gameStartTime;
+
+      // ① 24時間超えで自動破棄
+      if (elapsed >= AUTO_DISCARD_MS) {
+        clearInterval(this.playTimerInterval);
+        this.playTimerInterval = null;
+        showAlert('24時間が経過したため、ゲームデータを自動的にリセットします。\n大変お疲れさまでした！');
+        this.resetAndGoToTop();
+        return;
+      }
+
+      // ② 3時間未満はスキップ
+      if (elapsed < FIRST_WARNING_MS) return;
+
+      // 初回到達時にチェック時刻を初期化
+      if (this._nextLongPlayCheckMs === null) {
+        this._nextLongPlayCheckMs = this.gameStartTime + FIRST_WARNING_MS;
+      }
+
+      // ダイアログ表示中（Infinity）はスキップ
+      if (this._nextLongPlayCheckMs === Infinity) return;
+
+      if (now >= this._nextLongPlayCheckMs) {
+        this._nextLongPlayCheckMs = Infinity; // 表示中は再トリガーしない
+        const h = Math.floor(elapsed / 3_600_000);
         showConfirm(
-          '🕐 3時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？'
+          `🕐 ${h}時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？`
         ).then((ok) => {
           if (ok) {
             this.stopBattleSyncLoop();
-            this.showEndScreen();
+            this.showResultView(); // showEndScreen は存在しないため正しいメソッドを使用
+          } else {
+            // 「続ける」→ 1時間後に再確認
+            this._nextLongPlayCheckMs = Date.now() + RECHECK_INTERVAL_MS;
           }
-          // 「続ける」を選んでも以後はダイアログを出さない（_longPlayWarned = true のまま）
         });
       }
     }, 1000);
@@ -2352,13 +2378,16 @@ class OsanpoBingo {
         if (sRows.length > 0) {
           // 参加人数チェック（最大3人）
           let memberCount = 0;
+          const _savedRoomCode = this.roomCode; // 必ず復元するために事前退避
           try {
-            const tmpRoomCode = this.roomCode;
             this.roomCode = code;
             const colors = await this._fetchRoomPlayerColors();
-            this.roomCode = tmpRoomCode;
             memberCount = colors.size;
-          } catch {}
+          } catch {
+            // ネットワークエラー等は0人として扱う（参加ボタン側で再チェック）
+          } finally {
+            this.roomCode = _savedRoomCode; // 例外が発生しても必ず元に戻す
+          }
 
           if (memberCount >= MAX_BATTLE_PLAYERS) {
             joinStatusEl.textContent = `このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません`;
@@ -2546,6 +2575,9 @@ class OsanpoBingo {
           }
         }
 
+        // 新しいゲーム開始時は一時保存フラグをリセット
+        this._battlePaused = false;
+
         const difficulty = difficultySelect?.value || 'normal';
         const playerName = document.getElementById('playerNameCreateInput')?.value.trim() || '';
         // ゲーム作成者は常にblue（最初の参加者）
@@ -2632,8 +2664,40 @@ class OsanpoBingo {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
         const joinPlayerName = document.getElementById('playerNameJoinInput')?.value.trim() || '';
-        // 参加者はルームの空き色を取得してから参加（最大3人制限チェック含む）
-        this.roomCode = roomCode; // pickAvailableColorで使うため先にセット
+        // 新しいゲーム開始時は一時保存フラグをリセット
+        this._battlePaused = false;
+        this.roomCode = roomCode; // 以降のAPIコールで使うため先にセット
+
+        // ① ポーズ状態チェックを pickAvailableColor より先に行う
+        //    （ポーズ中→削除した場合に3人制限カウントが正しく反映されるよう）
+        const roomSettings = await this.fetchRoomSettings(roomCode);
+        if (roomSettings?.paused && roomSettings?.pauseTime) {
+          const pauseAge = Date.now() - roomSettings.pauseTime;
+          if (pauseAge >= 24 * 60 * 60 * 1000) {
+            showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
+            await this.deleteRoomData(roomCode);
+            this.roomCode = '';
+            return;
+          }
+          const h = Math.floor(pauseAge / 3_600_000);
+          const m = Math.floor((pauseAge % 3_600_000) / 60_000);
+          const ageText = h > 0 ? `${h}時間${m}分` : `${m}分`;
+          const resume = await showConfirm(
+            `このルームには${ageText}前に保存された途中データがあります。\n\n前回の続きから再開しますか？`
+          );
+          if (!resume) {
+            // 新しくスタート → サーバーデータを削除し参加も中止
+            await this.deleteRoomData(roomCode);
+            this.roomCode = '';
+            showAlert('ルームデータを削除しました。\n新しいゲームを作成してください。');
+            return;
+          }
+          // 再開：ポーズフラグをクリア
+          const updatedSettings = { ...roomSettings, paused: false, pauseTime: null };
+          await this.saveRoomSettingsToServer(roomCode, updatedSettings);
+        }
+
+        // ② ポーズ処理後に3人制限チェック（削除済みルームには引っかからない）
         const joinColor = await this.pickAvailableColor();
         if (joinColor === null) {
           showAlert(`このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません。`);
@@ -2643,36 +2707,6 @@ class OsanpoBingo {
         this.battlePlayerId = makeBattlePlayerId(joinPlayerName, joinColor, getBattleRandomId());
         this.battleBingoOwners = {};
         this.lastClaimedCellIndex = null;
-
-        // ルーム作成者の設定をサーバーから取得して同じボードを生成
-        const roomSettings = await this.fetchRoomSettings(roomCode);
-
-        // ポーズ済みルームの場合、24h有効期限チェックと再開確認
-        if (roomSettings?.paused && roomSettings?.pauseTime) {
-          const pauseAge = Date.now() - roomSettings.pauseTime;
-          if (pauseAge >= 24 * 60 * 60 * 1000) {
-            // 24時間超え → 期限切れで削除
-            showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
-            await this.deleteRoomData(roomCode);
-            this.roomCode = '';
-            return;
-          }
-          // 再開確認
-          const h = Math.floor(pauseAge / 3_600_000);
-          const m = Math.floor((pauseAge % 3_600_000) / 60_000);
-          const ageText = h > 0 ? `${h}時間${m}分` : `${m}分`;
-          const resume = await showConfirm(
-            `このルームには${ageText}前に保存された途中データがあります。\n\n前回の続きから再開しますか？`
-          );
-          if (!resume) {
-            // 新しくスタート → サーバーデータを削除
-            await this.deleteRoomData(roomCode);
-          } else {
-            // 再開：ポーズフラグをクリアしてゲーム継続
-            const updatedSettings = { ...roomSettings, paused: false, pauseTime: null };
-            await this.saveRoomSettingsToServer(roomCode, updatedSettings);
-          }
-        }
 
         const difficulty = roomSettings?.difficulty || 'normal';
         this.topicSetId = roomSettings?.topicSetId || 'default';
@@ -3696,6 +3730,10 @@ class OsanpoBingo {
 
   /** ルーム内の参加済みプレイヤー色セットを取得するユーティリティ */
   async _fetchRoomPlayerColors() {
+    // 未設定・solo の場合は空セットを返す（バックエンド未設定時も同様）
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
+      return new Set();
+    }
     const { url, key } = this.battleBackend;
     const res = await fetch(
       `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&select=cell_index,owner_user_id&limit=200`,
@@ -3760,9 +3798,10 @@ class OsanpoBingo {
         if (owner) counts[owner] = (counts[owner] || 0) + 1;
       });
       // 最多取得者をビンゴオーナーに（同数は ID 昇順でタイブレーク）
+      // bestOwner が null の初回は必ず更新し、null との比較を避ける
       let bestOwner = null, bestCount = -1;
       for (const [id, count] of Object.entries(counts)) {
-        if (count > bestCount || (count === bestCount && id < bestOwner)) {
+        if (count > bestCount || (count === bestCount && bestOwner !== null && id < bestOwner)) {
           bestOwner = id;
           bestCount = count;
         }
