@@ -217,20 +217,33 @@ class OsanpoBingo {
     if (!loaded || this.board.length !== 25) {
       this.showRoomCodeModal();
     } else {
-      // 既存データを使用（モーダルを確実に非表示にしてボードを操作可能に）
-      const roomModal = document.getElementById('roomCodeModal');
-      if (roomModal) roomModal.style.display = 'none';
-      this.renderBoard(); // localStorage 復元時の初回描画
-      this.checkBingo();
-      this.updateStats();
-      if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
-        this.syncBattleOwnersFromServer();
-        this.startBattleSyncLoop();
-      } else {
-        this.stopBattleSyncLoop();
-      }
-      // 位置情報トラッキング開始
-      this.startLocationTracking();
+      // 保存データがある → 続きから or 新しく始める を確認
+      this._showResumeModal().then((resume) => {
+        if (!resume) {
+          // 新しく始める: 保存データを削除してモーダルを表示
+          try { localStorage.removeItem(this._storageKey); } catch {}
+          this.board = [];
+          this.gameType = 'normal';
+          this.roomCode = '';
+          this.showRoomCodeModal();
+          return;
+        }
+        // 続きから: 既存データを使用
+        const roomModal = document.getElementById('roomCodeModal');
+        if (roomModal) roomModal.style.display = 'none';
+        this.renderBoard();
+        this.checkBingo();
+        this.updateStats();
+        if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
+          this.syncBattleOwnersFromServer();
+          this.startBattleSyncLoop();
+        } else {
+          this.stopBattleSyncLoop();
+        }
+        this.startLocationTracking();
+        // 復元されたゲームでも3時間・24時間タイマーを有効にする
+        this.startPlayTimer();
+      });
     }
 
   }
@@ -440,10 +453,9 @@ class OsanpoBingo {
       return;
     }
     try {
-      const endpointUrl = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
-      endpointUrl.searchParams.set('select', 'cell_index,owner_user_id');
-      endpointUrl.searchParams.set('room_code', `eq.${this.roomCode}`);
-      const res = await fetch(endpointUrl.toString(), {
+      const encodedRoom = encodeURIComponent(this.roomCode);
+      const syncUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=cell_index,owner_user_id&room_code=eq.${encodedRoom}`;
+      const res = await fetch(syncUrl, {
         headers: {
           apikey: this.battleBackend.key,
           Authorization: `Bearer ${this.battleBackend.key}`
@@ -513,6 +525,85 @@ class OsanpoBingo {
   }
 
   /**
+   * 保存データ復元確認モーダルを表示して Promise<boolean> を返す。
+   * true = 続きから / false = 新しく始める
+   */
+  _showResumeModal() {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('resumeModal');
+      const continueBtn = document.getElementById('resumeContinueBtn');
+      const newBtn = document.getElementById('resumeNewBtn');
+      if (!modal || !continueBtn || !newBtn) {
+        resolve(true); // モーダルがなければそのまま続きから
+        return;
+      }
+      const done = (ok) => {
+        modal.style.display = 'none';
+        continueBtn.onclick = null;
+        newBtn.onclick = null;
+        resolve(ok);
+      };
+      continueBtn.onclick = () => done(true);
+      newBtn.onclick    = () => done(false);
+      modal.style.display = 'flex';
+    });
+  }
+
+  /**
+   * バトルモード初回チュートリアルを表示する。
+   * localStorage に完了フラグがある場合はスキップ。
+   */
+  _showBattleTutorial() {
+    return new Promise((resolve) => {
+      const DONE_KEY = 'osanpo_battle_tutorial_done';
+      if (localStorage.getItem(DONE_KEY)) { resolve(); return; }
+
+      const modal     = document.getElementById('battleTutorialModal');
+      const slides    = modal ? modal.querySelectorAll('.tutorial-slide') : [];
+      const dots      = modal ? modal.querySelectorAll('.tutorial-dot')   : [];
+      const prevBtn   = document.getElementById('tutorialPrevBtn');
+      const nextBtn   = document.getElementById('tutorialNextBtn');
+      if (!modal || slides.length === 0) { resolve(); return; }
+
+      let current = 0;
+      const total = slides.length;
+
+      const goTo = (idx) => {
+        slides[current].style.display = 'none';
+        dots[current].classList.remove('active');
+        current = idx;
+        slides[current].style.display = '';
+        dots[current].classList.add('active');
+        prevBtn.style.visibility = current === 0 ? 'hidden' : '';
+        nextBtn.textContent = current === total - 1 ? 'はじめる ✓' : '次へ →';
+      };
+
+      dots.forEach((dot, i) => {
+        dot.onclick = () => goTo(i);
+      });
+      prevBtn.onclick = () => { if (current > 0) goTo(current - 1); };
+      nextBtn.onclick = () => {
+        if (current < total - 1) {
+          goTo(current + 1);
+        } else {
+          modal.style.display = 'none';
+          prevBtn.onclick = null;
+          nextBtn.onclick = null;
+          localStorage.setItem(DONE_KEY, '1');
+          resolve();
+        }
+      };
+
+      // 初期化
+      slides.forEach((s, i) => { s.style.display = i === 0 ? '' : 'none'; });
+      dots.forEach((d, i)   => { d.classList.toggle('active', i === 0); });
+      prevBtn.style.visibility = 'hidden';
+      nextBtn.textContent = '次へ →';
+      modal.style.display = 'flex';
+    });
+  }
+
+  /**
    * バトルルームのすべてのデータをサーバーから削除する。
    * プレイヤーが退出（ゲームリセット）したときに呼び出し、
    * ルームログを蓄積させず合言葉を再利用可能にする。
@@ -530,6 +621,27 @@ class OsanpoBingo {
       );
     } catch {
       // 削除失敗は無視（次回合言葉生成で別コードを使うため問題なし）
+    }
+  }
+
+  /**
+   * 自分のマスだけをサーバーから削除する。
+   * 参加者（非作成者）がゲームを退出するとき、カラースロットを解放して
+   * 後から合言葉を再入力すれば同じルームに再参加できるようにする。
+   */
+  async deleteMyBattleRows(roomCode, playerId) {
+    if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo' || !playerId) return;
+    try {
+      const { url, key } = this.battleBackend;
+      await fetch(
+        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&owner_user_id=eq.${encodeURIComponent(playerId)}`,
+        {
+          method: 'DELETE',
+          headers: { apikey: key, Authorization: `Bearer ${key}` }
+        }
+      );
+    } catch {
+      // 削除失敗は無視
     }
   }
 
@@ -569,7 +681,7 @@ class OsanpoBingo {
     settings.paused    = true;
     settings.pauseTime = Date.now();
     await this.saveRoomSettingsToServer(this.roomCode, settings);
-    this._battlePaused = true;
+    // _battlePaused は pauseAndGoToTop() 側で await より前にセット済み
   }
 
   /** バトルルームの設定をサーバーから取得 */
@@ -1342,6 +1454,9 @@ class OsanpoBingo {
     // 合言葉：バトルのみ表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
     if (roomCodeStatEl) roomCodeStatEl.style.display = isBattle ? '' : 'none';
+    // バトルモード遊び方：バトルのみ表示
+    const battleHowtoEl = document.getElementById('battleHowtoDetails');
+    if (battleHowtoEl) battleHowtoEl.style.display = isBattle ? '' : 'none';
     // 観光地フィールド選択時のみ地域を表示
     const regionStatEl = document.getElementById('regionStat');
     const regionDisplayEl = document.getElementById('regionDisplay');
@@ -1705,11 +1820,14 @@ class OsanpoBingo {
     const container = document.querySelector('.container');
     const editArea = document.getElementById('resultEditArea');
     const shareArea = document.getElementById('resultShareArea');
-    
+
     if (view) view.style.display = 'none';
     if (container) container.style.display = 'flex';
     if (editArea) editArea.style.display = 'flex';
     if (shareArea) shareArea.style.display = 'none';
+
+    // showResultView() でタイマーを停止したため、ゲームに戻る際に再開する
+    this.startPlayTimer();
   }
   
   // 決定ボタン：編集内容を確定して共有エリアに表示
@@ -1992,13 +2110,20 @@ class OsanpoBingo {
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
-    // バトルモード退出時: 作成者（blue）かつ未保存の場合のみルームデータを削除
-    // ・参加者が退出してもルームは残す（作成者が続けられるように）
-    // ・一時保存済み（_battlePaused = true）なら残す → 再入室で再開できる
+    // バトルモード退出時:
+    // ・作成者（blue）かつ未保存 → ルームデータを全削除（合言葉を再利用可能に）
+    // ・参加者（非blue）かつ未保存 → 自分のマスだけ削除しカラースロットを解放
+    //   （ルームは残るため、合言葉を再入力して再参加できる）
+    // ・一時保存済み（_battlePaused = true）→ 何も削除しない（再入室で再開）
     const isBattleRoom = this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo';
     const isCreator    = parseOwnerColor(this.battlePlayerId) === 'blue';
-    if (isBattleRoom && isCreator && !this._battlePaused) {
-      this.deleteRoomData(this.roomCode).catch(() => {});
+    if (isBattleRoom && !this._battlePaused) {
+      if (isCreator) {
+        this.deleteRoomData(this.roomCode).catch(() => {});
+      } else {
+        // 参加者：自分のマスだけ削除してカラースロットを解放
+        this.deleteMyBattleRows(this.roomCode, this.battlePlayerId).catch(() => {});
+      }
     }
     try {
       localStorage.removeItem(this._storageKey);
@@ -2042,6 +2167,8 @@ class OsanpoBingo {
    */
   async pauseAndGoToTop() {
     this.stopBattleSyncLoop();
+    // サーバー書き込み中に例外が発生してもフラグが立つよう await より前にセット
+    this._battlePaused = true;
     if (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo') {
       await this.pauseBattleGame();
     } else {
@@ -2415,7 +2542,9 @@ class OsanpoBingo {
             }
           }
         } else {
-          joinStatusEl.textContent = 'このコードのルームはまだ誰も使っていません';
+          // 設定行がない = ルーム未作成 or 作成者の設定書き込みが完了していない
+          // 少し待って再確認するよう案内
+          joinStatusEl.textContent = 'ルームが見つかりません。合言葉を確認してください';
           joinStatusEl.className = 'join-room-status status-empty';
           if (joinInfoEl) joinInfoEl.style.display = 'none';
         }
@@ -2626,8 +2755,9 @@ class OsanpoBingo {
         this.startPlayTimer();
         this.updateStats();
         // バトルモードの場合、ルーム設定をサーバーに保存（参加者が同じボードを作れるよう）
+        // await で保存完了を待つ：参加者が合言葉を入力したとき確実に設定が見える状態にする
         if (this.gameType === 'battle') {
-          this.saveRoomSettingsToServer(roomCode, {
+          await this.saveRoomSettingsToServer(roomCode, {
             difficulty: this.difficulty,
             topicSetId: this.topicSetId,
             landmarkMode: this.landmarkMode,
@@ -2643,6 +2773,9 @@ class OsanpoBingo {
 
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
+
+        // 初回バトルプレイ時はチュートリアルを表示（非同期・ゲーム開始後）
+        this._showBattleTutorial().catch(() => {});
       });
     }
 
@@ -2672,13 +2805,31 @@ class OsanpoBingo {
         //    （ポーズ中→削除した場合に3人制限カウントが正しく反映されるよう）
         const roomSettings = await this.fetchRoomSettings(roomCode);
         if (roomSettings?.paused && roomSettings?.pauseTime) {
+          // このプレイヤーが作成者かどうかをcreatorIdのrandomId部分で判定
+          const creatorParts   = (roomSettings.creatorId || '').split('::');
+          const creatorRandId  = creatorParts[creatorParts.length - 1] || '';
+          const isJoinerCreator = creatorRandId.length > 0 && creatorRandId === getBattleRandomId();
+
           const pauseAge = Date.now() - roomSettings.pauseTime;
           if (pauseAge >= 24 * 60 * 60 * 1000) {
-            showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
-            await this.deleteRoomData(roomCode);
+            // 期限切れ：作成者のみ削除できる。非作成者は案内のみ
+            if (isJoinerCreator) {
+              showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
+              await this.deleteRoomData(roomCode);
+            } else {
+              showAlert('このルームは期限切れです。\n作成者に新しいゲームを作成してもらってください。');
+            }
             this.roomCode = '';
             return;
           }
+          // 期限内の一時保存中ルーム
+          if (!isJoinerCreator) {
+            // 非作成者：再開を待つよう案内して終了
+            showAlert('このルームは現在一時停止中です。\n作成者が再開するまでお待ちください。');
+            this.roomCode = '';
+            return;
+          }
+          // 作成者：再開するか確認
           const h = Math.floor(pauseAge / 3_600_000);
           const m = Math.floor((pauseAge % 3_600_000) / 60_000);
           const ageText = h > 0 ? `${h}時間${m}分` : `${m}分`;
@@ -2686,7 +2837,7 @@ class OsanpoBingo {
             `このルームには${ageText}前に保存された途中データがあります。\n\n前回の続きから再開しますか？`
           );
           if (!resume) {
-            // 新しくスタート → サーバーデータを削除し参加も中止
+            // 作成者が再開しないを選択 → サーバーデータを削除し参加も中止
             await this.deleteRoomData(roomCode);
             this.roomCode = '';
             showAlert('ルームデータを削除しました。\n新しいゲームを作成してください。');
@@ -2698,7 +2849,14 @@ class OsanpoBingo {
         }
 
         // ② ポーズ処理後に3人制限チェック（削除済みルームには引っかからない）
-        const joinColor = await this.pickAvailableColor();
+        let joinColor;
+        try {
+          joinColor = await this.pickAvailableColor();
+        } catch (e) {
+          showAlert('サーバーへの接続に失敗しました。\n通信状態を確認して再度お試しください。');
+          this.roomCode = '';
+          return;
+        }
         if (joinColor === null) {
           showAlert(`このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません。`);
           this.roomCode = '';
@@ -2708,11 +2866,13 @@ class OsanpoBingo {
         this.battleBingoOwners = {};
         this.lastClaimedCellIndex = null;
 
-        const difficulty = roomSettings?.difficulty || 'normal';
-        this.topicSetId = roomSettings?.topicSetId || 'default';
-        this.playMode = roomSettings?.playMode || 'photo';
-        this.landmarkMode = roomSettings?.landmarkMode || false;
-        this.landmarkRegion = roomSettings?.landmarkRegion || 'all';
+        // roomSettings が null の場合（設定書き込みタイミングの競合）は再フェッチを試みる
+        const resolvedSettings = roomSettings || (await this.fetchRoomSettings(roomCode)) || {};
+        const difficulty = resolvedSettings.difficulty || 'normal';
+        this.topicSetId = resolvedSettings.topicSetId || 'default';
+        this.playMode = resolvedSettings.playMode || 'photo';
+        this.landmarkMode = resolvedSettings.landmarkMode || false;
+        this.landmarkRegion = resolvedSettings.landmarkRegion || 'all';
 
         this.gameStartTime = Date.now();
         this.battleCellOwners = {};
@@ -2743,6 +2903,9 @@ class OsanpoBingo {
 
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
+
+        // 初回バトルプレイ時はチュートリアルを表示（非同期・ゲーム開始後）
+        this._showBattleTutorial().catch(() => {});
       });
     }
   }
@@ -3083,6 +3246,12 @@ class OsanpoBingo {
     }
     
     // 写真削除ボタン
+    // 「変更」ボタン → プライバシー確認を経てカメラ起動
+    const changePhotoBtn = document.getElementById('changePhotoBtn');
+    if (changePhotoBtn) {
+      changePhotoBtn.addEventListener('click', openWithPrivacy('cellPhotoInputCamera'));
+    }
+
     if (deleteCurrentPhotoBtn) {
       deleteCurrentPhotoBtn.addEventListener('click', () => {
         const delIdx = this.currentPhotoIndex;
@@ -3625,7 +3794,8 @@ class OsanpoBingo {
         battleBingoOwners: this.battleBingoOwners,
         totalDistance: this.totalDistance,
         landmarkMode: this.landmarkMode,
-        landmarkRegion: this.landmarkRegion
+        landmarkRegion: this.landmarkRegion,
+        battlePaused: this._battlePaused
       };
       localStorage.setItem(this._storageKey, JSON.stringify(data));
     } catch (error) {
@@ -3712,6 +3882,9 @@ class OsanpoBingo {
       if (typeof data.landmarkRegion === 'string') {
         this.landmarkRegion = data.landmarkRegion;
       }
+      if (typeof data.battlePaused === 'boolean') {
+        this._battlePaused = data.battlePaused;
+      }
 
       return true;
     } catch (error) {
@@ -3760,19 +3933,15 @@ class OsanpoBingo {
   /**
    * ルーム内で未使用のプレイヤー色を取得する。
    * 最大参加人数（MAX_BATTLE_PLAYERS = 3）を超えている場合は null を返す。
+   * ネットワークエラーの場合は Error をスローして呼び出し元で区別できるようにする。
    */
   async pickAvailableColor() {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return PLAYER_COLORS[0];
     }
-    try {
-      const takenColors = await this._fetchRoomPlayerColors();
-      // 最大3人制限チェック（作成者含む）
-      if (takenColors.size >= MAX_BATTLE_PLAYERS) return null;
-      return PLAYER_COLORS.find(c => !takenColors.has(c)) || null;
-    } catch {
-      return PLAYER_COLORS[0];
-    }
+    const takenColors = await this._fetchRoomPlayerColors(); // エラーはそのままスロー
+    if (takenColors.size >= MAX_BATTLE_PLAYERS) return null;
+    return PLAYER_COLORS.find(c => !takenColors.has(c)) || null;
   }
 
   /**

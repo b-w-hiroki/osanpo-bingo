@@ -209,7 +209,7 @@
                 id="roomCodeInput"
                 class="input-text"
                 placeholder="例: さくら"
-                maxlength="5"
+                maxlength="8"
               >
               <button id="generateRoomCodeBtn" class="btn btn-secondary btn-icon" type="button">
                 自動
@@ -304,7 +304,7 @@
               id="joinRoomCodeInput"
               class="input-text"
               placeholder="合言葉を入力"
-              maxlength="5"
+              maxlength="8"
               autocomplete="off"
             >
             <div id="joinRoomStatus" class="join-room-status"></div>
@@ -355,7 +355,7 @@
           <img id="cellPhotoImg" alt="写真">
           <div class="cell-photo-actions">
             <button id="savePhotoToDeviceBtn" class="btn btn-secondary btn-small">保存</button>
-            <label for="cellPhotoInput" class="btn btn-secondary btn-small">変更</label>
+            <button id="changePhotoBtn" class="btn btn-secondary btn-small">変更</button>
             <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">削除</button>
           </div>
         </div>
@@ -377,6 +377,9 @@
         <div id="cellModalNoPhoto" class="cell-modal-no-photo" style="display: none;">
           <label for="cellPhotoInputCamera" class="btn btn-primary btn-large" id="uploadPhotoLabelCamera" style="width:100%;">
             写真を撮る
+          </label>
+          <label for="cellPhotoInputGallery" class="btn btn-secondary btn-large" id="uploadPhotoLabelGallery" style="width:100%;">
+            ギャラリーから選ぶ
           </label>
           <button type="button" id="toggleMarkBtn" class="link-btn" style="width:100%; text-align:center;">
             写真なしでマークする
@@ -464,7 +467,7 @@
         </ul>
       </details>
 
-      <details class="info-details">
+      <details class="info-details" id="battleHowtoDetails" style="display:none">
         <summary>🏆 バトルモードについて</summary>
         <ul>
           <li><strong>合言葉</strong>: 友だちと同じ合言葉を入力して同じボードを共有します</li>
@@ -472,6 +475,7 @@
           <li><strong>BINGO判定</strong>: ライン上に自分のマスが一番多いプレイヤーがBINGOを獲得</li>
           <li><strong>最大3人</strong>: 1つのルームに参加できるのは作成者含め3人まで</li>
           <li><strong>一時保存（作成者のみ）</strong>: ゲームを保存して中断できます。同じ合言葉で再入室すると続きから再開できます</li>
+          <li><strong>退出後の再参加</strong>: 合言葉を再入力すれば同じルームに戻れます</li>
           <li><strong>ルームの有効期限</strong>: 一時保存後24時間以内に再開しないとデータが削除されます</li>
         </ul>
       </details>
@@ -614,6 +618,69 @@
         <img id="battleViewPhoto" style="width: 100%; border-radius: 12px; display: block;" alt="相手の写真">
       </div>
       <p id="battleViewNoPhoto" style="text-align: center; color: #888; font-size: 0.9rem; padding: 24px 0; display: none;">📷 まだ写真がありません</p>
+    </div>
+  </div>
+
+  <!-- データ復元確認モーダル -->
+  <div id="resumeModal" class="dialog-modal" style="display: none;">
+    <div class="dialog-modal-backdrop"></div>
+    <div class="dialog-modal-content resume-modal-content">
+      <p class="resume-modal-icon">💾</p>
+      <h3 class="resume-modal-title">保存データがあります</h3>
+      <p class="resume-modal-desc">前回のゲームの続きから始めますか？</p>
+      <div class="dialog-modal-actions">
+        <button type="button" id="resumeNewBtn" class="btn btn-secondary dialog-btn">新しく始める</button>
+        <button type="button" id="resumeContinueBtn" class="btn btn-primary dialog-btn">続きから</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- バトルモード初回チュートリアルモーダル -->
+  <div id="battleTutorialModal" class="dialog-modal battle-tutorial-modal" style="display: none;">
+    <div class="dialog-modal-backdrop"></div>
+    <div class="battle-tutorial-content">
+      <!-- スライド 1 -->
+      <div class="tutorial-slide" data-slide="1">
+        <div class="tutorial-slide-icon">⚔️</div>
+        <h3 class="tutorial-slide-title">バトルモードへようこそ！</h3>
+        <p class="tutorial-slide-body">同じお題のビンゴボードで<br>友達と陣取りバトル！<br>先に多くのBINGOを獲れた人が勝ち！</p>
+      </div>
+      <!-- スライド 2 -->
+      <div class="tutorial-slide" data-slide="2" style="display:none">
+        <div class="tutorial-slide-icon">📢</div>
+        <h3 class="tutorial-slide-title">合言葉を共有しよう</h3>
+        <p class="tutorial-slide-body">ゲームを作ると<strong>合言葉</strong>が生成されます。<br>友達に合言葉を教えて<br>同じルームに参加してもらおう！</p>
+      </div>
+      <!-- スライド 3 -->
+      <div class="tutorial-slide" data-slide="3" style="display:none">
+        <div class="tutorial-slide-icon">📷</div>
+        <h3 class="tutorial-slide-title">見つけたら写真を撮ろう</h3>
+        <p class="tutorial-slide-body">お題を見つけたらマスをタップ。<br>写真を撮ってマークすると<br><strong>自分の色</strong>でマスが染まります！</p>
+      </div>
+      <!-- スライド 4 -->
+      <div class="tutorial-slide" data-slide="4" style="display:none">
+        <div class="tutorial-slide-icon">🏆</div>
+        <h3 class="tutorial-slide-title">BINGOの判定</h3>
+        <p class="tutorial-slide-body">縦・横・斜めのラインで<br>自分のマスが<strong>一番多い</strong>プレイヤーが<br>そのラインのBINGOを獲得！</p>
+      </div>
+      <!-- スライド 5 -->
+      <div class="tutorial-slide" data-slide="5" style="display:none">
+        <div class="tutorial-slide-icon">💾</div>
+        <h3 class="tutorial-slide-title">途中でやめるときは</h3>
+        <p class="tutorial-slide-body">作成者は「一時保存」ボタンで中断できます。<br>同じ合言葉で再入室すれば<br>続きから再開できます！</p>
+      </div>
+      <!-- ドット＋ボタン -->
+      <div class="tutorial-dots">
+        <span class="tutorial-dot active" data-idx="0"></span>
+        <span class="tutorial-dot" data-idx="1"></span>
+        <span class="tutorial-dot" data-idx="2"></span>
+        <span class="tutorial-dot" data-idx="3"></span>
+        <span class="tutorial-dot" data-idx="4"></span>
+      </div>
+      <div class="tutorial-actions">
+        <button type="button" id="tutorialPrevBtn" class="btn btn-secondary dialog-btn" style="visibility:hidden">← 前へ</button>
+        <button type="button" id="tutorialNextBtn" class="btn btn-primary dialog-btn">次へ →</button>
+      </div>
     </div>
   </div>
 
