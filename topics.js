@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-13 00:23:00（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-18 00:26:48（walking_bingo_master.xlsx より自動生成）
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -420,6 +420,7 @@ const topicIconMap = {
   723: 'icon723_宝くじ売り場.png',
   724: 'icon724_映画館.png',
   725: 'icon725_馬.png',
+  726: 'icon726_なんでも相談所.png',
 };
 
 function getTopicIcon(topic) {
@@ -917,7 +918,7 @@ const topicDatabase = {
     {id: 721, text: 'EV充電スタンド', icon: '🔍', category: 'その他観察', diff: 3, season: 'all'},
     {id: 723, text: '宝くじ売り場', icon: '🔍', category: 'その他観察', diff: 3, season: 'all'},
   ],
-  // ティア4（おに・26個）
+  // ティア4（おに・27個）
   4: [
     {id: 36, text: '公園のごみ箱', icon: '🔍', category: '自然・生き物', diff: 4, season: 'all'},
     {id: 71, text: 'トカゲ', icon: '🔍', category: '生活・学校', diff: 4, season: 'all', fields: ['residential']},
@@ -945,6 +946,7 @@ const topicDatabase = {
     {id: 722, text: '美術館', icon: '🔍', category: 'その他観察', diff: 4, season: 'all'},
     {id: 724, text: '映画館', icon: '🔍', category: 'その他観察', diff: 4, season: 'all'},
     {id: 725, text: '馬', icon: '🔍', category: 'その他観察', diff: 4, season: 'all'},
+    {id: 726, text: 'なんでも相談所', icon: '🔍', category: 'その他観察', diff: 4, season: 'all', fields: ['residential']},
   ],
 };
 
