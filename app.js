@@ -1482,6 +1482,20 @@ class OsanpoBingo {
       showAlert('まずはゲームを始めてみましょう！');
       return;
     }
+
+    // バトルモードで未保存の場合：復帰不可の警告を表示
+    const isBattleRoom = this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo';
+    if (isBattleRoom && !this._battlePaused) {
+      const isCreator = parseOwnerColor(this.battlePlayerId) === 'blue';
+      const msg = isCreator
+        ? '⚠️ ゲームを保存せずに終了しようとしています。\n\nルームデータが削除され、復帰できなくなります。\n本当に終了しますか？\n\n（「一時保存」ボタンを使うと後で再開できます）'
+        : '⚠️ ゲームから退出しようとしています。\n\n退出後は同じルームに再参加できなくなります。\n本当に退出しますか？';
+      showConfirm(msg).then((ok) => {
+        if (ok) this.showResultView();
+      });
+      return;
+    }
+
     showConfirm('おさんぽビンゴを終了しますか？\n結果を記録・共有できます。').then((ok) => {
       if (ok) this.showResultView();
     });
@@ -1952,10 +1966,12 @@ class OsanpoBingo {
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
-    // バトルモード退出時はサーバー側のルームデータを削除
-    // ただし一時保存済み（_battlePaused = true）の場合は残す → 再入室で再開できる
+    // バトルモード退出時: 作成者（blue）かつ未保存の場合のみルームデータを削除
+    // ・参加者が退出してもルームは残す（作成者が続けられるように）
+    // ・一時保存済み（_battlePaused = true）なら残す → 再入室で再開できる
     const isBattleRoom = this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo';
-    if (isBattleRoom && !this._battlePaused) {
+    const isCreator    = parseOwnerColor(this.battlePlayerId) === 'blue';
+    if (isBattleRoom && isCreator && !this._battlePaused) {
       this.deleteRoomData(this.roomCode).catch(() => {});
     }
     try {
