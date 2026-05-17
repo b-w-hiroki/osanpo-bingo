@@ -490,7 +490,12 @@ class OsanpoBingo {
     }
     try {
       const encodedRoom = encodeURIComponent(this.roomCode);
-      const syncUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=cell_index,owner_user_id&room_code=eq.${encodedRoom}`;
+      // NOTE: Supabase PostgREST の挙動で select=cell_index,owner_user_id (2列のみ) だと
+      // player行が返らず設定行のみになるバグがある。
+      // 回避策: cell_index=gte.0 フィルタを追加することで全行が正常に返る。
+      // (room_code,cell_index,owner_user_id の3列selectでも部分的に同問題が出るため
+      //  cell_index フィルタが最も確実な回避策)
+      const syncUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=cell_index,owner_user_id&room_code=eq.${encodedRoom}&cell_index=gte.0`;
       const res = await fetch(syncUrl, {
         headers: {
           apikey: this.battleBackend.key,
