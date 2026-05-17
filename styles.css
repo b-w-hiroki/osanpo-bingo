@@ -1996,9 +1996,9 @@ h1 {
   position: relative;
   background: var(--card-bg);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl) var(--spacing-xl);
-  max-width: 380px;
-  width: 100%;
+  padding: var(--spacing-xl) calc(var(--spacing-xl) + 8px);
+  max-width: 440px;
+  width: calc(100% - 32px);
   box-shadow: var(--shadow-lg);
   animation: fadeInUp 0.25s ease;
   text-align: center;
