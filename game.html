@@ -355,7 +355,7 @@
           <img id="cellPhotoImg" alt="写真">
           <div class="cell-photo-actions">
             <button id="savePhotoToDeviceBtn" class="btn btn-secondary btn-small">保存</button>
-            <label for="cellPhotoInput" class="btn btn-secondary btn-small">変更</label>
+            <button id="changePhotoBtn" class="btn btn-secondary btn-small">変更</button>
             <button id="deleteCurrentPhotoBtn" class="btn btn-danger btn-small">削除</button>
           </div>
         </div>
@@ -377,6 +377,9 @@
         <div id="cellModalNoPhoto" class="cell-modal-no-photo" style="display: none;">
           <label for="cellPhotoInputCamera" class="btn btn-primary btn-large" id="uploadPhotoLabelCamera" style="width:100%;">
             写真を撮る
+          </label>
+          <label for="cellPhotoInputGallery" class="btn btn-secondary btn-large" id="uploadPhotoLabelGallery" style="width:100%;">
+            ギャラリーから選ぶ
           </label>
           <button type="button" id="toggleMarkBtn" class="link-btn" style="width:100%; text-align:center;">
             写真なしでマークする

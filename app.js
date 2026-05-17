@@ -3246,6 +3246,12 @@ class OsanpoBingo {
     }
     
     // 写真削除ボタン
+    // 「変更」ボタン → プライバシー確認を経てカメラ起動
+    const changePhotoBtn = document.getElementById('changePhotoBtn');
+    if (changePhotoBtn) {
+      changePhotoBtn.addEventListener('click', openWithPrivacy('cellPhotoInputCamera'));
+    }
+
     if (deleteCurrentPhotoBtn) {
       deleteCurrentPhotoBtn.addEventListener('click', () => {
         const delIdx = this.currentPhotoIndex;
@@ -3788,7 +3794,8 @@ class OsanpoBingo {
         battleBingoOwners: this.battleBingoOwners,
         totalDistance: this.totalDistance,
         landmarkMode: this.landmarkMode,
-        landmarkRegion: this.landmarkRegion
+        landmarkRegion: this.landmarkRegion,
+        battlePaused: this._battlePaused
       };
       localStorage.setItem(this._storageKey, JSON.stringify(data));
     } catch (error) {
@@ -3874,6 +3881,9 @@ class OsanpoBingo {
       }
       if (typeof data.landmarkRegion === 'string') {
         this.landmarkRegion = data.landmarkRegion;
+      }
+      if (typeof data.battlePaused === 'boolean') {
+        this._battlePaused = data.battlePaused;
       }
 
       return true;
