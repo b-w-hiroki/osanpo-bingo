@@ -222,8 +222,14 @@ class OsanpoBingo {
     if (!loaded || this.board.length !== 25) {
       this.showRoomCodeModal();
     } else {
-      // 保存データがある → 続きから or 新しく始める を確認
-      this._showResumeModal().then(async (resume) => {
+      // バトルゲーム進行中（一時保存していない）のリフレッシュは確認なしに自動再開する。
+      // 一時保存済み（_battlePaused=true）やソロゲームは従来通りモーダルで確認する。
+      const autoResume = BATTLE_MODE_ENABLED
+        && this.gameType === 'battle'
+        && !this._battlePaused;
+
+      // resume=true: 続きから / false: 新しく始める
+      const doResume = async (resume) => {
         if (!resume) {
           // 新しく始める: 保存データを削除してモーダルを表示
           try { localStorage.removeItem(this._storageKey); } catch {}
@@ -260,7 +266,14 @@ class OsanpoBingo {
         this.startLocationTracking();
         // 復元されたゲームでも3時間・24時間タイマーを有効にする
         this.startPlayTimer();
-      });
+      };
+
+      if (autoResume) {
+        // バトル進行中リフレッシュ: モーダルを出さずにそのまま再開
+        doResume(true);
+      } else {
+        this._showResumeModal().then(doResume);
+      }
     }
 
   }
