@@ -64,10 +64,11 @@ function getBattleBackendConfig() {
 }
 
 function getBattleRandomId() {
-  let id = sessionStorage.getItem('osanpo_battle_player_id');
+  // localStorage を使用（sessionStorageはタブを閉じると消えIDが変わりcreator判定が壊れるため）
+  let id = localStorage.getItem('osanpo_battle_player_id');
   if (!id) {
     id = 'bp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
-    sessionStorage.setItem('osanpo_battle_player_id', id);
+    localStorage.setItem('osanpo_battle_player_id', id);
   }
   return id;
 }
@@ -217,7 +218,7 @@ class OsanpoBingo {
       this.showRoomCodeModal();
     } else {
       // 保存データがある → 続きから or 新しく始める を確認
-      this._showResumeModal().then((resume) => {
+      this._showResumeModal().then(async (resume) => {
         if (!resume) {
           // 新しく始める: 保存データを削除してモーダルを表示
           try { localStorage.removeItem(this._storageKey); } catch {}
@@ -230,12 +231,17 @@ class OsanpoBingo {
         // 続きから: 既存データを使用
         const roomModal = document.getElementById('roomCodeModal');
         if (roomModal) roomModal.style.display = 'none';
+        if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
+          // battleBingoOwners はキャッシュから復元されるが、battleCellOwners から再計算して正確にする
+          this.battleBingoOwners = this.recomputeBattleBingoOwners();
+        }
         this.renderBoard();
         this.checkBingo();
         this.updateStats();
         if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
-          this.syncBattleOwnersFromServer();
-          this.startBattleSyncLoop();
+          // 初回 sync を await してから描画済み状態を上書き（stale flash 防止）
+          await this.syncBattleOwnersFromServer();
+          this.startBattleSyncLoop(/* skipInitialSync= */ true);
         } else {
           this.stopBattleSyncLoop();
         }
@@ -338,7 +344,9 @@ class OsanpoBingo {
     document.addEventListener('visibilitychange', () => {
       if (!BATTLE_MODE_ENABLED) return;
       if (document.visibilityState === 'visible') {
-        this.startBattleSyncLoop();
+        // skipInitialSync=true にして startBattleSyncLoop 内の自動sync呼び出しを抑制し、
+        // 直後の syncBattleOwnersFromServer 1回だけ走らせる（二重fetch防止）
+        this.startBattleSyncLoop(/* skipInitialSync= */ true);
         this.syncBattleOwnersFromServer();
       } else {
         this.stopBattleSyncLoop();
@@ -448,6 +456,7 @@ class OsanpoBingo {
   }
 
   async syncBattleOwnersFromServer() {
+    if (this._battlePaused) return; // ポーズ中はサーバー同期をスキップ
     if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return;
     }
@@ -500,6 +509,7 @@ class OsanpoBingo {
 
   startBattleSyncLoop(skipInitialSync = false) {
     this.stopBattleSyncLoop();
+    if (this._battlePaused) return; // ポーズ中は再起動しない
     if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return;
     }
@@ -712,6 +722,7 @@ class OsanpoBingo {
       return 'claimed';
     }
     if (index < 0 || index >= 25) return 'claimed';
+    if (index === 12) return 'claimed'; // フリーマス / 設定スロット — 絶対にclaimしない
     const { url, key } = this.battleBackend;
 
     // POST（先着取得試行: room_code + cell_index の UNIQUE 制約で早い者勝ち）
@@ -977,28 +988,34 @@ class OsanpoBingo {
   // セルクリック処理
   async handleCellClick(index) {
     if (this.board[index]?.isFree) return;
+    // 連打ガード: 非同期 sync 中に別のタップが重なってモーダルが二重起動するのを防ぐ
+    if (this._cellClickBusy) return;
+    this._cellClickBusy = true;
+    try {
+      if (this.gameType === 'battle' && this.battleBackend.enabled && this.roomCode && this.roomCode !== 'solo') {
+        await this.syncBattleOwnersFromServer();
+      }
 
-    if (this.gameType === 'battle' && this.battleBackend.enabled && this.roomCode && this.roomCode !== 'solo') {
-      await this.syncBattleOwnersFromServer();
-    }
-
-    const ownerId = this.getCellOwnerId(index);
-    if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
-      // 相手が取得したマス → 写真モーダルを表示
-      this.showBattleOpponentPhotoModal(index, ownerId);
-      return;
-    }
-    
-    if (this.playMode === 'markOnly') {
-      if (this.gameType === 'battle') {
-        showAlert('バトルでは写真アップロード時にマス取得となります。');
-        this.showCellModal(index);
+      const ownerId = this.getCellOwnerId(index);
+      if (this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId) {
+        // 相手が取得したマス → 写真モーダルを表示
+        this.showBattleOpponentPhotoModal(index, ownerId);
         return;
       }
-      this.toggleMark(index);
-      return;
+
+      if (this.playMode === 'markOnly') {
+        if (this.gameType === 'battle') {
+          showAlert('バトルでは写真アップロード時にマス取得となります。');
+          this.showCellModal(index);
+          return;
+        }
+        this.toggleMark(index);
+        return;
+      }
+      this.showCellModal(index);
+    } finally {
+      this._cellClickBusy = false;
     }
-    this.showCellModal(index);
   }
   
   // ビンゴ判定
@@ -3686,8 +3703,11 @@ class OsanpoBingo {
   // セル写真を保存（IndexedDB に Blob で保存）
   async saveCellPhoto() {
     if (this.currentPhotoIndex === null || !this.tempPhotoBlob) return;
+    // await を挟む前にインデックスとblobをスナップショット（モーダルclose競合でnullになるのを防ぐ）
+    const claimIndex = this.currentPhotoIndex;
+    const claimBlob  = this.tempPhotoBlob;
     if (this.gameType === 'battle') {
-      const ownerId = this.getCellOwnerId(this.currentPhotoIndex);
+      const ownerId = this.getCellOwnerId(claimIndex);
       if (ownerId && ownerId !== this.battlePlayerId) {
         showAlert(`このマスは${parseOwnerName(ownerId)}が取得していました。`);
         this.closeCellModal();
@@ -3697,13 +3717,13 @@ class OsanpoBingo {
       // 写真を先に圧縮してINSERT本体に含める。これにより1リクエストでphoto_dataを保存。
       let photoDataForClaim = null;
       try {
-        const compressed = await this.compressToBase64(this.tempPhotoBlob, 640, 0.75);
+        const compressed = await this.compressToBase64(claimBlob, 640, 0.75);
         if (compressed && compressed !== 'data:,') photoDataForClaim = compressed;
       } catch (e) {
         console.warn('photo compression before claim failed:', e);
       }
       try {
-        const claimResult = await this.claimBattleCellOnServer(this.currentPhotoIndex, photoDataForClaim);
+        const claimResult = await this.claimBattleCellOnServer(claimIndex, photoDataForClaim);
         if (claimResult === 'taken') {
           showAlert('このマスはすでに他の人が取得していました。');
           this.closeCellModal();
@@ -3714,16 +3734,16 @@ class OsanpoBingo {
         // サーバー通信エラー → ブロックせずローカル保存を続行。シンクループで後から同期。
         console.warn('battle claim server error, proceeding locally:', e);
       }
-      this.battleCellOwners[this.currentPhotoIndex] = this.battlePlayerId;
-      this.lastClaimedCellIndex = this.currentPhotoIndex;
+      this.battleCellOwners[claimIndex] = this.battlePlayerId;
+      this.lastClaimedCellIndex = claimIndex;
     }
     
     // 振動フィードバック
     if (navigator.vibrate) navigator.vibrate(30);
 
-    // IndexedDB に Blob 保存
-    const idx = this.currentPhotoIndex;
-    const blob = this.tempPhotoBlob;
+    // IndexedDB に Blob 保存（スナップショット済みの claimIndex/claimBlob を使用）
+    const idx = claimIndex;
+    const blob = claimBlob;
     try {
       await this.photoStorage.save(idx, blob);
     } catch (e) {
@@ -3813,7 +3833,15 @@ class OsanpoBingo {
   // LocalStorageから読み込み
   loadFromStorage() {
     try {
-      const json = localStorage.getItem(this._storageKey);
+      // _storageKey はページロード直後 gameType='normal'/roomCode='' のため 'osanpoBingo' を返す。
+      // バトルセーブは 'osanpoBingo_battle_<roomCode>' に保存されているため、
+      // ベースキーにデータがなければ battle_* キーをスキャンする。
+      let json = localStorage.getItem(this._storageKey);
+      if (!json) {
+        const battleKey = Object.keys(localStorage)
+          .find(k => k.startsWith('osanpoBingo_battle_') && k !== 'osanpoBingo_battle_');
+        if (battleKey) json = localStorage.getItem(battleKey);
+      }
       if (!json) return false;
       
       const data = JSON.parse(json);
