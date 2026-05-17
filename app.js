@@ -1407,7 +1407,7 @@ class OsanpoBingo {
         ).then((ok) => {
           if (ok) {
             this.stopBattleSyncLoop();
-            this.showEndScreen();
+            this.showResultView();
           } else {
             // 「続ける」→ 1時間後に再確認
             this._nextLongPlayCheckMs = Date.now() + RECHECK_INTERVAL_MS;
