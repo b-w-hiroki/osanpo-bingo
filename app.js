@@ -74,6 +74,8 @@ function getBattleRandomId() {
 
 // バトルモード: プレイヤー色の定義（参加順に割り当て）
 const PLAYER_COLORS = ['blue', 'red', 'yellow', 'green'];
+/** 1ルームに参加できる最大人数（作成者含む） */
+const MAX_BATTLE_PLAYERS = 3;
 const BINGO_LINE_PREFIX = '__bingo_line_';
 
 function makeBattlePlayerId(name, color, randomId) {
@@ -136,6 +138,7 @@ class OsanpoBingo {
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
     this.playTimerInterval = null; // プレイ時間更新タイマー
+    this._longPlayWarned = false;  // 3時間超えの確認モーダルを出したか
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
@@ -492,6 +495,27 @@ class OsanpoBingo {
   async registerPlayerPresence() {
     // cell_index ベースのスキーマでは presence 専用レコードを持てないため省略。
     // 代わりにセルをクレームしたプレイヤーが getBattleScores に自動的に現れる。
+  }
+
+  /**
+   * バトルルームのすべてのデータをサーバーから削除する。
+   * プレイヤーが退出（ゲームリセット）したときに呼び出し、
+   * ルームログを蓄積させず合言葉を再利用可能にする。
+   */
+  async deleteRoomData(roomCode) {
+    if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo') return;
+    try {
+      const { url, key } = this.battleBackend;
+      await fetch(
+        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}`,
+        {
+          method: 'DELETE',
+          headers: { apikey: key, Authorization: `Bearer ${key}` }
+        }
+      );
+    } catch {
+      // 削除失敗は無視（次回合言葉生成で別コードを使うため問題なし）
+    }
   }
 
   /** バトルルームの設定（難易度・topicSet等）をサーバーに保存 */
@@ -1343,7 +1367,28 @@ class OsanpoBingo {
 
   startPlayTimer() {
     if (this.playTimerInterval) clearInterval(this.playTimerInterval);
-    this.playTimerInterval = setInterval(() => this.updateStats(), 1000);
+    this._longPlayWarned = false;
+    const LONG_PLAY_MS = 3 * 60 * 60 * 1000; // 3時間
+    this.playTimerInterval = setInterval(() => {
+      this.updateStats();
+      // 3時間超えチェック（初回のみ）
+      if (
+        !this._longPlayWarned &&
+        this.gameStartTime &&
+        Date.now() - this.gameStartTime >= LONG_PLAY_MS
+      ) {
+        this._longPlayWarned = true;
+        showConfirm(
+          '🕐 3時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？'
+        ).then((ok) => {
+          if (ok) {
+            this.stopBattleSyncLoop();
+            this.showEndScreen();
+          }
+          // 「続ける」を選んでも以後はダイアログを出さない（_longPlayWarned = true のまま）
+        });
+      }
+    }, 1000);
   }
 
   stopPlayTimer() {
@@ -1866,6 +1911,13 @@ class OsanpoBingo {
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
+    // バトルモード退出時はサーバー側のルームデータを削除
+    // （ログ蓄積防止 & 合言葉の再利用を可能にする）
+    const roomCodeToDelete = (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo')
+      ? this.roomCode : null;
+    if (roomCodeToDelete) {
+      this.deleteRoomData(roomCodeToDelete).catch(() => {});
+    }
     try {
       localStorage.removeItem(this._storageKey);
       // 旧フォーマット(固定キー)の残存データも念のため削除
@@ -2048,7 +2100,8 @@ class OsanpoBingo {
     };
     
     if (roomCodeInput) {
-      roomCodeInput.value = (this.roomCode && this.roomCode !== 'solo') ? this.roomCode : this.generateRoomCode();
+      // 再設定時は既存の合言葉を復元、新規は空白（ユーザーが手入力 or 生成ボタンで設定）
+      roomCodeInput.value = (this.roomCode && this.roomCode !== 'solo') ? this.roomCode : '';
     }
     if (difficultySelect) difficultySelect.value = this.difficulty || 'normal';
     
@@ -2170,7 +2223,7 @@ class OsanpoBingo {
       modeCreateBtn.addEventListener('click', () => {
         hideAll();
         if (createGameStep) createGameStep.style.display = 'block';
-        if (roomCodeInput && !roomCodeInput.value) roomCodeInput.value = this.generateRoomCode();
+        // 合言葉は空白のままにする（ユーザーが手入力 or 生成ボタンで設定する）
       });
     }
     
@@ -2221,23 +2274,40 @@ class OsanpoBingo {
         if (!sRes.ok) throw new Error('fetch failed');
         const sRows = await sRes.json();
         if (sRows.length > 0) {
-          joinStatusEl.textContent = 'ルームが見つかりました';
-          joinStatusEl.className = 'join-room-status status-found';
-          // 設定サマリー表示
-          if (joinInfoEl && joinInfoContent) {
-            const diffLabel = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', oni: 'おに' };
-            let settingsChips = '';
-            try {
-              const rawOwner = sRows[0].owner_user_id || '';
-              const s = JSON.parse(rawOwner.startsWith('__settings__:') ? rawOwner.slice('__settings__:'.length) : rawOwner);
-              const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
-              const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
-              settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
-            } catch (_) {}
-            joinInfoContent.innerHTML =
-              `<span class="join-room-info-chip">バトルモード</span>` +
-              settingsChips;
-            joinInfoEl.style.display = 'block';
+          // 参加人数チェック（最大3人）
+          let memberCount = 0;
+          try {
+            const tmpRoomCode = this.roomCode;
+            this.roomCode = code;
+            const colors = await this._fetchRoomPlayerColors();
+            this.roomCode = tmpRoomCode;
+            memberCount = colors.size;
+          } catch {}
+
+          if (memberCount >= MAX_BATTLE_PLAYERS) {
+            joinStatusEl.textContent = `このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません`;
+            joinStatusEl.className = 'join-room-status status-full';
+            if (joinInfoEl) joinInfoEl.style.display = 'none';
+          } else {
+            const remaining = MAX_BATTLE_PLAYERS - memberCount;
+            joinStatusEl.textContent = `ルームが見つかりました（残り${remaining}人参加可）`;
+            joinStatusEl.className = 'join-room-status status-found';
+            // 設定サマリー表示
+            if (joinInfoEl && joinInfoContent) {
+              const diffLabel = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', oni: 'おに' };
+              let settingsChips = '';
+              try {
+                const rawOwner = sRows[0].owner_user_id || '';
+                const s = JSON.parse(rawOwner.startsWith('__settings__:') ? rawOwner.slice('__settings__:'.length) : rawOwner);
+                const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
+                const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
+                settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
+              } catch (_) {}
+              joinInfoContent.innerHTML =
+                `<span class="join-room-info-chip">バトルモード</span>` +
+                settingsChips;
+              joinInfoEl.style.display = 'block';
+            }
           }
         } else {
           joinStatusEl.textContent = 'このコードのルームはまだ誰も使っていません';
@@ -2367,7 +2437,11 @@ class OsanpoBingo {
         const difficultySelect = document.getElementById('difficultySelect');
         const modal = document.getElementById('roomCodeModal');
 
-        const roomCode = roomCodeInput?.value.trim() || this.generateRoomCode();
+        const roomCode = roomCodeInput?.value.trim();
+        if (!roomCode) {
+          showAlert('合言葉を入力してください。\n自動生成する場合は「ランダム生成」ボタンを押してください。');
+          return;
+        }
         const difficulty = difficultySelect?.value || 'normal';
         const playerName = document.getElementById('playerNameCreateInput')?.value.trim() || '';
         // ゲーム作成者は常にblue（最初の参加者）
@@ -2454,9 +2528,14 @@ class OsanpoBingo {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
         const joinPlayerName = document.getElementById('playerNameJoinInput')?.value.trim() || '';
-        // 参加者はルームの空き色を取得してから参加
+        // 参加者はルームの空き色を取得してから参加（最大3人制限チェック含む）
         this.roomCode = roomCode; // pickAvailableColorで使うため先にセット
         const joinColor = await this.pickAvailableColor();
+        if (joinColor === null) {
+          showAlert(`このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません。`);
+          this.roomCode = '';
+          return;
+        }
         this.battlePlayerId = makeBattlePlayerId(joinPlayerName, joinColor, getBattleRandomId());
         this.battleBingoOwners = {};
         this.lastClaimedCellIndex = null;
@@ -2633,37 +2712,37 @@ class OsanpoBingo {
   
   // 意味のある合言葉を生成（3-5文字）
   generateRoomCode() {
-    // 3-5文字の単語リスト
+    // ひらがな単語リスト（3〜5文字）
     const words = [
-      // 色（3文字）
-      'きいろ', 'みどり', 'ちゃいろ', 'むらさき', 'ももいろ',
-      // 自然（3-4文字）
-      'そら', 'うみ', 'やま', 'かわ', 'もり', 'いけ', 'たに', 'はやし',
-      // 植物（3-5文字）
-      'はな', 'さくら', 'ばら', 'すみれ', 'ひまわり', 'こすもす', 'たんぽぽ',
-      // 動物（3-5文字）
-      'ねこ', 'いぬ', 'とり', 'さかな', 'うさぎ', 'くま', 'きつね', 'りす',
-      // 天体（3-4文字）
-      'ほし', 'つき', 'にじ', 'ひかり', 'たいよう',
-      // 季節・時間（3-4文字）
-      'はる', 'なつ', 'あき', 'ふゆ', 'あさひ', 'ゆうひ', 'よぞら',
-      // 天気（3-4文字）
-      'はれ', 'くもり', 'あめ', 'ゆき', 'かぜ', 'つゆ', 'きり',
-      // 場所（3-4文字）
-      'みち', 'はし', 'にわ', 'こうえん', 'ひろば', 'みなと',
-      // 感情・様子（3-5文字）
-      'えがお', 'げんき', 'わくわく', 'どきどき', 'にこにこ', 'きらきら',
-      // その他（3-4文字）
-      'ゆめ', 'うた', 'おと', 'いろ', 'かげ', 'みず', 'ひかり', 'おもいで'
+      // 色
+      'あお', 'あか', 'きいろ', 'みどり', 'ちゃいろ', 'むらさき', 'ももいろ', 'しろ', 'くろ', 'だいだい',
+      // 自然
+      'そら', 'うみ', 'やま', 'かわ', 'もり', 'いけ', 'たに', 'はやし', 'しま', 'たき',
+      // 植物
+      'はな', 'さくら', 'ばら', 'すみれ', 'ひまわり', 'たんぽぽ', 'もみじ', 'かえで', 'まつ', 'たけ',
+      // 動物
+      'ねこ', 'いぬ', 'とり', 'さかな', 'うさぎ', 'くま', 'きつね', 'りす', 'かえる', 'ちょう',
+      // 天体・天気
+      'ほし', 'つき', 'にじ', 'ひかり', 'たいよう', 'はれ', 'くもり', 'かぜ', 'ゆき', 'きり',
+      // 季節・時間
+      'はる', 'なつ', 'あき', 'ふゆ', 'あさひ', 'ゆうひ', 'よぞら', 'あした', 'きょう',
+      // 場所
+      'みち', 'にわ', 'こうえん', 'ひろば', 'みなと', 'えき', 'まち', 'むら', 'さと',
+      // 感情・様子
+      'えがお', 'げんき', 'わくわく', 'どきどき', 'にこにこ', 'きらきら', 'のんびり', 'ほんわか',
+      // お散歩関連
+      'さんぽ', 'あるく', 'みつける', 'はっけん', 'たのしい', 'ふしぎ', 'きれい',
     ];
-    
-    // 3文字以上のものだけをフィルタ
-    const validWords = words.filter(word => word.length >= 3);
-    
-    // ランダムに1つ選ぶ
-    const word = validWords[Math.floor(Math.random() * validWords.length)];
-    
-    return word;
+
+    // 3〜5文字の単語のみ使用
+    const validWords = words.filter(w => w.length >= 3 && w.length <= 5);
+
+    // ランダムに1語選択し、残り文字数を数字で埋めて合計8文字にする
+    const word  = validWords[Math.floor(Math.random() * validWords.length)];
+    const digitCount = 8 - word.length;  // 3〜5桁
+    const digits = Array.from({ length: digitCount }, () => Math.floor(Math.random() * 10)).join('');
+
+    return word + digits;
   }
   
   // マス詳細モーダルを表示
@@ -3483,34 +3562,44 @@ class OsanpoBingo {
     return null;
   }
 
-  // ルーム内で未使用のプレイヤー色を取得
+  /** ルーム内の参加済みプレイヤー色セットを取得するユーティリティ */
+  async _fetchRoomPlayerColors() {
+    const { url, key } = this.battleBackend;
+    const res = await fetch(
+      `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&select=cell_index,owner_user_id&limit=200`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+    );
+    if (!res.ok) throw new Error('fetch failed');
+    const rows = await res.json();
+    const takenColors = new Set();
+    (rows || []).forEach(r => {
+      const id = r?.owner_user_id || '';
+      if (!id) return;
+      if (id.startsWith('__settings__:')) {
+        try {
+          const s = JSON.parse(id.slice('__settings__:'.length));
+          if (s.creatorId) takenColors.add(parseOwnerColor(s.creatorId));
+        } catch {}
+      } else {
+        takenColors.add(parseOwnerColor(id));
+      }
+    });
+    return takenColors;
+  }
+
+  /**
+   * ルーム内で未使用のプレイヤー色を取得する。
+   * 最大参加人数（MAX_BATTLE_PLAYERS = 3）を超えている場合は null を返す。
+   */
   async pickAvailableColor() {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return PLAYER_COLORS[0];
     }
     try {
-      const { url, key } = this.battleBackend;
-      const res = await fetch(
-        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&select=cell_index,owner_user_id&limit=200`,
-        { headers: { apikey: key, Authorization: `Bearer ${key}` } }
-      );
-      if (!res.ok) return PLAYER_COLORS[0];
-      const rows = await res.json();
-      const takenColors = new Set();
-      (rows || []).forEach(r => {
-        const id = r?.owner_user_id || '';
-        if (!id) return;
-        if (id.startsWith('__settings__:')) {
-          // 設定レコードからクリエイターIDの色を取得
-          try {
-            const s = JSON.parse(id.slice('__settings__:'.length));
-            if (s.creatorId) takenColors.add(parseOwnerColor(s.creatorId));
-          } catch {}
-        } else {
-          takenColors.add(parseOwnerColor(id));
-        }
-      });
-      return PLAYER_COLORS.find(c => !takenColors.has(c)) || PLAYER_COLORS[0];
+      const takenColors = await this._fetchRoomPlayerColors();
+      // 最大3人制限チェック（作成者含む）
+      if (takenColors.size >= MAX_BATTLE_PLAYERS) return null;
+      return PLAYER_COLORS.find(c => !takenColors.has(c)) || null;
     } catch {
       return PLAYER_COLORS[0];
     }
