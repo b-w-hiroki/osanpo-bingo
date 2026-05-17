@@ -181,17 +181,22 @@ h1 {
   flex: 0 0 auto;
 }
 
+/* ボード上部ヘッダー: ？ボタン + 将来の見出し用レイアウト */
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 8px 4px;
+  min-height: 40px;
+}
+
 /* ボードラッパー */
 .board-wrap {
   display: block;
 }
 
-/* 遊び方（？）ボタン: 画面右上に固定 */
+/* 遊び方（？）ボタン: ボード上部ヘッダー内に配置 */
 .help-btn {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 200;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -207,6 +212,7 @@ h1 {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   line-height: 1;
   padding: 0;
+  flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s, box-shadow 0.15s;
 }
@@ -1574,13 +1580,15 @@ h1 {
 
 /* 写真付きセル：上に写真・下にテキスト（アップロード前と同じ並び） */
 .bingo-cell.has-photo {
-  justify-content: flex-end;
+  justify-content: flex-start;
+  padding-bottom: 2px;
 }
 
+/* 写真エリア: テキスト量に関わらず固定比率（セル高さの約65%） */
 .bingo-cell.has-photo .cell-photo-wrap {
-  flex: 1;
-  min-height: 0;
+  flex: none;
   width: 100%;
+  height: 65%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1598,8 +1606,14 @@ h1 {
   transform: translateZ(0); /* GPU合成でiOSのレンダリング品質を向上 */
 }
 
+/* テキスト: 残りスペースを使用（overflow は bingo-cell の overflow:hidden で隠れる） */
 .bingo-cell.has-photo .cell-text {
-  flex-shrink: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  line-height: 1.2;
   color: inherit;
 }
 

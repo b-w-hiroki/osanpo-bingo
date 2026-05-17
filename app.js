@@ -836,7 +836,7 @@ class OsanpoBingo {
 
   // 戻り値: 'claimed'=新規取得成功 / 'self'=自分が既に所持（冪等） / 'taken'=他人が先取り
   // photoData: base64 data URL（Supabase RLS がUPDATEを許可しないためINSERT時にまとめて送信）
-  async claimBattleCellOnServer(index, photoData = null) {
+  async claimBattleCellOnServer(index) {
     if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return 'claimed';
     }
@@ -845,13 +845,12 @@ class OsanpoBingo {
     const { url, key } = this.battleBackend;
 
     // POST（先着取得試行: room_code + cell_index の UNIQUE 制約で早い者勝ち）
-    // photo_data をINSERT時に含めることで、UPDATE権限なしでも写真を保存できる
+    // photo_data はサイズが大きいため別リクエスト(uploadPhotoCellOnServer)で送る
     const postBody = {
       room_code: this.roomCode,
       cell_index: index,
       owner_user_id: this.battlePlayerId
     };
-    if (photoData) postBody.photo_data = photoData;
     const postRes = await fetch(`${url}/rest/v1/${this.battleTable}`, {
       method: 'POST',
       headers: {
@@ -957,8 +956,9 @@ class OsanpoBingo {
       if (isInBingoLine) {
         cell.classList.add('bingo');
       }
-      // リーチラインの「残り1マス（未マーク）」のみ点滅
-      const isUnclaimedReach = !isInBingoLine && !this.isCellClaimed(index) &&
+      // リーチラインの「残り1マス（誰にも取られていないマス）」のみ点滅
+      // バトルでは相手取得済みも含めて isAnyCellClaimed でチェックする
+      const isUnclaimedReach = !isInBingoLine && !this.isAnyCellClaimed(index) &&
         this.reachLines.some(line => line.includes(index));
       if (isUnclaimedReach) {
         cell.classList.add('reach');
@@ -1030,7 +1030,8 @@ class OsanpoBingo {
           ? ownerId === this.battlePlayerId
           : this.markedCells.has(index)
       );
-      const isUnclaimedReach = !isInBingoLine && !this.isCellClaimed(index) &&
+      // バトルでは相手取得済みも含めて isAnyCellClaimed でチェックする
+      const isUnclaimedReach = !isInBingoLine && !this.isAnyCellClaimed(index) &&
         this.reachLines.some(line => line.includes(index));
 
       // 写真DOMの同期：this.photos[index] と DOM の状態が乖離していたら修正
@@ -3843,17 +3844,11 @@ class OsanpoBingo {
         this.closeCellModal();
         return;
       }
-      // Supabase RLS はINSERTのみ許可（UPDATEは不可）のため、
-      // 写真を先に圧縮してINSERT本体に含める。これにより1リクエストでphoto_dataを保存。
-      let photoDataForClaim = null;
+      // Step1: マスの先着取得（写真なし・小サイズのINSERT）
+      // photo_data は別途 PATCH で送るため、ここではclaim本体のみ。
+      // INSERTを軽量に保つことでサイズ制限エラーを防ぎ、クレームの確実性を高める。
       try {
-        const compressed = await this.compressToBase64(claimBlob, 640, 0.75);
-        if (compressed && compressed !== 'data:,') photoDataForClaim = compressed;
-      } catch (e) {
-        console.warn('photo compression before claim failed:', e);
-      }
-      try {
-        const claimResult = await this.claimBattleCellOnServer(claimIndex, photoDataForClaim);
+        const claimResult = await this.claimBattleCellOnServer(claimIndex);
         if (claimResult === 'taken') {
           showAlert('このマスはすでに他の人が取得していました。');
           this.closeCellModal();
@@ -3864,6 +3859,7 @@ class OsanpoBingo {
         // サーバー通信エラー → ブロックせずローカル保存を続行。シンクループで後から同期。
         console.warn('battle claim server error, proceeding locally:', e);
       }
+      // Step2: クレーム成功とみなしてローカル状態を即時反映
       this.battleCellOwners[claimIndex] = this.battlePlayerId;
       this.lastClaimedCellIndex = claimIndex;
     }
@@ -3907,6 +3903,14 @@ class OsanpoBingo {
     // バトルモードでは battleCellOwners が唯一のソースのため追加しない
     if (this.gameType !== 'battle') {
       this.markedCells.add(idx);
+    }
+
+    // バトルモード: Step3 として写真を Supabase にアップロード（ノンブロッキング）
+    // claimBattleCellOnServer でINSERTが確定した後に PATCH で photo_data を付与する。
+    if (this.gameType === 'battle' && this.battleBackend.enabled && this.roomCode && this.roomCode !== 'solo') {
+      this.compressToBase64(blob, 640, 0.75).then(base64 => {
+        this.uploadPhotoCellOnServer(idx, base64);
+      }).catch(() => {}); // 失敗は無視（ローカル写真はIndexedDBに保存済み）
     }
 
     // 再レンダリング
@@ -4146,6 +4150,36 @@ class OsanpoBingo {
   async claimBingoLineOnServer(lineIndex) {
     // Supabase の CHECK 制約 (cell_index 0-24) のためビンゴライン記録は行わない。
     // ビンゴ判定は recomputeBattleBingoOwners() で battleCellOwners から毎回再計算する。
+  }
+
+  /**
+   * バトルモード: クレーム済みセルに photo_data を追加アップロードする。
+   * claimBattleCellOnServer（INSERT）とは別リクエストにすることで、
+   * 大容量 base64 がINSERT本体のサイズ制限に引っかかる問題を回避する。
+   * UPDATE RLS が付与されている前提で PATCH を使用する。
+   */
+  async uploadPhotoCellOnServer(index, photoBase64) {
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
+    if (!photoBase64 || photoBase64 === 'data:,') return;
+    const { url, key } = this.battleBackend;
+    const encodedRoom = encodeURIComponent(this.roomCode);
+    try {
+      await fetch(
+        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodedRoom}&cell_index=eq.${index}&owner_user_id=eq.${encodeURIComponent(this.battlePlayerId)}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: key,
+            Authorization: `Bearer ${key}`,
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({ photo_data: photoBase64 }),
+        }
+      );
+    } catch (e) {
+      console.warn('uploadPhotoCellOnServer failed (non-critical):', e);
+    }
   }
 
   // ========== バトル: 相手マス写真表示 ==========
