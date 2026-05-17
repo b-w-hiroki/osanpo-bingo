@@ -393,10 +393,13 @@
     
     <!-- ビンゴボード -->
     <main class="main">
-      <div id="bingoBoard" class="bingo-board">
-        <!-- JavaScriptで動的に生成 -->
+      <div class="board-wrap">
+        <div id="bingoBoard" class="bingo-board">
+          <!-- JavaScriptで動的に生成 -->
+        </div>
+        <button type="button" id="howToPlayBtn" class="help-btn" aria-label="遊び方を見る">？</button>
       </div>
-      
+
       <!-- ビンゴメッセージ -->
       <div id="bingoMessage" class="bingo-message" style="display: none;">
         🎉 BINGO！
@@ -632,48 +635,54 @@
     </div>
   </div>
 
-  <!-- バトルモード初回チュートリアルモーダル -->
+  <!-- 遊び方モーダル（バトル初回チュートリアル兼用） -->
   <div id="battleTutorialModal" class="dialog-modal battle-tutorial-modal" style="display: none;">
     <div class="dialog-modal-backdrop"></div>
     <div class="battle-tutorial-content">
-      <!-- スライド 1 -->
-      <div class="tutorial-slide" data-slide="1">
+      <!-- ===== 通常モード用スライド（data-mode="normal"） ===== -->
+      <div class="tutorial-slide" data-mode="normal">
+        <div class="tutorial-slide-icon">🚶</div>
+        <h3 class="tutorial-slide-title">おさんぽビンゴの遊び方</h3>
+        <p class="tutorial-slide-body">散歩しながらお題を探そう！<br>見つけたらマスをタップして<br>写真を撮ってマーク完了！</p>
+      </div>
+      <div class="tutorial-slide" data-mode="normal" style="display:none">
+        <div class="tutorial-slide-icon">📷</div>
+        <h3 class="tutorial-slide-title">写真を撮ってマーク</h3>
+        <p class="tutorial-slide-body">マスをタップするとカメラが起動。<br>お題のものを撮影すると<br>マスがマーク済みになります！</p>
+      </div>
+      <div class="tutorial-slide" data-mode="normal" style="display:none">
+        <div class="tutorial-slide-icon">🏆</div>
+        <h3 class="tutorial-slide-title">BINGOを目指せ！</h3>
+        <p class="tutorial-slide-body">縦・横・斜めのラインが揃うとBINGO！<br>「終わる」ボタンで<br>結果を確認・シェアできます。</p>
+      </div>
+      <!-- ===== バトルモード用スライド（data-mode="battle"） ===== -->
+      <div class="tutorial-slide" data-mode="battle" style="display:none">
         <div class="tutorial-slide-icon">⚔️</div>
         <h3 class="tutorial-slide-title">バトルモードへようこそ！</h3>
         <p class="tutorial-slide-body">同じお題のビンゴボードで<br>友達と陣取りバトル！<br>先に多くのBINGOを獲れた人が勝ち！</p>
       </div>
-      <!-- スライド 2 -->
-      <div class="tutorial-slide" data-slide="2" style="display:none">
+      <div class="tutorial-slide" data-mode="battle" style="display:none">
         <div class="tutorial-slide-icon">📢</div>
         <h3 class="tutorial-slide-title">合言葉を共有しよう</h3>
         <p class="tutorial-slide-body">ゲームを作ると<strong>合言葉</strong>が生成されます。<br>友達に合言葉を教えて<br>同じルームに参加してもらおう！</p>
       </div>
-      <!-- スライド 3 -->
-      <div class="tutorial-slide" data-slide="3" style="display:none">
+      <div class="tutorial-slide" data-mode="battle" style="display:none">
         <div class="tutorial-slide-icon">📷</div>
         <h3 class="tutorial-slide-title">見つけたら写真を撮ろう</h3>
         <p class="tutorial-slide-body">お題を見つけたらマスをタップ。<br>写真を撮ってマークすると<br><strong>自分の色</strong>でマスが染まります！</p>
       </div>
-      <!-- スライド 4 -->
-      <div class="tutorial-slide" data-slide="4" style="display:none">
+      <div class="tutorial-slide" data-mode="battle" style="display:none">
         <div class="tutorial-slide-icon">🏆</div>
         <h3 class="tutorial-slide-title">BINGOの判定</h3>
         <p class="tutorial-slide-body">縦・横・斜めのラインで<br>自分のマスが<strong>一番多い</strong>プレイヤーが<br>そのラインのBINGOを獲得！</p>
       </div>
-      <!-- スライド 5 -->
-      <div class="tutorial-slide" data-slide="5" style="display:none">
+      <div class="tutorial-slide" data-mode="battle" style="display:none">
         <div class="tutorial-slide-icon">💾</div>
         <h3 class="tutorial-slide-title">途中でやめるときは</h3>
         <p class="tutorial-slide-body">作成者は「一時保存」ボタンで中断できます。<br>同じ合言葉で再入室すれば<br>続きから再開できます！</p>
       </div>
-      <!-- ドット＋ボタン -->
-      <div class="tutorial-dots">
-        <span class="tutorial-dot active" data-idx="0"></span>
-        <span class="tutorial-dot" data-idx="1"></span>
-        <span class="tutorial-dot" data-idx="2"></span>
-        <span class="tutorial-dot" data-idx="3"></span>
-        <span class="tutorial-dot" data-idx="4"></span>
-      </div>
+      <!-- ドット＋ボタン（JS で枚数に合わせて動的更新） -->
+      <div class="tutorial-dots" id="tutorialDots"></div>
       <div class="tutorial-actions">
         <button type="button" id="tutorialPrevBtn" class="btn btn-secondary dialog-btn" style="visibility:hidden">← 前へ</button>
         <button type="button" id="tutorialNextBtn" class="btn btn-primary dialog-btn">次へ →</button>

@@ -244,6 +244,13 @@ class OsanpoBingo {
         this.checkBingo();
         this.updateStats();
         if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
+          // pauseAndGoToTop() 後に続きから再入室した場合、_battlePaused=true が
+          // localStorage から復元されているとすべての sync がブロックされる。
+          // 「続きから」を選んだ = ゲームを再開する意思があるのでフラグを解除する。
+          this._battlePaused = false;
+          this.saveToStorage(); // リセットを即座に永続化
+          // 再起動後も相手のリストに表示されるようプレゼンスを再登録（冪等）
+          this.registerPlayerPresence();
           // 初回 sync を await してから描画済み状態を上書き（stale flash 防止）
           await this.syncBattleOwnersFromServer();
           this.startBattleSyncLoop(/* skipInitialSync= */ true);
@@ -278,7 +285,13 @@ class OsanpoBingo {
     if (newGameBtn) {
       newGameBtn.addEventListener('click', () => this.newGame());
     }
-    
+
+    // 遊び方（？）ボタン
+    const howToPlayBtn = document.getElementById('howToPlayBtn');
+    if (howToPlayBtn) {
+      howToPlayBtn.addEventListener('click', () => this.showHowToPlay());
+    }
+
     // 終わるボタン
     const endGameBtn = document.getElementById('endGameBtn');
     if (endGameBtn) {
@@ -605,6 +618,76 @@ class OsanpoBingo {
   }
 
   /**
+   * 遊び方モーダルを開く（常に表示）。
+   * mode: 'battle' | 'normal' — 表示するスライドセットを切り替える。
+   * closeCb: モーダルを閉じたときのコールバック（省略可）。
+   */
+  _openTutorialModal(mode, closeCb) {
+    const modal   = document.getElementById('battleTutorialModal');
+    const dotsEl  = document.getElementById('tutorialDots');
+    const prevBtn = document.getElementById('tutorialPrevBtn');
+    const nextBtn = document.getElementById('tutorialNextBtn');
+    if (!modal) { closeCb?.(); return; }
+
+    // モード一致スライドだけを有効スライドとして収集
+    const allSlides = Array.from(modal.querySelectorAll('.tutorial-slide'));
+    const slides = allSlides.filter(s => {
+      const m = s.dataset.mode;
+      return !m || m === mode;
+    });
+    if (slides.length === 0) { closeCb?.(); return; }
+
+    // ドットを動的生成
+    if (dotsEl) {
+      dotsEl.innerHTML = slides.map((_, i) =>
+        `<span class="tutorial-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></span>`
+      ).join('');
+    }
+    const dots = dotsEl ? Array.from(dotsEl.querySelectorAll('.tutorial-dot')) : [];
+
+    let current = 0;
+    const total = slides.length;
+
+    const goTo = (idx) => {
+      slides[current].style.display = 'none';
+      if (dots[current]) dots[current].classList.remove('active');
+      current = idx;
+      slides[current].style.display = '';
+      if (dots[current]) dots[current].classList.add('active');
+      prevBtn.style.visibility = current === 0 ? 'hidden' : '';
+      nextBtn.textContent = current === total - 1 ? '閉じる ✓' : '次へ →';
+    };
+
+    dots.forEach((dot, i) => { dot.onclick = () => goTo(i); });
+    prevBtn.onclick = () => { if (current > 0) goTo(current - 1); };
+    nextBtn.onclick = () => {
+      if (current < total - 1) {
+        goTo(current + 1);
+      } else {
+        close();
+      }
+    };
+    // 背景タップで閉じる
+    const backdrop = modal.querySelector('.dialog-modal-backdrop');
+    if (backdrop) backdrop.onclick = () => close();
+
+    const close = () => {
+      modal.style.display = 'none';
+      prevBtn.onclick = null;
+      nextBtn.onclick = null;
+      if (backdrop) backdrop.onclick = null;
+      closeCb?.();
+    };
+
+    // 全スライドを非表示にしてから有効スライドを表示
+    allSlides.forEach(s => { s.style.display = 'none'; });
+    slides[0].style.display = '';
+    prevBtn.style.visibility = 'hidden';
+    nextBtn.textContent = total === 1 ? '閉じる ✓' : '次へ →';
+    modal.style.display = 'flex';
+  }
+
+  /**
    * バトルモード初回チュートリアルを表示する。
    * localStorage に完了フラグがある場合はスキップ。
    */
@@ -612,50 +695,19 @@ class OsanpoBingo {
     return new Promise((resolve) => {
       const DONE_KEY = 'osanpo_battle_tutorial_done';
       if (localStorage.getItem(DONE_KEY)) { resolve(); return; }
-
-      const modal     = document.getElementById('battleTutorialModal');
-      const slides    = modal ? modal.querySelectorAll('.tutorial-slide') : [];
-      const dots      = modal ? modal.querySelectorAll('.tutorial-dot')   : [];
-      const prevBtn   = document.getElementById('tutorialPrevBtn');
-      const nextBtn   = document.getElementById('tutorialNextBtn');
-      if (!modal || slides.length === 0) { resolve(); return; }
-
-      let current = 0;
-      const total = slides.length;
-
-      const goTo = (idx) => {
-        slides[current].style.display = 'none';
-        dots[current].classList.remove('active');
-        current = idx;
-        slides[current].style.display = '';
-        dots[current].classList.add('active');
-        prevBtn.style.visibility = current === 0 ? 'hidden' : '';
-        nextBtn.textContent = current === total - 1 ? 'はじめる ✓' : '次へ →';
-      };
-
-      dots.forEach((dot, i) => {
-        dot.onclick = () => goTo(i);
+      this._openTutorialModal('battle', () => {
+        localStorage.setItem(DONE_KEY, '1');
+        resolve();
       });
-      prevBtn.onclick = () => { if (current > 0) goTo(current - 1); };
-      nextBtn.onclick = () => {
-        if (current < total - 1) {
-          goTo(current + 1);
-        } else {
-          modal.style.display = 'none';
-          prevBtn.onclick = null;
-          nextBtn.onclick = null;
-          localStorage.setItem(DONE_KEY, '1');
-          resolve();
-        }
-      };
-
-      // 初期化
-      slides.forEach((s, i) => { s.style.display = i === 0 ? '' : 'none'; });
-      dots.forEach((d, i)   => { d.classList.toggle('active', i === 0); });
-      prevBtn.style.visibility = 'hidden';
-      nextBtn.textContent = '次へ →';
-      modal.style.display = 'flex';
     });
+  }
+
+  /**
+   * ？ボタンからの遊び方表示（常に開く、gameType に応じてスライドを切り替え）。
+   */
+  showHowToPlay() {
+    const mode = this.gameType === 'battle' ? 'battle' : 'normal';
+    this._openTutorialModal(mode);
   }
 
   /**
