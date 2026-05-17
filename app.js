@@ -453,10 +453,9 @@ class OsanpoBingo {
       return;
     }
     try {
-      const endpointUrl = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
-      endpointUrl.searchParams.set('select', 'cell_index,owner_user_id');
-      endpointUrl.searchParams.set('room_code', `eq.${this.roomCode}`);
-      const res = await fetch(endpointUrl.toString(), {
+      const encodedRoom = encodeURIComponent(this.roomCode);
+      const syncUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=cell_index,owner_user_id&room_code=eq.${encodedRoom}`;
+      const res = await fetch(syncUrl, {
         headers: {
           apikey: this.battleBackend.key,
           Authorization: `Bearer ${this.battleBackend.key}`
