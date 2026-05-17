@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osanpo-bingo-v135';
+const CACHE_NAME = 'osanpo-bingo-v136';
 const urlsToCache = [
   'index.html',
   'game.html',
@@ -40,6 +40,10 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   // ナビゲーション（ページ遷移）はSWを通さずブラウザに任せる（リンクエラー回避）
   if (event.request.mode === 'navigate') return;
+  // 外部ドメイン（Supabase API等）はキャッシュせずネットワークに直接パス
+  // APIレスポンスをキャッシュすると古いデータが返り続けるため
+  const reqUrl = new URL(event.request.url);
+  if (reqUrl.origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
