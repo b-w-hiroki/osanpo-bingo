@@ -244,6 +244,13 @@ class OsanpoBingo {
         this.checkBingo();
         this.updateStats();
         if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
+          // pauseAndGoToTop() 後に続きから再入室した場合、_battlePaused=true が
+          // localStorage から復元されているとすべての sync がブロックされる。
+          // 「続きから」を選んだ = ゲームを再開する意思があるのでフラグを解除する。
+          this._battlePaused = false;
+          this.saveToStorage(); // リセットを即座に永続化
+          // 再起動後も相手のリストに表示されるようプレゼンスを再登録（冪等）
+          this.registerPlayerPresence();
           // 初回 sync を await してから描画済み状態を上書き（stale flash 防止）
           await this.syncBattleOwnersFromServer();
           this.startBattleSyncLoop(/* skipInitialSync= */ true);
