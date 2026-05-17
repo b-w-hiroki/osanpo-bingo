@@ -138,7 +138,7 @@ class OsanpoBingo {
     this.playMode = 'photo';      // 'photo' | 'markOnly'
     this.gameStartTime = null;    // ゲーム開始時刻（プレイ時間表示用）
     this.playTimerInterval = null; // プレイ時間更新タイマー
-    this._longPlayWarned = false;  // 3時間超えの確認モーダルを出したか
+    this._nextLongPlayCheckMs = null; // 長時間プレイ確認の次回チェック時刻（null=未初期化）
     this.gameType = 'normal';     // 'normal' | 'battle'
     this.landmarkMode = false;    // ランドマークモード ON/OFF
     this.landmarkRegion = 'all'; // 観光地エリア（'all' or 都道府県名）
@@ -1367,25 +1367,51 @@ class OsanpoBingo {
 
   startPlayTimer() {
     if (this.playTimerInterval) clearInterval(this.playTimerInterval);
-    this._longPlayWarned = false;
-    const LONG_PLAY_MS = 3 * 60 * 60 * 1000; // 3時間
+    this._nextLongPlayCheckMs = null; // null = まだ初期化していない（3時間後に初回チェック）
+    const FIRST_WARNING_MS    = 3  * 60 * 60 * 1000; // 最初の警告: 3時間後
+    const RECHECK_INTERVAL_MS = 1  * 60 * 60 * 1000; // 「続ける」後: 1時間ごと
+    const AUTO_DISCARD_MS     = 24 * 60 * 60 * 1000; // 24時間放置で自動破棄
+
     this.playTimerInterval = setInterval(() => {
       this.updateStats();
-      // 3時間超えチェック（初回のみ）
-      if (
-        !this._longPlayWarned &&
-        this.gameStartTime &&
-        Date.now() - this.gameStartTime >= LONG_PLAY_MS
-      ) {
-        this._longPlayWarned = true;
+      if (!this.gameStartTime) return;
+
+      const now     = Date.now();
+      const elapsed = now - this.gameStartTime;
+
+      // ① 24時間超えで警告なしに自動破棄
+      if (elapsed >= AUTO_DISCARD_MS) {
+        clearInterval(this.playTimerInterval);
+        this.playTimerInterval = null;
+        showAlert('24時間が経過したため、ゲームデータを自動的にリセットします。\n大変お疲れさまでした！');
+        this.resetAndGoToTop();
+        return;
+      }
+
+      // ② 3時間以降、_nextLongPlayCheckMs に達したらダイアログ表示
+      if (elapsed < FIRST_WARNING_MS) return; // まだ3時間未満
+
+      // 初回到達時にチェック時刻を初期化
+      if (this._nextLongPlayCheckMs === null) {
+        this._nextLongPlayCheckMs = this.gameStartTime + FIRST_WARNING_MS;
+      }
+
+      // ダイアログ表示中（Infinity）はスキップ
+      if (this._nextLongPlayCheckMs === Infinity) return;
+
+      if (now >= this._nextLongPlayCheckMs) {
+        this._nextLongPlayCheckMs = Infinity; // 表示中は再トリガーしない
+        const h = Math.floor(elapsed / 3_600_000);
         showConfirm(
-          '🕐 3時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？'
+          `🕐 ${h}時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？`
         ).then((ok) => {
           if (ok) {
             this.stopBattleSyncLoop();
             this.showEndScreen();
+          } else {
+            // 「続ける」→ 1時間後に再確認
+            this._nextLongPlayCheckMs = Date.now() + RECHECK_INTERVAL_MS;
           }
-          // 「続ける」を選んでも以後はダイアログを出さない（_longPlayWarned = true のまま）
         });
       }
     }, 1000);
