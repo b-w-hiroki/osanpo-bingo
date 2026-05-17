@@ -1515,7 +1515,7 @@ class OsanpoBingo {
       const isCreator = parseOwnerColor(this.battlePlayerId) === 'blue';
       const msg = isCreator
         ? '⚠️ ゲームを保存せずに終了しようとしています。\n\nルームデータが削除され、復帰できなくなります。\n本当に終了しますか？\n\n（「一時保存」ボタンを使うと後で再開できます）'
-        : '⚠️ ゲームから退出しようとしています。\n\n退出後は同じルームに再参加できなくなります。\n本当に退出しますか？';
+        : '⚠️ ゲームから退出しようとしています。\n\n退出後も合言葉を再入力すれば同じルームに再参加できます。\n本当に退出しますか？';
       showConfirm(msg).then((ok) => {
         if (ok) this.showResultView();
       });
