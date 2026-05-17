@@ -531,6 +531,11 @@ class OsanpoBingo {
       this.battlePresencePlayers = nextPresence;
       // 差分チェック: owners が変わっていなければ DOM 更新をスキップして点滅を防ぐ
       const changed = presenceChanged || JSON.stringify(nextOwners) !== JSON.stringify(this.battleCellOwners);
+      const ownerCountBefore = Object.keys(this.battleCellOwners).length;
+      const ownerCountAfter = Object.keys(nextOwners).length;
+      if (ownerCountAfter !== ownerCountBefore) {
+        console.log(`[battle] sync: battleCellOwners ${ownerCountBefore} → ${ownerCountAfter}`, nextOwners);
+      }
       this.battleCellOwners = nextOwners;
       // BINGO 所有権をサーバーデータから決定論的に再計算（全端末で一致させる）
       this.battleBingoOwners = this.recomputeBattleBingoOwners();
@@ -1204,8 +1209,10 @@ class OsanpoBingo {
     this.updateStats();
 
     if (newBingoCount > oldBingoCount) {
-      // GA: ビンゴ達成
-      const _gaFilledOnBingo = [...this.markedCells].filter(i => !this.board[i]?.isFree).length;
+      // GA: ビンゴ達成（バトル時は battleCellOwners、スタンダードは markedCells を使用）
+      const _gaFilledOnBingo = this.gameType === 'battle'
+        ? Object.keys(this.battleCellOwners).filter(i => Number(i) !== 12).length
+        : [...this.markedCells].filter(i => !this.board[i]?.isFree).length;
       sendGA('bingo_achieved', {
         bingo_count:  newBingoCount,
         cells_filled: _gaFilledOnBingo,
@@ -1756,7 +1763,9 @@ class OsanpoBingo {
     if (!this.debugBattle || !this.debugPanelEl) return;
     const ownerCount = Object.keys(this.battleCellOwners || {}).length;
     const syncText = this.lastBattleSyncAt ? new Date(this.lastBattleSyncAt).toLocaleTimeString() : '-';
-    this.debugPanelEl.textContent = `debug battle | room=${this.roomCode || '-'} | mode=${this.gameType} | player=${this.battlePlayerId} | owners=${ownerCount} | lastSync=${syncText} | status=${this.lastBattleSyncStatus} | err=${this.lastBattleSyncError || '-'}`;
+    const myMarks = Object.entries(this.battleCellOwners || {}).filter(([i, id]) => Number(i) !== 12 && id === this.battlePlayerId).length;
+    const bingoCount = Object.keys(this.battleBingoOwners || {}).length;
+    this.debugPanelEl.textContent = `debug | room=${this.roomCode || '-'} | player=${this.battlePlayerId} | owners=${ownerCount} | myMarks=${myMarks} | bingos=${bingoCount} | lastSync=${syncText} | status=${this.lastBattleSyncStatus} | err=${this.lastBattleSyncError || '-'}`;
   }
   
   // 終了（結果記録・共有画面を表示）
@@ -3849,6 +3858,7 @@ class OsanpoBingo {
       // INSERTを軽量に保つことでサイズ制限エラーを防ぎ、クレームの確実性を高める。
       try {
         const claimResult = await this.claimBattleCellOnServer(claimIndex);
+        console.log(`[battle] claim cell ${claimIndex} → ${claimResult}`);
         if (claimResult === 'taken') {
           showAlert('このマスはすでに他の人が取得していました。');
           this.closeCellModal();
@@ -3857,11 +3867,12 @@ class OsanpoBingo {
         // 'claimed' / 'self' / 'unknown' → 写真保存処理を続行（unknownはシンクループで後から反映）
       } catch (e) {
         // サーバー通信エラー → ブロックせずローカル保存を続行。シンクループで後から同期。
-        console.warn('battle claim server error, proceeding locally:', e);
+        console.warn('[battle] claim server error, proceeding locally:', e);
       }
       // Step2: クレーム成功とみなしてローカル状態を即時反映
       this.battleCellOwners[claimIndex] = this.battlePlayerId;
       this.lastClaimedCellIndex = claimIndex;
+      console.log(`[battle] battleCellOwners set locally: cell ${claimIndex} → ${this.battlePlayerId}`);
     }
     
     // 振動フィードバック
@@ -4164,7 +4175,7 @@ class OsanpoBingo {
     const { url, key } = this.battleBackend;
     const encodedRoom = encodeURIComponent(this.roomCode);
     try {
-      await fetch(
+      const res = await fetch(
         `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodedRoom}&cell_index=eq.${index}&owner_user_id=eq.${encodeURIComponent(this.battlePlayerId)}`,
         {
           method: 'PATCH',
@@ -4177,6 +4188,9 @@ class OsanpoBingo {
           body: JSON.stringify({ photo_data: photoBase64 }),
         }
       );
+      if (!res.ok) {
+        console.warn(`uploadPhotoCellOnServer HTTP ${res.status} for cell ${index}`);
+      }
     } catch (e) {
       console.warn('uploadPhotoCellOnServer failed (non-critical):', e);
     }
@@ -4297,8 +4311,10 @@ class OsanpoBingo {
     Object.values(this.battleCellOwners).forEach(id => addPlayer(id));
     Object.values(this.battleBingoOwners).forEach(id => { if (id) addPlayer(id); });
 
-    for (const ownerId of Object.values(this.battleCellOwners)) {
-      if (ownerId && playerMap.has(ownerId)) playerMap.get(ownerId).marks++;
+    for (const [idx, ownerId] of Object.entries(this.battleCellOwners)) {
+      if (ownerId && playerMap.has(ownerId) && Number(idx) !== 12) {
+        playerMap.get(ownerId).marks++;
+      }
     }
     for (const ownerId of Object.values(this.battleBingoOwners)) {
       if (ownerId && playerMap.has(ownerId)) playerMap.get(ownerId).bingos++;
