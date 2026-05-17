@@ -247,12 +247,11 @@ class OsanpoBingo {
         this.renderBoard();
         this.checkBingo();
         this.updateStats();
+        // 「続きから」選択 = 再開の意思 → モード共通で _battlePaused をリセット＆永続化。
+        // これをしないと「一時保存」後に続きから選んでもリフレッシュのたびにモーダルが出続ける。
+        this._battlePaused = false;
+        this.saveToStorage();
         if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
-          // pauseAndGoToTop() 後に続きから再入室した場合、_battlePaused=true が
-          // localStorage から復元されているとすべての sync がブロックされる。
-          // 「続きから」を選んだ = ゲームを再開する意思があるのでフラグを解除する。
-          this._battlePaused = false;
-          this.saveToStorage(); // リセットを即座に永続化
           // 再起動後も相手のリストに表示されるようプレゼンスを再登録（冪等）
           this.registerPlayerPresence();
           // 初回 sync を await してから描画済み状態を上書き（stale flash 防止）
@@ -2779,6 +2778,8 @@ class OsanpoBingo {
           landmark_mode:       this.landmarkMode ? 1 : 0,
           custom_topic_count:  customTopics.length,
         });
+        // 前のゲームで _battlePaused=true が残っていると自動再開が効かなくなるためリセット
+        this._battlePaused = false;
         const soloSalt = Date.now().toString();
         this.createBoard('solo', this.difficulty, soloSalt, customTopics);
         if (this.board[12]?.isFree) this.markCell(12);
@@ -2789,6 +2790,7 @@ class OsanpoBingo {
         this.startLocationTracking();
         this.startPlayTimer();
         this.updateStats();
+        this.saveToStorage(); // 開始直後にリフレッシュしても続きから再開できるよう保存
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
       });
