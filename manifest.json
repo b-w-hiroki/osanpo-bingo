@@ -1,6 +1,6 @@
 {
-  "name": "おさんぽビンゴ",
-  "short_name": "おさんぽビンゴ",
+  "name": "おさんぽビンゴバトル",
+  "short_name": "おさんぽビンゴバトル",
   "description": "おさんぽ中に見つけたものをマークしてBINGOを目指そう！",
   "start_url": "./",
   "scope": "./",
