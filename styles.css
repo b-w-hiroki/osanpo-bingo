@@ -181,17 +181,22 @@ h1 {
   flex: 0 0 auto;
 }
 
+/* ボード上部ヘッダー: ？ボタン + 将来の見出し用レイアウト */
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 8px 4px;
+  min-height: 40px;
+}
+
 /* ボードラッパー */
 .board-wrap {
   display: block;
 }
 
-/* 遊び方（？）ボタン: 画面右上に固定 */
+/* 遊び方（？）ボタン: ボード上部ヘッダー内に配置 */
 .help-btn {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 200;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -207,6 +212,7 @@ h1 {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   line-height: 1;
   padding: 0;
+  flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s, box-shadow 0.15s;
 }
