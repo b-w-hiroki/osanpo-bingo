@@ -1708,7 +1708,7 @@ class OsanpoBingo {
         this._nextLongPlayCheckMs = Infinity; // 表示中は再トリガーしない
         const h = Math.floor(elapsed / 3_600_000);
         showConfirm(
-          `🕐 ${h}時間が経過しました\n\nお疲れさまです！そろそろゲームを終了しますか？`
+          `🕐 ${h}時間が経過しました\n\nお疲れさまです！\nそろそろゲームを終了しますか？`
         ).then((ok) => {
           if (ok) {
             this.stopBattleSyncLoop();
