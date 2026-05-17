@@ -77,6 +77,11 @@ function getBattleRandomId() {
 const PLAYER_COLORS = ['blue', 'red', 'yellow', 'green'];
 /** 1ルームに参加できる最大人数（作成者含む） */
 const MAX_BATTLE_PLAYERS = 3;
+/**
+ * プレゼンスレコードに使う cell_index のベース値（ゲームセル 0-24 の範囲外）。
+ * blue=25, red=26, yellow=27, green=28 に対応。
+ */
+const PRESENCE_CELL_BASE = 25;
 
 function makeBattlePlayerId(name, color, randomId) {
   const safeName = (name || '').trim() || '名無しさん';
@@ -477,16 +482,32 @@ class OsanpoBingo {
       }
       const rows = await res.json();
       const nextOwners = {};
+      const nextPresence = new Set();
       (rows || []).forEach((row) => {
         const idx = Number(row?.cell_index);
         const ownerId = typeof row?.owner_user_id === 'string' ? row.owner_user_id : '';
-        if (!ownerId || !Number.isInteger(idx) || idx < 0 || idx > 24) return;
-        // cell_index 12 にルーム設定レコードを格納（__settings__: プレフィックス）→ スキップ
-        if (ownerId.startsWith('__settings__:')) return;
-        nextOwners[idx] = ownerId;
+        if (!ownerId || !Number.isInteger(idx)) return;
+        // __settings__: プレフィックス → ルーム設定レコード。creatorId を presence に追加してスキップ
+        if (ownerId.startsWith('__settings__:')) {
+          try {
+            const s = JSON.parse(ownerId.slice('__settings__:'.length));
+            if (s.creatorId) nextPresence.add(s.creatorId);
+          } catch {}
+          return;
+        }
+        // cell_index 25+ → プレゼンスレコード（ゲームセル範囲外）
+        if (idx >= PRESENCE_CELL_BASE) {
+          nextPresence.add(ownerId);
+          return;
+        }
+        // cell_index 0-24 → ゲームセルのクレーム
+        if (idx >= 0 && idx <= 24) nextOwners[idx] = ownerId;
       });
+      // プレゼンス差分チェック（スコアボード再描画が必要か判断）
+      const presenceChanged = [...nextPresence].sort().join(',') !== [...this.battlePresencePlayers].sort().join(',');
+      this.battlePresencePlayers = nextPresence;
       // 差分チェック: owners が変わっていなければ DOM 更新をスキップして点滅を防ぐ
-      const changed = JSON.stringify(nextOwners) !== JSON.stringify(this.battleCellOwners);
+      const changed = presenceChanged || JSON.stringify(nextOwners) !== JSON.stringify(this.battleCellOwners);
       this.battleCellOwners = nextOwners;
       // BINGO 所有権をサーバーデータから決定論的に再計算（全端末で一致させる）
       this.battleBingoOwners = this.recomputeBattleBingoOwners();
@@ -527,10 +548,35 @@ class OsanpoBingo {
     }
   }
 
-  /** 参加者プレゼンス登録（廃止：テーブルに topic_key カラムがないため不使用） */
+  /**
+   * プレゼンスレコードを Supabase に登録する。
+   * cell_index = PRESENCE_CELL_BASE + color_index（25-28）に owner_user_id を INSERT。
+   * ignore-duplicates なので再ログイン時も冪等に動作する。
+   * これにより相手がまだセルをクレームしていない段階でもスコアボードに表示される。
+   */
   async registerPlayerPresence() {
-    // cell_index ベースのスキーマでは presence 専用レコードを持てないため省略。
-    // 代わりにセルをクレームしたプレイヤーが getBattleScores に自動的に現れる。
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
+    const { url, key } = this.battleBackend;
+    const color = parseOwnerColor(this.battlePlayerId);
+    const presenceIdx = PRESENCE_CELL_BASE + PLAYER_COLORS.indexOf(color);
+    try {
+      await fetch(`${url}/rest/v1/${this.battleTable}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          Prefer: 'resolution=ignore-duplicates,return=minimal'
+        },
+        body: JSON.stringify({
+          room_code: this.roomCode,
+          cell_index: presenceIdx,
+          owner_user_id: this.battlePlayerId
+        })
+      });
+    } catch (e) {
+      console.warn('registerPlayerPresence failed:', e);
+    }
   }
 
   /**
@@ -4128,6 +4174,8 @@ class OsanpoBingo {
       playerMap.set(id, { name: parseOwnerName(id), color: parseOwnerColor(id), marks: 0, bingos: 0 });
     };
     addPlayer(this.battlePlayerId);
+    // プレゼンス登録済みプレイヤー（まだセルを取得していなくても表示）
+    this.battlePresencePlayers?.forEach(id => addPlayer(id));
     Object.values(this.battleCellOwners).forEach(id => addPlayer(id));
     Object.values(this.battleBingoOwners).forEach(id => { if (id) addPlayer(id); });
 
