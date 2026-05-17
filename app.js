@@ -496,12 +496,18 @@ class OsanpoBingo {
       // (room_code,cell_index,owner_user_id の3列selectでも部分的に同問題が出るため
       //  cell_index フィルタが最も確実な回避策)
       const syncUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=cell_index,owner_user_id&room_code=eq.${encodedRoom}&cell_index=gte.0`;
-      const res = await fetch(syncUrl, {
-        headers: {
-          apikey: this.battleBackend.key,
-          Authorization: `Bearer ${this.battleBackend.key}`
-        }
-      });
+      // プレゼンスは別ルーム（::prs サフィックス）に保存されているため別途取得
+      const encodedPresenceRoom = encodeURIComponent(this.roomCode + '::prs');
+      const presenceUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=owner_user_id&room_code=eq.${encodedPresenceRoom}`;
+      const authHeaders = {
+        apikey: this.battleBackend.key,
+        Authorization: `Bearer ${this.battleBackend.key}`
+      };
+      // ゲームセル行とプレゼンス行を並行取得
+      const [res, presRes] = await Promise.all([
+        fetch(syncUrl, { headers: authHeaders }),
+        fetch(presenceUrl, { headers: authHeaders })
+      ]);
       if (!res.ok) {
         this.lastBattleSyncStatus = `http_${res.status}`;
         this.lastBattleSyncError = 'sync_get_failed';
@@ -509,8 +515,13 @@ class OsanpoBingo {
         return;
       }
       const rows = await res.json();
+      const presRows = presRes.ok ? (await presRes.json()) : [];
       const nextOwners = {};
       const nextPresence = new Set();
+      // ::prs ルームのプレゼンス行を処理
+      (presRows || []).forEach((row) => {
+        if (row?.owner_user_id) nextPresence.add(row.owner_user_id);
+      });
       (rows || []).forEach((row) => {
         const idx = Number(row?.cell_index);
         const ownerId = typeof row?.owner_user_id === 'string' ? row.owner_user_id : '';
@@ -523,7 +534,7 @@ class OsanpoBingo {
           } catch {}
           return;
         }
-        // cell_index 25+ → プレゼンスレコード（ゲームセル範囲外）
+        // 後方互換: cell_index 25+ → 旧プレゼンス形式（新規INSERTはされないが既存行のフォールバック）
         if (idx >= PRESENCE_CELL_BASE) {
           nextPresence.add(ownerId);
           return;
@@ -583,15 +594,20 @@ class OsanpoBingo {
 
   /**
    * プレゼンスレコードを Supabase に登録する。
-   * cell_index = PRESENCE_CELL_BASE + color_index（25-28）に owner_user_id を INSERT。
+   * Supabase の battle_cell_owners テーブルは cell_index 0-24 の CHECK 制約があるため、
+   * 従来の cell_index=25-28 方式は制約違反で INSERT 失敗する。
+   * 代わりに room_code = "${roomCode}::prs" の別ルームに cell_index=0-3 で保存する方式に変更。
+   * - blue=0, red=1, yellow=2, green=3
    * ignore-duplicates なので再ログイン時も冪等に動作する。
-   * これにより相手がまだセルをクレームしていない段階でもスコアボードに表示される。
    */
   async registerPlayerPresence() {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
     const { url, key } = this.battleBackend;
     const color = parseOwnerColor(this.battlePlayerId);
-    const presenceIdx = PRESENCE_CELL_BASE + PLAYER_COLORS.indexOf(color);
+    // プレゼンス用の別ルームコード (::prs サフィックス) に cell_index=0-3 で保存
+    // → CHECK 制約 (cell_index 0-24) の範囲内に収まる
+    const presenceRoom = this.roomCode + '::prs';
+    const presenceIdx = PLAYER_COLORS.indexOf(color); // 0-3
     try {
       await fetch(`${url}/rest/v1/${this.battleTable}`, {
         method: 'POST',
@@ -602,7 +618,7 @@ class OsanpoBingo {
           Prefer: 'resolution=ignore-duplicates,return=minimal'
         },
         body: JSON.stringify({
-          room_code: this.roomCode,
+          room_code: presenceRoom,
           cell_index: presenceIdx,
           owner_user_id: this.battlePlayerId
         })
