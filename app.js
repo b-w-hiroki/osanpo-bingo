@@ -217,22 +217,33 @@ class OsanpoBingo {
     if (!loaded || this.board.length !== 25) {
       this.showRoomCodeModal();
     } else {
-      // 既存データを使用（モーダルを確実に非表示にしてボードを操作可能に）
-      const roomModal = document.getElementById('roomCodeModal');
-      if (roomModal) roomModal.style.display = 'none';
-      this.renderBoard(); // localStorage 復元時の初回描画
-      this.checkBingo();
-      this.updateStats();
-      if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
-        this.syncBattleOwnersFromServer();
-        this.startBattleSyncLoop();
-      } else {
-        this.stopBattleSyncLoop();
-      }
-      // 位置情報トラッキング開始
-      this.startLocationTracking();
-      // 復元されたゲームでも3時間・24時間タイマーを有効にする
-      this.startPlayTimer();
+      // 保存データがある → 続きから or 新しく始める を確認
+      this._showResumeModal().then((resume) => {
+        if (!resume) {
+          // 新しく始める: 保存データを削除してモーダルを表示
+          try { localStorage.removeItem(this._storageKey); } catch {}
+          this.board = [];
+          this.gameType = 'normal';
+          this.roomCode = '';
+          this.showRoomCodeModal();
+          return;
+        }
+        // 続きから: 既存データを使用
+        const roomModal = document.getElementById('roomCodeModal');
+        if (roomModal) roomModal.style.display = 'none';
+        this.renderBoard();
+        this.checkBingo();
+        this.updateStats();
+        if (BATTLE_MODE_ENABLED && this.gameType === 'battle') {
+          this.syncBattleOwnersFromServer();
+          this.startBattleSyncLoop();
+        } else {
+          this.stopBattleSyncLoop();
+        }
+        this.startLocationTracking();
+        // 復元されたゲームでも3時間・24時間タイマーを有効にする
+        this.startPlayTimer();
+      });
     }
 
   }
@@ -512,6 +523,85 @@ class OsanpoBingo {
   async registerPlayerPresence() {
     // cell_index ベースのスキーマでは presence 専用レコードを持てないため省略。
     // 代わりにセルをクレームしたプレイヤーが getBattleScores に自動的に現れる。
+  }
+
+  /**
+   * 保存データ復元確認モーダルを表示して Promise<boolean> を返す。
+   * true = 続きから / false = 新しく始める
+   */
+  _showResumeModal() {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('resumeModal');
+      const continueBtn = document.getElementById('resumeContinueBtn');
+      const newBtn = document.getElementById('resumeNewBtn');
+      if (!modal || !continueBtn || !newBtn) {
+        resolve(true); // モーダルがなければそのまま続きから
+        return;
+      }
+      const done = (ok) => {
+        modal.style.display = 'none';
+        continueBtn.onclick = null;
+        newBtn.onclick = null;
+        resolve(ok);
+      };
+      continueBtn.onclick = () => done(true);
+      newBtn.onclick    = () => done(false);
+      modal.style.display = 'flex';
+    });
+  }
+
+  /**
+   * バトルモード初回チュートリアルを表示する。
+   * localStorage に完了フラグがある場合はスキップ。
+   */
+  _showBattleTutorial() {
+    return new Promise((resolve) => {
+      const DONE_KEY = 'osanpo_battle_tutorial_done';
+      if (localStorage.getItem(DONE_KEY)) { resolve(); return; }
+
+      const modal     = document.getElementById('battleTutorialModal');
+      const slides    = modal ? modal.querySelectorAll('.tutorial-slide') : [];
+      const dots      = modal ? modal.querySelectorAll('.tutorial-dot')   : [];
+      const prevBtn   = document.getElementById('tutorialPrevBtn');
+      const nextBtn   = document.getElementById('tutorialNextBtn');
+      if (!modal || slides.length === 0) { resolve(); return; }
+
+      let current = 0;
+      const total = slides.length;
+
+      const goTo = (idx) => {
+        slides[current].style.display = 'none';
+        dots[current].classList.remove('active');
+        current = idx;
+        slides[current].style.display = '';
+        dots[current].classList.add('active');
+        prevBtn.style.visibility = current === 0 ? 'hidden' : '';
+        nextBtn.textContent = current === total - 1 ? 'はじめる ✓' : '次へ →';
+      };
+
+      dots.forEach((dot, i) => {
+        dot.onclick = () => goTo(i);
+      });
+      prevBtn.onclick = () => { if (current > 0) goTo(current - 1); };
+      nextBtn.onclick = () => {
+        if (current < total - 1) {
+          goTo(current + 1);
+        } else {
+          modal.style.display = 'none';
+          prevBtn.onclick = null;
+          nextBtn.onclick = null;
+          localStorage.setItem(DONE_KEY, '1');
+          resolve();
+        }
+      };
+
+      // 初期化
+      slides.forEach((s, i) => { s.style.display = i === 0 ? '' : 'none'; });
+      dots.forEach((d, i)   => { d.classList.toggle('active', i === 0); });
+      prevBtn.style.visibility = 'hidden';
+      nextBtn.textContent = '次へ →';
+      modal.style.display = 'flex';
+    });
   }
 
   /**
@@ -1365,6 +1455,9 @@ class OsanpoBingo {
     // 合言葉：バトルのみ表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
     if (roomCodeStatEl) roomCodeStatEl.style.display = isBattle ? '' : 'none';
+    // バトルモード遊び方：バトルのみ表示
+    const battleHowtoEl = document.getElementById('battleHowtoDetails');
+    if (battleHowtoEl) battleHowtoEl.style.display = isBattle ? '' : 'none';
     // 観光地フィールド選択時のみ地域を表示
     const regionStatEl = document.getElementById('regionStat');
     const regionDisplayEl = document.getElementById('regionDisplay');
@@ -2678,6 +2771,9 @@ class OsanpoBingo {
 
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
+
+        // 初回バトルプレイ時はチュートリアルを表示（非同期・ゲーム開始後）
+        this._showBattleTutorial().catch(() => {});
       });
     }
 
@@ -2796,6 +2892,9 @@ class OsanpoBingo {
 
         if (modal) modal.style.display = 'none';
         if (this.messageElement) this.messageElement.style.display = 'none';
+
+        // 初回バトルプレイ時はチュートリアルを表示（非同期・ゲーム開始後）
+        this._showBattleTutorial().catch(() => {});
       });
     }
   }

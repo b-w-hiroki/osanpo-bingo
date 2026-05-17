@@ -1940,11 +1940,13 @@ h1 {
 }
 
 .dialog-modal-message {
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.9rem;
+  line-height: 1.6;
   color: var(--text);
   margin: 0 0 var(--spacing-xl) 0;
   white-space: pre-line;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .dialog-modal-actions {
@@ -1963,6 +1965,83 @@ h1 {
   padding: 12px 20px;
   font-size: 0.95rem;
   border-radius: var(--radius-md);
+}
+
+/* ==================== データ復元確認モーダル ==================== */
+.resume-modal-content {
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+.resume-modal-icon {
+  font-size: 2.4rem;
+  margin: 0 0 8px;
+}
+.resume-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.resume-modal-desc {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin: 0 0 var(--spacing-xl);
+  line-height: 1.5;
+}
+
+/* ==================== バトルチュートリアルモーダル ==================== */
+.battle-tutorial-modal .battle-tutorial-content {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 32px var(--spacing-lg) 24px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.25s ease;
+  text-align: center;
+}
+.tutorial-slide-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+.tutorial-slide-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+.tutorial-slide-body {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--text-light);
+  margin: 0 0 20px;
+  min-height: 72px;
+}
+.tutorial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.tutorial-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.tutorial-dot.active {
+  background: var(--primary);
+}
+.tutorial-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.tutorial-actions .dialog-btn {
+  min-width: 100px;
 }
 
 /* ==================== フッター ==================== */
