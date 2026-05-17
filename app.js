@@ -222,11 +222,9 @@ class OsanpoBingo {
     if (!loaded || this.board.length !== 25) {
       this.showRoomCodeModal();
     } else {
-      // バトルゲーム進行中（一時保存していない）のリフレッシュは確認なしに自動再開する。
-      // 一時保存済み（_battlePaused=true）やソロゲームは従来通りモーダルで確認する。
-      const autoResume = BATTLE_MODE_ENABLED
-        && this.gameType === 'battle'
-        && !this._battlePaused;
+      // 一時保存済み（_battlePaused=true）以外はリフレッシュとみなして確認なしに自動再開。
+      // 「作り直す」ボタンがゲーム画面にあるため、ここで毎回聞く必要はない。
+      const autoResume = !this._battlePaused;
 
       // resume=true: 続きから / false: 新しく始める
       const doResume = async (resume) => {
