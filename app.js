@@ -231,6 +231,8 @@ class OsanpoBingo {
       }
       // 位置情報トラッキング開始
       this.startLocationTracking();
+      // 復元されたゲームでも3時間・24時間タイマーを有効にする
+      this.startPlayTimer();
     }
 
   }
@@ -533,6 +535,27 @@ class OsanpoBingo {
     }
   }
 
+  /**
+   * 自分のマスだけをサーバーから削除する。
+   * 参加者（非作成者）がゲームを退出するとき、カラースロットを解放して
+   * 後から合言葉を再入力すれば同じルームに再参加できるようにする。
+   */
+  async deleteMyBattleRows(roomCode, playerId) {
+    if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo' || !playerId) return;
+    try {
+      const { url, key } = this.battleBackend;
+      await fetch(
+        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&owner_user_id=eq.${encodeURIComponent(playerId)}`,
+        {
+          method: 'DELETE',
+          headers: { apikey: key, Authorization: `Bearer ${key}` }
+        }
+      );
+    } catch {
+      // 削除失敗は無視
+    }
+  }
+
   /** バトルルームの設定（難易度・topicSet等）をサーバーに保存 */
   async saveRoomSettingsToServer(roomCode, settings) {
     if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo') return;
@@ -569,7 +592,7 @@ class OsanpoBingo {
     settings.paused    = true;
     settings.pauseTime = Date.now();
     await this.saveRoomSettingsToServer(this.roomCode, settings);
-    this._battlePaused = true;
+    // _battlePaused は pauseAndGoToTop() 側で await より前にセット済み
   }
 
   /** バトルルームの設定をサーバーから取得 */
@@ -1705,11 +1728,14 @@ class OsanpoBingo {
     const container = document.querySelector('.container');
     const editArea = document.getElementById('resultEditArea');
     const shareArea = document.getElementById('resultShareArea');
-    
+
     if (view) view.style.display = 'none';
     if (container) container.style.display = 'flex';
     if (editArea) editArea.style.display = 'flex';
     if (shareArea) shareArea.style.display = 'none';
+
+    // showResultView() でタイマーを停止したため、ゲームに戻る際に再開する
+    this.startPlayTimer();
   }
   
   // 決定ボタン：編集内容を確定して共有エリアに表示
@@ -1992,13 +2018,20 @@ class OsanpoBingo {
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
-    // バトルモード退出時: 作成者（blue）かつ未保存の場合のみルームデータを削除
-    // ・参加者が退出してもルームは残す（作成者が続けられるように）
-    // ・一時保存済み（_battlePaused = true）なら残す → 再入室で再開できる
+    // バトルモード退出時:
+    // ・作成者（blue）かつ未保存 → ルームデータを全削除（合言葉を再利用可能に）
+    // ・参加者（非blue）かつ未保存 → 自分のマスだけ削除しカラースロットを解放
+    //   （ルームは残るため、合言葉を再入力して再参加できる）
+    // ・一時保存済み（_battlePaused = true）→ 何も削除しない（再入室で再開）
     const isBattleRoom = this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo';
     const isCreator    = parseOwnerColor(this.battlePlayerId) === 'blue';
-    if (isBattleRoom && isCreator && !this._battlePaused) {
-      this.deleteRoomData(this.roomCode).catch(() => {});
+    if (isBattleRoom && !this._battlePaused) {
+      if (isCreator) {
+        this.deleteRoomData(this.roomCode).catch(() => {});
+      } else {
+        // 参加者：自分のマスだけ削除してカラースロットを解放
+        this.deleteMyBattleRows(this.roomCode, this.battlePlayerId).catch(() => {});
+      }
     }
     try {
       localStorage.removeItem(this._storageKey);
@@ -2042,6 +2075,8 @@ class OsanpoBingo {
    */
   async pauseAndGoToTop() {
     this.stopBattleSyncLoop();
+    // サーバー書き込み中に例外が発生してもフラグが立つよう await より前にセット
+    this._battlePaused = true;
     if (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo') {
       await this.pauseBattleGame();
     } else {
@@ -2672,13 +2707,31 @@ class OsanpoBingo {
         //    （ポーズ中→削除した場合に3人制限カウントが正しく反映されるよう）
         const roomSettings = await this.fetchRoomSettings(roomCode);
         if (roomSettings?.paused && roomSettings?.pauseTime) {
+          // このプレイヤーが作成者かどうかをcreatorIdのrandomId部分で判定
+          const creatorParts   = (roomSettings.creatorId || '').split('::');
+          const creatorRandId  = creatorParts[creatorParts.length - 1] || '';
+          const isJoinerCreator = creatorRandId.length > 0 && creatorRandId === getBattleRandomId();
+
           const pauseAge = Date.now() - roomSettings.pauseTime;
           if (pauseAge >= 24 * 60 * 60 * 1000) {
-            showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
-            await this.deleteRoomData(roomCode);
+            // 期限切れ：作成者のみ削除できる。非作成者は案内のみ
+            if (isJoinerCreator) {
+              showAlert('このルームは24時間以上前に保存されたため期限切れです。\n新しいゲームを作成してください。');
+              await this.deleteRoomData(roomCode);
+            } else {
+              showAlert('このルームは期限切れです。\n作成者に新しいゲームを作成してもらってください。');
+            }
             this.roomCode = '';
             return;
           }
+          // 期限内の一時保存中ルーム
+          if (!isJoinerCreator) {
+            // 非作成者：再開を待つよう案内して終了
+            showAlert('このルームは現在一時停止中です。\n作成者が再開するまでお待ちください。');
+            this.roomCode = '';
+            return;
+          }
+          // 作成者：再開するか確認
           const h = Math.floor(pauseAge / 3_600_000);
           const m = Math.floor((pauseAge % 3_600_000) / 60_000);
           const ageText = h > 0 ? `${h}時間${m}分` : `${m}分`;
@@ -2686,7 +2739,7 @@ class OsanpoBingo {
             `このルームには${ageText}前に保存された途中データがあります。\n\n前回の続きから再開しますか？`
           );
           if (!resume) {
-            // 新しくスタート → サーバーデータを削除し参加も中止
+            // 作成者が再開しないを選択 → サーバーデータを削除し参加も中止
             await this.deleteRoomData(roomCode);
             this.roomCode = '';
             showAlert('ルームデータを削除しました。\n新しいゲームを作成してください。');
@@ -3771,7 +3824,8 @@ class OsanpoBingo {
       if (takenColors.size >= MAX_BATTLE_PLAYERS) return null;
       return PLAYER_COLORS.find(c => !takenColors.has(c)) || null;
     } catch {
-      return PLAYER_COLORS[0];
+      // ネットワークエラー時は安全側に倒してnullを返す（作成者色の誤割当を防ぐ）
+      return null;
     }
   }
 
