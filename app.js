@@ -706,7 +706,8 @@ class OsanpoBingo {
   }
 
   // 戻り値: 'claimed'=新規取得成功 / 'self'=自分が既に所持（冪等） / 'taken'=他人が先取り
-  async claimBattleCellOnServer(index) {
+  // photoData: base64 data URL（Supabase RLS がUPDATEを許可しないためINSERT時にまとめて送信）
+  async claimBattleCellOnServer(index, photoData = null) {
     if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return 'claimed';
     }
@@ -714,6 +715,13 @@ class OsanpoBingo {
     const { url, key } = this.battleBackend;
 
     // POST（先着取得試行: room_code + cell_index の UNIQUE 制約で早い者勝ち）
+    // photo_data をINSERT時に含めることで、UPDATE権限なしでも写真を保存できる
+    const postBody = {
+      room_code: this.roomCode,
+      cell_index: index,
+      owner_user_id: this.battlePlayerId
+    };
+    if (photoData) postBody.photo_data = photoData;
     const postRes = await fetch(`${url}/rest/v1/${this.battleTable}`, {
       method: 'POST',
       headers: {
@@ -722,11 +730,7 @@ class OsanpoBingo {
         Authorization: `Bearer ${key}`,
         Prefer: 'resolution=ignore-duplicates,return=representation'
       },
-      body: JSON.stringify({
-        room_code: this.roomCode,
-        cell_index: index,
-        owner_user_id: this.battlePlayerId
-      })
+      body: JSON.stringify(postBody)
     });
     if (!postRes.ok) {
       this.lastBattleSyncStatus = `claim_http_${postRes.status}`;
@@ -3689,8 +3693,17 @@ class OsanpoBingo {
         this.closeCellModal();
         return;
       }
+      // Supabase RLS はINSERTのみ許可（UPDATEは不可）のため、
+      // 写真を先に圧縮してINSERT本体に含める。これにより1リクエストでphoto_dataを保存。
+      let photoDataForClaim = null;
       try {
-        const claimResult = await this.claimBattleCellOnServer(this.currentPhotoIndex);
+        const compressed = await this.compressToBase64(this.tempPhotoBlob, 640, 0.75);
+        if (compressed && compressed !== 'data:,') photoDataForClaim = compressed;
+      } catch (e) {
+        console.warn('photo compression before claim failed:', e);
+      }
+      try {
+        const claimResult = await this.claimBattleCellOnServer(this.currentPhotoIndex, photoDataForClaim);
         if (claimResult === 'taken') {
           showAlert('このマスはすでに他の人が取得していました。');
           this.closeCellModal();
@@ -3744,11 +3757,6 @@ class OsanpoBingo {
     // バトルモードでは battleCellOwners が唯一のソースのため追加しない
     if (this.gameType !== 'battle') {
       this.markedCells.add(idx);
-    }
-
-    // バトルモードで写真をサーバーへアップロード（失敗しても続行）
-    if (this.gameType === 'battle' && this.battleBackend.enabled) {
-      this.uploadBattlePhoto(idx, blob).catch(() => {});
     }
 
     // 再レンダリング
@@ -4043,18 +4051,13 @@ class OsanpoBingo {
   /** Supabase から特定セルの photo_data を取得（オンデマンド） */
   async fetchOpponentCellPhoto(cellIndex, ownerId) {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return null;
+    const { url, key } = this.battleBackend;
     try {
-      const url = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
-      url.searchParams.set('select', 'photo_data');
-      url.searchParams.set('room_code', `eq.${this.roomCode}`);
-      url.searchParams.set('cell_index', `eq.${cellIndex}`);
       // オーナーIDを絞り込むことで、別プレイヤーのレコードと混在しないよう確実に特定する
-      if (ownerId) url.searchParams.set('owner_user_id', `eq.${ownerId}`);
-      const res = await fetch(url.toString(), {
-        headers: {
-          apikey: this.battleBackend.key,
-          Authorization: `Bearer ${this.battleBackend.key}`
-        }
+      const ownerFilter = ownerId ? `&owner_user_id=eq.${encodeURIComponent(ownerId)}` : '';
+      const fetchUrl = `${url}/rest/v1/${this.battleTable}?select=photo_data&room_code=eq.${encodeURIComponent(this.roomCode)}&cell_index=eq.${cellIndex}${ownerFilter}`;
+      const res = await fetch(fetchUrl, {
+        headers: { apikey: key, Authorization: `Bearer ${key}` }
       });
       if (!res.ok) return null;
       const rows = await res.json();
@@ -4087,38 +4090,6 @@ class OsanpoBingo {
       img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
       img.src = objectUrl;
     });
-  }
-
-  /** バトルモード: 写真を圧縮してSupabaseのphoto_dataカラムへアップロード */
-  async uploadBattlePhoto(cellIndex, blob) {
-    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
-    try {
-      const photoData = await this.compressToBase64(blob, 640, 0.75);
-      if (!photoData || photoData === 'data:,') {
-        console.warn('uploadBattlePhoto: compressToBase64 returned empty');
-        return;
-      }
-      const url = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
-      url.searchParams.set('room_code', `eq.${this.roomCode}`);
-      url.searchParams.set('cell_index', `eq.${cellIndex}`);
-      url.searchParams.set('owner_user_id', `eq.${this.battlePlayerId}`);
-      const res = await fetch(url.toString(), {
-        method: 'PATCH',
-        headers: {
-          'apikey': this.battleBackend.key,
-          'Authorization': `Bearer ${this.battleBackend.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ photo_data: photoData })
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        console.warn(`uploadBattlePhoto PATCH failed: ${res.status}`, errText);
-      }
-    } catch (e) {
-      console.warn('uploadBattlePhoto failed', e);
-    }
   }
 
   // スコアボード用: 全プレイヤーのスコアを計算
