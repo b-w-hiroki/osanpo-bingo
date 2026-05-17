@@ -450,6 +450,8 @@ class OsanpoBingo {
       // 差分チェック: owners が変わっていなければ DOM 更新をスキップして点滅を防ぐ
       const changed = JSON.stringify(nextOwners) !== JSON.stringify(this.battleCellOwners);
       this.battleCellOwners = nextOwners;
+      // BINGO 所有権をサーバーデータから決定論的に再計算（全端末で一致させる）
+      this.battleBingoOwners = this.recomputeBattleBingoOwners();
       if (changed) {
         this.checkBingo();   // updateBoardOwnership() + bingo celebration
         this.updateStats();
@@ -871,17 +873,9 @@ class OsanpoBingo {
       const markedCount = line.filter(claimChecker).length;
       if (markedCount === 5) {
         newBingoLines.push(line);
-        // バトルビンゴ成立権: 自分が最後のマスをクレームした場合のみサーバーへ登録
-        // サーバー側は ignore-duplicates なので早い者勝ち。登録後に即syncして正しい権利者を取得する。
-        if (this.gameType === 'battle' && this.battleBingoOwners[lineIndex] === undefined) {
-          if (this.lastClaimedCellIndex !== null && line.includes(this.lastClaimedCellIndex)) {
-            // 暫定でローカルに自分を設定（sync後にサーバー値で上書きされる）
-            this.battleBingoOwners[lineIndex] = this.battlePlayerId;
-            this.claimBingoLineOnServer(lineIndex).then(() => this.syncBattleOwnersFromServer());
-          }
-          // sync経由でビンゴ検知した場合はサーバーがすでに権利者を持っているため
-          // ローカルには設定せず、次のsyncで battleBingoOwners が正しく更新される
-        }
+        // バトルモード: BINGO 所有権は recomputeBattleBingoOwners() で
+        // battleCellOwners（サーバー同期済み）から決定論的に算出するため、
+        // ここではローカル割り当てを行わない（sync 後に一括再計算される）。
       } else if (markedCount === 4) {
         newReachLines.push(line);
       }
@@ -3512,10 +3506,45 @@ class OsanpoBingo {
     }
   }
 
+  /**
+   * バトルモード: BINGO成立ラインのオーナーを battleCellOwners から決定論的に再計算する。
+   * 各デバイスが同じ計算を行うことで、サーバーへの BINGO 記録なしに全端末で一致した
+   * スコアを表示できる。
+   *
+   * ルール: ライン内でフリーマスを除く取得マス数が最多のプレイヤーがビンゴオーナー。
+   *         同数の場合は player ID 昇順（決定論的タイブレーカー）。
+   */
+  recomputeBattleBingoOwners() {
+    const lines = this.getAllLines();
+    const newBingoOwners = {};
+    lines.forEach((line, lineIndex) => {
+      // ライン上の全マスがクレーム済みか（フリーマス含む）
+      const allClaimed = line.every(idx => this.isAnyCellClaimed(idx));
+      if (!allClaimed) return;
+      // フリーマス以外のマスについてプレイヤー別取得数を集計
+      const counts = {};
+      line.forEach(idx => {
+        if (this.board[idx]?.isFree) return;
+        const owner = this.battleCellOwners[idx];
+        if (owner) counts[owner] = (counts[owner] || 0) + 1;
+      });
+      // 最多取得者をビンゴオーナーに（同数は ID 昇順でタイブレーク）
+      let bestOwner = null, bestCount = -1;
+      for (const [id, count] of Object.entries(counts)) {
+        if (count > bestCount || (count === bestCount && id < bestOwner)) {
+          bestOwner = id;
+          bestCount = count;
+        }
+      }
+      if (bestOwner) newBingoOwners[lineIndex] = bestOwner;
+    });
+    return newBingoOwners;
+  }
+
   // バトルビンゴ成立をサーバーに記録（cell_index 0-24 のみ許容のためサーバー側記録は廃止）
   async claimBingoLineOnServer(lineIndex) {
     // Supabase の CHECK 制約 (cell_index 0-24) のためビンゴライン記録は行わない。
-    // ビンゴ判定はローカルの battleCellOwners から各クライアントが個別に計算する。
+    // ビンゴ判定は recomputeBattleBingoOwners() で battleCellOwners から毎回再計算する。
   }
 
   // ========== バトル: 相手マス写真表示 ==========
@@ -3554,8 +3583,8 @@ class OsanpoBingo {
         noPhotoEl.style.display = '';
         noPhotoEl.textContent = '📡 読み込み中...';
       }
-      // 非同期でサーバーから取得してキャッシュ
-      this.fetchOpponentCellPhoto(index).then(data => {
+      // 非同期でサーバーから取得してキャッシュ（ownerId を指定して確実に特定）
+      this.fetchOpponentCellPhoto(index, ownerId).then(data => {
         if (data) {
           this.battleOpponentPhotos[index] = data;
           // モーダルがまだ開いていれば写真に切り替え
@@ -3577,13 +3606,15 @@ class OsanpoBingo {
   }
 
   /** Supabase から特定セルの photo_data を取得（オンデマンド） */
-  async fetchOpponentCellPhoto(cellIndex) {
+  async fetchOpponentCellPhoto(cellIndex, ownerId) {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return null;
     try {
       const url = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
       url.searchParams.set('select', 'photo_data');
       url.searchParams.set('room_code', `eq.${this.roomCode}`);
       url.searchParams.set('cell_index', `eq.${cellIndex}`);
+      // オーナーIDを絞り込むことで、別プレイヤーのレコードと混在しないよう確実に特定する
+      if (ownerId) url.searchParams.set('owner_user_id', `eq.${ownerId}`);
       const res = await fetch(url.toString(), {
         headers: {
           apikey: this.battleBackend.key,
