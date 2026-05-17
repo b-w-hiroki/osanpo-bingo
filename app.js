@@ -55,6 +55,90 @@ function showAlert(message) {
   });
 }
 
+// ===== Supabase Realtime Broadcast クライアント =====
+// Phoenix WebSocket プロトコル（Supabase Realtime v1）を使って
+// チャンネルへの Broadcast 送受信を行う軽量クライアント。
+// 外部 SDK 不要・自動再接続付き。
+class SupabaseRealtimeClient {
+  constructor(url, key) {
+    this._wsUrl = url.replace(/^https?:\/\//, 'wss://') + '/realtime/v1/websocket?apikey=' + key + '&vsn=1.0.0';
+    this._ws = null;
+    this._ref = 0;
+    this._joinRef = 0;
+    this._heartbeatTimer = null;
+    this._reconnectTimer = null;
+    this._channels = {}; // topic -> {joinRef, handlers:{event->fn}, joined}
+    this._active = false; // connect() で true、disconnect() で false
+  }
+
+  /** WebSocket 接続を開始（冪等） */
+  connect() {
+    if (this._ws || !this._active) return;
+    this._ws = new WebSocket(this._wsUrl);
+    this._ws.onopen = () => {
+      this._startHeartbeat();
+      for (const topic of Object.keys(this._channels)) this._doJoin(topic);
+    };
+    this._ws.onmessage = (evt) => {
+      try {
+        const [, , topic, event, payload] = JSON.parse(evt.data);
+        if (event === 'broadcast' && this._channels[topic]) {
+          const fn = this._channels[topic].handlers[payload?.event];
+          if (fn) fn(payload?.payload ?? {});
+        }
+      } catch {}
+    };
+    this._ws.onclose = () => {
+      this._ws = null;
+      this._stopHeartbeat();
+      for (const ch of Object.values(this._channels)) ch.joined = false;
+      if (this._active) {
+        this._reconnectTimer = setTimeout(() => { this._reconnectTimer = null; this.connect(); }, 5000);
+      }
+    };
+    this._ws.onerror = () => {};
+  }
+
+  /** チャンネルを購読してハンドラを登録（connect より前でも可） */
+  on(channelName, event, handler) {
+    const topic = `realtime:${channelName}`;
+    if (!this._channels[topic]) this._channels[topic] = { joinRef: null, handlers: {}, joined: false };
+    this._channels[topic].handlers[event] = handler;
+    if (this._ws?.readyState === WebSocket.OPEN) this._doJoin(topic);
+    return this;
+  }
+
+  /** チャンネルに Broadcast を送信 */
+  broadcast(channelName, event, payload = {}) {
+    const topic = `realtime:${channelName}`;
+    const ch = this._channels[topic];
+    if (!ch || this._ws?.readyState !== WebSocket.OPEN) return;
+    this._send([ch.joinRef, String(++this._ref), topic, 'broadcast', { type: 'broadcast', event, payload }]);
+  }
+
+  /** 接続・購読を全て破棄（以後 reconnect しない） */
+  disconnect() {
+    this._active = false;
+    clearTimeout(this._reconnectTimer);
+    this._stopHeartbeat();
+    if (this._ws) { this._ws.onclose = null; this._ws.close(); this._ws = null; }
+    this._channels = {};
+  }
+
+  _doJoin(topic) {
+    const ch = this._channels[topic];
+    if (!ch || ch.joined) return;
+    const jRef = String(++this._joinRef);
+    ch.joinRef = jRef;
+    ch.joined = true;
+    this._send([jRef, String(++this._ref), topic, 'phx_join', { config: { broadcast: { self: false, ack: false } } }]);
+  }
+
+  _send(msg) { if (this._ws?.readyState === WebSocket.OPEN) this._ws.send(JSON.stringify(msg)); }
+  _startHeartbeat() { this._heartbeatTimer = setInterval(() => this._send([null, String(++this._ref), 'phoenix', 'heartbeat', {}]), 30000); }
+  _stopHeartbeat() { clearInterval(this._heartbeatTimer); this._heartbeatTimer = null; }
+}
+
 function getBattleBackendConfig() {
   const cfg = window.OSANPO_BATTLE_CONFIG || {};
   const url = typeof cfg.supabaseUrl === 'string' ? cfg.supabaseUrl.trim() : '';
@@ -156,6 +240,8 @@ class OsanpoBingo {
     this.battleBackend = getBattleBackendConfig();
     this.battleTable = 'battle_cell_owners';
     this.battleSyncTimer = null;
+    this._realtimeClient = null;   // SupabaseRealtimeClient（バトル中のみ生存）
+    this._realtimeChannel = null;  // 現在購読中のチャンネル名
     this._battlePaused = false; // true=一時保存済み（退出時にサーバーデータを残す）
     this.debugBattle = new URLSearchParams(window.location.search).get('debugBattle') === '1';
     this._resultImageBlob = null; // 結果画面用キャッシュ済みblob（ライブラリ保存の事前生成）
@@ -588,21 +674,65 @@ class OsanpoBingo {
 
   startBattleSyncLoop(skipInitialSync = false) {
     this.stopBattleSyncLoop();
-    if (this._battlePaused) return; // ポーズ中は再起動しない
+    if (this._battlePaused) { this._stopBattleRealtime(); return; } // ポーズ中は再起動しない
     if (this.gameType !== 'battle' || !this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
+      this._stopBattleRealtime(); // ソロゲーム等に切り替えたときは Realtime も解放
       return;
     }
     // skipInitialSync=true のときは初回を省略（呼び出し元が await 済みの場合）
     if (!skipInitialSync) this.syncBattleOwnersFromServer();
+    // Realtime WebSocket を起動（冪等）→ 相手のクレームを即時受信して sync 呼び出し
+    this._startBattleRealtime();
+    // ポーリングは Realtime の保険として継続（切断時フォールバック）
+    // Realtime が生きていれば 10s、未接続なら 2s で補完
+    const interval = this._realtimeClient ? 10000 : 2000;
     this.battleSyncTimer = setInterval(() => {
       this.syncBattleOwnersFromServer();
-    }, 2000);
+    }, interval);
   }
 
   stopBattleSyncLoop() {
     if (this.battleSyncTimer) {
       clearInterval(this.battleSyncTimer);
       this.battleSyncTimer = null;
+    }
+    // Realtime は stopBattleSyncLoop では止めない
+    // （画面非表示時にポーリングを止めても WebSocket は生かして即時通知を維持）
+  }
+
+  /** Supabase Realtime Broadcast チャンネルを購読開始（冪等） */
+  _startBattleRealtime() {
+    if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
+    const channelName = 'osanpo-' + this.roomCode;
+    // 既に同じルームに接続済みならスキップ
+    if (this._realtimeClient && this._realtimeChannel === channelName) return;
+    // 別ルームに接続していたら先に解放
+    if (this._realtimeClient) this._stopBattleRealtime();
+
+    const client = new SupabaseRealtimeClient(this.battleBackend.url, this.battleBackend.key);
+    client._active = true;
+    client.on(channelName, 'sync', () => {
+      // 相手がクレームしたとき即座に同期
+      this.syncBattleOwnersFromServer().catch(() => {});
+    });
+    client.connect();
+    this._realtimeClient = client;
+    this._realtimeChannel = channelName;
+  }
+
+  /** Realtime チャンネルを切断・破棄 */
+  _stopBattleRealtime() {
+    if (this._realtimeClient) {
+      this._realtimeClient.disconnect();
+      this._realtimeClient = null;
+      this._realtimeChannel = null;
+    }
+  }
+
+  /** バトルルーム全員に「今すぐ sync して」と Broadcast */
+  _broadcastBattleSync() {
+    if (this._realtimeClient && this._realtimeChannel) {
+      this._realtimeClient.broadcast(this._realtimeChannel, 'sync', {});
     }
   }
 
@@ -916,6 +1046,8 @@ class OsanpoBingo {
       this.lastBattleSyncStatus = 'claim_ok';
       this.lastBattleSyncError = '';
       this.updateDebugPanel();
+      // Realtime Broadcast で他プレイヤーに即座に同期を促す
+      this._broadcastBattleSync();
       return 'claimed';
     }
 
@@ -1814,6 +1946,7 @@ class OsanpoBingo {
         ).then((ok) => {
           if (ok) {
             this.stopBattleSyncLoop();
+            this._stopBattleRealtime();
             this.showResultView(); // showEndScreen は存在しないため正しいメソッドを使用
           } else {
             // 「続ける」→ 1時間後に再確認
@@ -2363,6 +2496,7 @@ class OsanpoBingo {
   // ゲームデータ・キャッシュをクリアしてトップへ遷移
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
+    this._stopBattleRealtime();
     // バトルモード退出時:
     // ・作成者（blue）かつ未保存 → ルームデータを全削除（合言葉を再利用可能に）
     // ・参加者（非blue）かつ未保存 → 自分のマスだけ削除しカラースロットを解放
