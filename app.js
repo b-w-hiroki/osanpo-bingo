@@ -2543,7 +2543,9 @@ class OsanpoBingo {
             }
           }
         } else {
-          joinStatusEl.textContent = 'このコードのルームはまだ誰も使っていません';
+          // 設定行がない = ルーム未作成 or 作成者の設定書き込みが完了していない
+          // 少し待って再確認するよう案内
+          joinStatusEl.textContent = 'ルームが見つかりません。合言葉を確認してください';
           joinStatusEl.className = 'join-room-status status-empty';
           if (joinInfoEl) joinInfoEl.style.display = 'none';
         }
@@ -2754,8 +2756,9 @@ class OsanpoBingo {
         this.startPlayTimer();
         this.updateStats();
         // バトルモードの場合、ルーム設定をサーバーに保存（参加者が同じボードを作れるよう）
+        // await で保存完了を待つ：参加者が合言葉を入力したとき確実に設定が見える状態にする
         if (this.gameType === 'battle') {
-          this.saveRoomSettingsToServer(roomCode, {
+          await this.saveRoomSettingsToServer(roomCode, {
             difficulty: this.difficulty,
             topicSetId: this.topicSetId,
             landmarkMode: this.landmarkMode,
@@ -2847,7 +2850,14 @@ class OsanpoBingo {
         }
 
         // ② ポーズ処理後に3人制限チェック（削除済みルームには引っかからない）
-        const joinColor = await this.pickAvailableColor();
+        let joinColor;
+        try {
+          joinColor = await this.pickAvailableColor();
+        } catch (e) {
+          showAlert('サーバーへの接続に失敗しました。\n通信状態を確認して再度お試しください。');
+          this.roomCode = '';
+          return;
+        }
         if (joinColor === null) {
           showAlert(`このルームはすでに${MAX_BATTLE_PLAYERS}人参加しており、これ以上参加できません。`);
           this.roomCode = '';
@@ -2857,11 +2867,13 @@ class OsanpoBingo {
         this.battleBingoOwners = {};
         this.lastClaimedCellIndex = null;
 
-        const difficulty = roomSettings?.difficulty || 'normal';
-        this.topicSetId = roomSettings?.topicSetId || 'default';
-        this.playMode = roomSettings?.playMode || 'photo';
-        this.landmarkMode = roomSettings?.landmarkMode || false;
-        this.landmarkRegion = roomSettings?.landmarkRegion || 'all';
+        // roomSettings が null の場合（設定書き込みタイミングの競合）は再フェッチを試みる
+        const resolvedSettings = roomSettings || (await this.fetchRoomSettings(roomCode)) || {};
+        const difficulty = resolvedSettings.difficulty || 'normal';
+        this.topicSetId = resolvedSettings.topicSetId || 'default';
+        this.playMode = resolvedSettings.playMode || 'photo';
+        this.landmarkMode = resolvedSettings.landmarkMode || false;
+        this.landmarkRegion = resolvedSettings.landmarkRegion || 'all';
 
         this.gameStartTime = Date.now();
         this.battleCellOwners = {};
@@ -3912,20 +3924,15 @@ class OsanpoBingo {
   /**
    * ルーム内で未使用のプレイヤー色を取得する。
    * 最大参加人数（MAX_BATTLE_PLAYERS = 3）を超えている場合は null を返す。
+   * ネットワークエラーの場合は Error をスローして呼び出し元で区別できるようにする。
    */
   async pickAvailableColor() {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') {
       return PLAYER_COLORS[0];
     }
-    try {
-      const takenColors = await this._fetchRoomPlayerColors();
-      // 最大3人制限チェック（作成者含む）
-      if (takenColors.size >= MAX_BATTLE_PLAYERS) return null;
-      return PLAYER_COLORS.find(c => !takenColors.has(c)) || null;
-    } catch {
-      // ネットワークエラー時は安全側に倒してnullを返す（作成者色の誤割当を防ぐ）
-      return null;
-    }
+    const takenColors = await this._fetchRoomPlayerColors(); // エラーはそのままスロー
+    if (takenColors.size >= MAX_BATTLE_PLAYERS) return null;
+    return PLAYER_COLORS.find(c => !takenColors.has(c)) || null;
   }
 
   /**
