@@ -318,16 +318,8 @@ h1 {
 .bingo-cell.claimed-red.locked         { background: #ffcdd2; border-color: #ef9a9a; color: #7f0000; }
 .bingo-cell.claimed-yellow.locked      { background: #fff9c4; border-color: #fff176; color: #e65100; }
 .bingo-cell.claimed-green.locked       { background: #c8e6c9; border-color: #a5d6a7; color: #1b5e20; }
-/* ビンゴライン: 自分マスはプレイヤーカラーの濃色 */
-.bingo-cell.bingo.claimed-blue.claimed-self   { background: #0d47a1; border-color: #1565c0; color: #fff; }
-.bingo-cell.bingo.claimed-red.claimed-self    { background: #7f0000; border-color: #b71c1c; color: #fff; }
-.bingo-cell.bingo.claimed-yellow.claimed-self { background: #e65100; border-color: #bf360c; color: #fff; }
-.bingo-cell.bingo.claimed-green.claimed-self  { background: #1b5e20; border-color: #2e7d32; color: #fff; }
-/* ビンゴライン: 相手マスは飽和色 */
-.bingo-cell.bingo.claimed-blue.locked   { background: #0288d1; border-color: #01579b; color: #fff; }
-.bingo-cell.bingo.claimed-red.locked    { background: #e53935; border-color: #b71c1c; color: #fff; }
-.bingo-cell.bingo.claimed-yellow.locked { background: #f9a825; border-color: #f57f17; color: #fff; }
-.bingo-cell.bingo.claimed-green.locked  { background: #43a047; border-color: #1b5e20; color: #fff; }
+/* ビンゴライン: ライン所有者色で全セル統一（bingo-line-* クラスで上書き）
+   ※ styles.css 後半の .bingo-cell.bingo ルールより後に配置し、確実に上書き */
 
 /* ===== バトルスコアボード ===== */
 .battle-scoreboard {
@@ -408,6 +400,14 @@ h1 {
   color: white;
   animation: bingoPulse 0.6s ease-in-out;
 }
+
+/* ===== バトルモード: ビンゴライン所有者色（bingo-line-* クラス） =====
+   ライン全体をライン所有者の色で統一表示（FREEマス・相手セルも含む）。
+   .bingo-cell.bingo（specificity 0,2,0）より後に置き、specificity 0,3,0 で上書き。 */
+.bingo-cell.bingo.bingo-line-blue   { background: linear-gradient(145deg, #1e88e5, #0d47a1); border-color: #1565c0; color: #fff; }
+.bingo-cell.bingo.bingo-line-red    { background: linear-gradient(145deg, #ef5350, #b71c1c); border-color: #b71c1c; color: #fff; }
+.bingo-cell.bingo.bingo-line-yellow { background: linear-gradient(145deg, #ffd54f, #f57f17); border-color: #bf360c; color: #fff; }
+.bingo-cell.bingo.bingo-line-green  { background: linear-gradient(145deg, #66bb6a, #1b5e20); border-color: #2e7d32; color: #fff; }
 
 .bingo-cell.locked,
 .bingo-cell.locked.marked {

@@ -553,6 +553,21 @@ class OsanpoBingo {
         console.log(`[battle] sync: battleCellOwners ${ownerCountBefore} → ${ownerCountAfter}`, nextOwners);
       }
       this.battleCellOwners = nextOwners;
+      // 相手の新規クレームセルの写真を非同期フェッチ（セル上表示用）
+      // battleOpponentPhotos[idx] が undefined → 未取得なのでフェッチ試行
+      // null → 試行済み（写真なし or 取得失敗）, string → キャッシュ済み
+      Object.entries(nextOwners).forEach(([idxStr, ownerId]) => {
+        const idx = Number(idxStr);
+        if (ownerId === this.battlePlayerId) return; // 自分のセルはスキップ
+        if (this.battleOpponentPhotos[idx] !== undefined) return; // 試行済み
+        this.battleOpponentPhotos[idx] = null; // フェッチ試行済みフラグ
+        this.fetchOpponentCellPhoto(idx, ownerId).then(data => {
+          if (data) {
+            this.battleOpponentPhotos[idx] = data;
+            this._applyCellPhoto(idx, data);
+          }
+        }).catch(() => {});
+      });
       // BINGO 所有権をサーバーデータから決定論的に再計算（全端末で一致させる）
       this.battleBingoOwners = this.recomputeBattleBingoOwners();
       if (changed) {
@@ -937,9 +952,12 @@ class OsanpoBingo {
   // ボードをレンダリング
   renderBoard() {
     if (!this.boardElement) return;
-    
+
     this.boardElement.innerHTML = '';
-    
+
+    // バトル: ビンゴライン所有者カラーマップを事前計算（ループ内で毎回計算しない）
+    const bingoLineColors = this.getBattleBingoLineCellColors();
+
     this.board.forEach((topic, index) => {
       const cell = document.createElement('div');
       cell.className = 'bingo-cell';
@@ -952,7 +970,10 @@ class OsanpoBingo {
       }
 
       // 写真がある場合（上に写真・下にテキストの構成で描画）
-      const hasPhoto = !!this.photos[index];
+      // バトル: 相手マスの場合は battleOpponentPhotos も参照（自分写真優先）
+      const isOpponentCell = this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId;
+      const displayPhotoUrl = this.photos[index] || (isOpponentCell ? (this.battleOpponentPhotos[index] || null) : null);
+      const hasPhoto = !!displayPhotoUrl;
       if (hasPhoto) {
         cell.classList.add('has-photo');
       }
@@ -981,6 +1002,9 @@ class OsanpoBingo {
       const isInBingoLine = this.bingoLines.some(line => line.includes(index));
       if (isInBingoLine) {
         cell.classList.add('bingo');
+        // バトル: ライン所有者色クラスを付与（ライン全体を統一色で表示）
+        const blc = bingoLineColors[index];
+        if (blc) cell.classList.add(`bingo-line-${blc}`);
       }
       // リーチラインの「残り1マス（誰にも取られていないマス）」のみ点滅
       // バトルでは相手取得済みも含めて isAnyCellClaimed でチェックする
@@ -1014,8 +1038,8 @@ class OsanpoBingo {
 
       if (hasPhoto) {
         cell.innerHTML = displayText
-          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${this.photos[index]}" alt=""></div><div class="cell-text ${sizeClass}">${displayText}</div>`
-          : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${this.photos[index]}" alt=""></div>`;
+          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div><div class="cell-text ${sizeClass}">${displayText}</div>`
+          : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div>`;
       } else {
         cell.innerHTML = displayText
           ? `${getTopicIcon(topic)}<div class="cell-text ${sizeClass}">${displayText}</div>`
@@ -1040,9 +1064,61 @@ class OsanpoBingo {
   }
 
   // セルの状態（写真・マーク・ビンゴライン・所有者色）を差分更新
+  /**
+   * バトルモード: 各セルのビンゴライン所有者色を返す。
+   * {cellIndex: 'blue'|'red'|'yellow'|'green'} 形式。
+   * 複数ビンゴライン交差セルは自分のラインを優先し、次に早いラインを使用。
+   */
+  getBattleBingoLineCellColors() {
+    if (this.gameType !== 'battle') return {};
+    const lines = this.getAllLines();
+    const result = {};
+    Object.entries(this.battleBingoOwners).forEach(([lineIdxStr, ownerId]) => {
+      const line = lines[Number(lineIdxStr)];
+      if (!line) return;
+      const color = parseOwnerColor(ownerId);
+      const isSelf = (ownerId === this.battlePlayerId);
+      line.forEach(cellIdx => {
+        // 未設定 or 自分のラインで上書き（自分ビンゴを優先表示）
+        if (!result[cellIdx] || isSelf) {
+          result[cellIdx] = color;
+        }
+      });
+    });
+    return result;
+  }
+
+  /**
+   * 指定セルに写真を非同期適用するDOMヘルパー（相手写真フェッチ後の更新用）。
+   */
+  _applyCellPhoto(index, photoUrl) {
+    if (!this.boardElement || !photoUrl) return;
+    const cell = this.boardElement.querySelector(`.bingo-cell[data-index="${index}"]`);
+    if (!cell) return;
+    const existing = cell.querySelector('.cell-photo-wrap');
+    if (existing) {
+      const img = existing.querySelector('.cell-photo-img');
+      if (img && img.src !== photoUrl) img.src = photoUrl;
+    } else {
+      const existingIcon = cell.querySelector('.cell-icon');
+      if (existingIcon) existingIcon.remove();
+      const wrap = document.createElement('div');
+      wrap.className = 'cell-photo-wrap';
+      const img = document.createElement('img');
+      img.className = 'cell-photo-img';
+      img.src = photoUrl;
+      img.alt = '';
+      wrap.appendChild(img);
+      cell.insertBefore(wrap, cell.firstChild);
+      cell.classList.add('has-photo');
+    }
+  }
+
   // DOM再構築なし。写真の追加/削除は単一セルだけ DOM パッチで対応（flicker防止）
   updateBoardOwnership() {
     if (!this.boardElement) return;
+    // バトル: ビンゴライン所有者カラーマップを事前計算（ループ内で毎回計算しない）
+    const bingoLineColors = this.getBattleBingoLineCellColors();
     this.boardElement.querySelectorAll('.bingo-cell').forEach(cell => {
       const index = parseInt(cell.dataset.index, 10);
       if (isNaN(index)) return;
@@ -1060,12 +1136,12 @@ class OsanpoBingo {
       const isUnclaimedReach = !isInBingoLine && !this.isAnyCellClaimed(index) &&
         this.reachLines.some(line => line.includes(index));
 
-      // 写真DOMの同期：this.photos[index] と DOM の状態が乖離していたら修正
-      const photoUrl = this.photos[index] || '';
+      // 写真DOMの同期：自分写真優先、バトルでは相手写真も表示
+      const isOpponentCell = this.gameType === 'battle' && ownerId && ownerId !== this.battlePlayerId;
+      const photoUrl = this.photos[index] || (isOpponentCell ? (this.battleOpponentPhotos[index] || '') : '') || '';
       const cellHasPhotoClass = cell.classList.contains('has-photo');
       if (photoUrl && !cellHasPhotoClass) {
         // 写真が新規追加 → 既存アイコンを除去してから先頭に photo-wrap を挿入
-        // （renderBoard と同じ構成にする：cell-icon が残ると写真と半々になるバグを防ぐ）
         const existingIcon = cell.querySelector('.cell-icon');
         if (existingIcon) existingIcon.remove();
         const wrap = document.createElement('div');
@@ -1091,6 +1167,12 @@ class OsanpoBingo {
       cell.classList.toggle('marked', isMarked);
       cell.classList.toggle('bingo', isInBingoLine);
       cell.classList.toggle('reach', isUnclaimedReach);
+
+      // バトル: ビンゴライン所有者色クラスをリセット→付与
+      ['bingo-line-blue', 'bingo-line-red', 'bingo-line-yellow', 'bingo-line-green'].forEach(c => cell.classList.remove(c));
+      if (isInBingoLine && bingoLineColors[index]) {
+        cell.classList.add(`bingo-line-${bingoLineColors[index]}`);
+      }
 
       // 所有者色クラスをリセットしてから付与
       ['claimed', 'claimed-self', 'locked',
