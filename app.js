@@ -1867,7 +1867,9 @@ class OsanpoBingo {
   resetAndGoToTop() {
     this.stopBattleSyncLoop();
     try {
-      localStorage.removeItem('osanpoBingo');
+      localStorage.removeItem(this._storageKey);
+      // 旧フォーマット(固定キー)の残存データも念のため削除
+      if (this._storageKey !== 'osanpoBingo') localStorage.removeItem('osanpoBingo');
     } catch (e) {}
     // IDB の写真も削除（次セッションに持ち越さない）
     this._revokeAllPhotoURLs();
@@ -3349,6 +3351,14 @@ class OsanpoBingo {
   }
   
   
+  // ストレージキー: バトルモードは合言葉ごとに分離（同一PC複数タブの競合防止）
+  get _storageKey() {
+    if (this.gameType === 'battle' && this.roomCode && this.roomCode !== 'solo') {
+      return `osanpoBingo_battle_${this.roomCode}`;
+    }
+    return 'osanpoBingo';
+  }
+
   // LocalStorageに保存（写真は IndexedDB で管理するため含めない）
   saveToStorage() {
     try {
@@ -3372,7 +3382,7 @@ class OsanpoBingo {
         landmarkMode: this.landmarkMode,
         landmarkRegion: this.landmarkRegion
       };
-      localStorage.setItem('osanpoBingo', JSON.stringify(data));
+      localStorage.setItem(this._storageKey, JSON.stringify(data));
     } catch (error) {
       console.error('❌ 保存エラー:', error);
       if (error.name === 'QuotaExceededError') {
@@ -3384,7 +3394,7 @@ class OsanpoBingo {
   // LocalStorageから読み込み
   loadFromStorage() {
     try {
-      const json = localStorage.getItem('osanpoBingo');
+      const json = localStorage.getItem(this._storageKey);
       if (!json) return false;
       
       const data = JSON.parse(json);
