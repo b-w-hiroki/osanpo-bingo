@@ -794,7 +794,18 @@ class OsanpoBingo {
    */
   async pauseBattleGame() {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return;
-    const settings = await this.fetchRoomSettings(this.roomCode) || {};
+    // fetchRoomSettings が null を返した場合はローカルの設定値でフォールバック。
+    // null のまま {} に paused だけ書くと difficulty 等の既存設定が失われる。
+    const existing = await this.fetchRoomSettings(this.roomCode);
+    const settings = existing ?? {
+      difficulty:   this.difficulty,
+      topicSetId:   this.topicSetId,
+      landmarkMode: this.landmarkMode,
+      landmarkRegion: this.landmarkRegion,
+      playMode:     this.playMode,
+      creatorId:    this.battlePlayerId,
+      customTopics: this.customTopics || []
+    };
     settings.paused    = true;
     settings.pauseTime = Date.now();
     await this.saveRoomSettingsToServer(this.roomCode, settings);
@@ -847,7 +858,10 @@ class OsanpoBingo {
         'Content-Type': 'application/json',
         apikey: key,
         Authorization: `Bearer ${key}`,
-        Prefer: 'resolution=ignore-duplicates,return=representation'
+        // return=minimal: レスポンスボディなし。photo_data を送り返さず帯域節約。
+        // 201 Created = 新規INSERT成功（クレーム取得）
+        // 200 OK      = UNIQUE重複でスキップ（既に誰かが所持）
+        Prefer: 'resolution=ignore-duplicates,return=minimal'
       },
       body: JSON.stringify(postBody)
     });
@@ -857,10 +871,9 @@ class OsanpoBingo {
       this.updateDebugPanel();
       throw new Error(`claim failed: ${postRes.status}`);
     }
-    const postRows = await postRes.json();
 
-    // 取得成功
-    if (Array.isArray(postRows) && postRows.length > 0) {
+    // 取得成功（201 = 新規INSERT）
+    if (postRes.status === 201) {
       this.lastBattleSyncStatus = 'claim_ok';
       this.lastBattleSyncError = '';
       this.updateDebugPanel();
@@ -1101,7 +1114,9 @@ class OsanpoBingo {
     this._cellClickBusy = true;
     try {
       if (this.gameType === 'battle' && this.battleBackend.enabled && this.roomCode && this.roomCode !== 'solo') {
-        await this.syncBattleOwnersFromServer();
+        // await しない: バックグラウンドで最新状態を取得しつつ、現在の battleCellOwners
+        // でモーダルを即座に開いてレスポンスを改善（2秒ループで既に最新に近い）
+        this.syncBattleOwnersFromServer().catch(() => {});
       }
 
       const ownerId = this.getCellOwnerId(index);
@@ -1113,7 +1128,7 @@ class OsanpoBingo {
 
       if (this.playMode === 'markOnly') {
         if (this.gameType === 'battle') {
-          showAlert('バトルでは写真アップロード時にマス取得となります。');
+          // バトルでは markOnly でも写真撮影でマス取得 → モーダルを開く（alert なし）
           this.showCellModal(index);
           return;
         }
@@ -1617,34 +1632,32 @@ class OsanpoBingo {
       }
     }
     // スコアボード（バトル／スタンダード共通）
+    // innerHTML の全書き換えを抑制: 内容が変わった場合のみ更新（2秒ループでの点滅防止）
     const scoreboardEl = document.getElementById('battleScoreboard');
     if (scoreboardEl) {
+      let nextHtml;
       if (isBattle) {
         const scores = this.getBattleScores();
-        scoreboardEl.innerHTML = scores.map(p => {
+        nextHtml = scores.map(p => {
           const isMe = p.id === this.battlePlayerId;
-          return `
-          <div class="battle-score-row${isMe ? ' battle-score-row--me' : ''}">
-            <span class="battle-score-dot battle-color-${p.color}"></span>
-            <span class="battle-score-name">${p.name}${isMe ? '<span class="battle-score-you">あなた</span>' : ''}</span>
-            <span class="battle-score-marks">${p.marks}マス</span>
-            <span class="battle-score-bingo">BINGO×${p.bingos}</span>
-            <span class="battle-score-total">${p.total}pt</span>
-          </div>`;
+          return `<div class="battle-score-row${isMe ? ' battle-score-row--me' : ''}">` +
+            `<span class="battle-score-dot battle-color-${p.color}"></span>` +
+            `<span class="battle-score-name">${p.name}${isMe ? '<span class="battle-score-you">あなた</span>' : ''}</span>` +
+            `<span class="battle-score-marks">${p.marks}マス</span>` +
+            `<span class="battle-score-bingo">BINGO×${p.bingos}</span>` +
+            `<span class="battle-score-total">${p.total}pt</span></div>`;
         }).join('');
-        scoreboardEl.style.display = '';
       } else {
         // スタンダードモード：マーク数とBINGO本数を表示
         const markedNonFree = [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
         const bingoCount = this.bingoLines.length;
-        scoreboardEl.innerHTML = `
-          <div class="battle-score-row">
-            <span class="battle-score-name">あなた</span>
-            <span class="battle-score-marks">${markedNonFree}マス</span>
-            <span class="battle-score-bingo">BINGO×${bingoCount}</span>
-          </div>`;
-        scoreboardEl.style.display = '';
+        nextHtml = `<div class="battle-score-row">` +
+          `<span class="battle-score-name">あなた</span>` +
+          `<span class="battle-score-marks">${markedNonFree}マス</span>` +
+          `<span class="battle-score-bingo">BINGO×${bingoCount}</span></div>`;
       }
+      if (scoreboardEl.innerHTML !== nextHtml) scoreboardEl.innerHTML = nextHtml;
+      scoreboardEl.style.display = '';
     }
     this.updateDebugPanel();
   }
@@ -2895,7 +2908,9 @@ class OsanpoBingo {
             landmarkMode: this.landmarkMode,
             landmarkRegion: this.landmarkRegion,
             playMode: this.playMode,
-            creatorId: this.battlePlayerId
+            creatorId: this.battlePlayerId,
+            // カスタムお題: 参加者が同じボードを生成できるよう送信
+            customTopics: this.customTopics || []
           });
         }
         this.registerPlayerPresence();
@@ -3005,21 +3020,25 @@ class OsanpoBingo {
         this.playMode = resolvedSettings.playMode || 'photo';
         this.landmarkMode = resolvedSettings.landmarkMode || false;
         this.landmarkRegion = resolvedSettings.landmarkRegion || 'all';
+        // カスタムお題: 作成者が設定したものを取得して同じボードを生成
+        const joinCustomTopics = Array.isArray(resolvedSettings.customTopics)
+          ? resolvedSettings.customTopics : [];
+        this.customTopics = joinCustomTopics;
 
         this.gameStartTime = Date.now();
         this.battleCellOwners = {};
         this.playerCount = 1;
         // GA: ゲーム開始（参加）
         sendGA('game_start', {
-          difficulty:    difficulty,
-          game_type:     'battle',
-          play_mode:     this.playMode,
-          topic_set:     this.topicSetId || 'default',
-          landmark_mode: this.landmarkMode ? 1 : 0,
-          custom_topic_count: 0,
+          difficulty:         difficulty,
+          game_type:          'battle',
+          play_mode:          this.playMode,
+          topic_set:          this.topicSetId || 'default',
+          landmark_mode:      this.landmarkMode ? 1 : 0,
+          custom_topic_count: joinCustomTopics.length,
         });
 
-        this.createBoard(roomCode, difficulty, '', []);
+        this.createBoard(roomCode, difficulty, '', joinCustomTopics);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
         this.totalDistance = 0;
