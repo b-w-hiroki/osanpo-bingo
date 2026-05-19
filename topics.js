@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-19 00:13:54（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-20 00:25:36（walking_bingo_master.xlsx より自動生成）
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -74,7 +74,7 @@ const topicIconMap = {
   79: 'icon079_ガチャガチャ.png',
   80: 'icon080_店先の箱.png',
   81: 'icon081_テイクアウト窓口.png',
-  82: 'icon082_商店街の旗.png',
+  82: 'icon082_住宅街の旗.png',
   83: 'icon083_レジ横の小窓.png',
   84: 'icon084_店のライト.png',
   87: 'icon087_通学路標識.png',
@@ -199,7 +199,7 @@ const topicIconMap = {
   428: 'icon428_工事中カラー.png',
   430: 'icon430_古いステッカー跡.png',
   432: 'icon432_半分はがれた表示.png',
-  442: 'icon442_グレーチング.png',
+  442: 'icon442_グレーチング端.png',
   461: 'icon461_傾いたポール.png',
   462: 'icon462_傾いた看板.png',
   463: 'icon463_曲がったフェンス.png',
@@ -207,8 +207,8 @@ const topicIconMap = {
   466: 'icon466_シーサー.png',
   467: 'icon467_ふくろう置き物.png',
   468: 'icon468_黄色い量販店.png',
-  469: 'icon469_商店街フラッグキャラ.png',
-  470: 'icon470_商店街バナーキャラ.png',
+  469: 'icon469_住宅街フラッグキャラ.png',
+  470: 'icon470_住宅街バナーキャラ.png',
   471: 'icon471_店先ポップスタンドキャラ.png',
   472: 'icon472_アーケード装飾キャラ.png',
   473: 'icon473_シャッターキャラ絵.png',
@@ -275,7 +275,7 @@ const topicIconMap = {
   575: 'icon575_長靴.png',
   576: 'icon576_グラフィティアート.png',
   577: 'icon577_クレープ屋さん.png',
-  578: 'icon578_珍しいポスト.png',
+  578: 'icon578_ポスト.png',
   579: 'icon579_オブジェ.png',
   580: 'icon580_町中華.png',
   581: 'icon581_おしるこ缶（冬）.png',
