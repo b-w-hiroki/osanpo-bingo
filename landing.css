@@ -590,7 +590,7 @@ body {
   }
 
   .main-content {
-    padding: 22px 16px 32px;
+    padding: 22px 16px 20px;
     padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
   }
 
@@ -629,7 +629,7 @@ body {
   }
 
   .main-content {
-    padding: 18px 12px 28px;
+    padding: 18px 12px 18px;
     padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
   }
 }
