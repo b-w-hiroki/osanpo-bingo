@@ -2037,6 +2037,7 @@ h1 {
   white-space: pre-line;
   overflow-wrap: break-word;
   text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .dialog-modal-actions {
