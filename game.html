@@ -558,6 +558,51 @@
           </a>
         </div>
 
+        <!-- 広告（i-mobile・結果画面下／インラインバナー・PC/SP出し分け・表示時に読込） -->
+        <div class="ad-slot ad-slot-result" id="adSlotResult">
+          <div class="ad-slot-inner">
+            <span class="ad-slot-label">広告</span>
+            <div id="imAdSlotResult"></div>
+          </div>
+        </div>
+        <script>
+          // 結果画面は初期非表示のため、広告枠が画面に入ったタイミングでi-mobileバナーを読み込む
+          (function () {
+            var host = document.getElementById('imAdSlotResult');
+            if (!host) return;
+            var loaded = false;
+            function loadAd() {
+              if (loaded) return;
+              loaded = true;
+              var isMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone|webOS|BlackBerry/i.test(navigator.userAgent);
+              var spot = isMobile
+                ? { mid: 593149, asid: 1932614, elementid: 'im-2c65d2d72137451cb2d7df43e664ab56' }
+                : { mid: 593148, asid: 1932615, elementid: 'im-a420dcb83a834a079e2f38bed1fc31a9' };
+              var box = document.createElement('div');
+              box.id = spot.elementid;
+              host.appendChild(box);
+              (window.adsbyimobile = window.adsbyimobile || []).push({
+                pid: 84969, mid: spot.mid, asid: spot.asid,
+                type: 'banner', display: 'inline', elementid: spot.elementid
+              });
+              var s = document.createElement('script');
+              s.async = true;
+              s.src = 'https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104';
+              host.appendChild(s);
+            }
+            if ('IntersectionObserver' in window) {
+              var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                  if (e.isIntersecting) { loadAd(); io.disconnect(); }
+                });
+              });
+              io.observe(host);
+            } else {
+              loadAd();
+            }
+          })();
+        </script>
+
         <button id="exitScreenshotBtn" class="link-btn result-exit-btn">← トップへ戻る</button>
       </div>
     </div>
