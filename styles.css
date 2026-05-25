@@ -914,20 +914,45 @@ h1 {
 
 .info-details {
   margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--cell-border);
 }
 
 .info-details summary {
   cursor: pointer;
-  font-weight: 600;
-  color: var(--primary-dark);
-  margin-bottom: var(--spacing-sm);
+  font-weight: 700;
+  color: #2e6648;
   user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1.5px solid #4aaf54;
+  border-radius: 12px;
+  background: rgba(74, 175, 84, 0.07);
+  transition: background 0.18s, border-color 0.18s;
 }
 
-.info-details summary:hover {
-  color: var(--primary);
+.info-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.info-details summary::after {
+  content: "▼";
+  font-size: 0.7em;
+  color: #4aaf54;
+  flex: none;
+  transition: transform 0.2s;
+}
+
+.info-details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.info-details summary:hover,
+.info-details summary:active {
+  background: rgba(74, 175, 84, 0.16);
+  border-color: #2e6648;
 }
 
 .info-details ul {
@@ -2011,6 +2036,7 @@ h1 {
   margin: 0 0 var(--spacing-xl) 0;
   white-space: pre-line;
   overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .dialog-modal-actions {
@@ -2289,10 +2315,8 @@ h1 {
   }
 
   .info-details summary {
-    padding: 12px 0;
+    padding: 12px 16px;
     min-height: 44px;
-    display: flex;
-    align-items: center;
   }
 
   .footer {
@@ -2418,7 +2442,8 @@ h1 {
 
 /* 結果共有画面の広告枠 */
 .ad-slot-result {
-  margin: 16px 0 8px;
+  margin: 0 0 8px;
+  padding: 4px 0;
 }
 
 /* ゲーム画面（遊び方の下）の広告枠 */
