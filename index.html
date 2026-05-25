@@ -195,18 +195,35 @@
       </a>
     </div>
 
-    <!-- 広告（i-mobile・フッター直前／インラインバナー） -->
+    <!-- 広告（i-mobile・フッター直前／インラインバナー・PC/SP出し分け） -->
     <div class="ad-slot ad-slot-footer" id="adSlotFooter">
       <div class="ad-slot-inner">
         <span class="ad-slot-label">広告</span>
-        <!-- i-mobile -->
-        <div id="im-2c65d2d72137451cb2d7df43e664ab56">
-        <script async src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"></script>
-        <script>(window.adsbyimobile=window.adsbyimobile||[]).push({pid:84969,mid:593149,asid:1932614,type:"banner",display:"inline",elementid:"im-2c65d2d72137451cb2d7df43e664ab56"})</script>
-        </div>
-        <!-- /i-mobile -->
+        <div id="imAdSlot"></div>
       </div>
     </div>
+    <script>
+      // i-mobile: 端末に応じてスポットを出し分け（SP用 / PC用）。インラインバナーのみ・オーバーレイ不使用。
+      (function () {
+        var isMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone|webOS|BlackBerry/i.test(navigator.userAgent);
+        var spot = isMobile
+          ? { mid: 593149, asid: 1932614, elementid: 'im-2c65d2d72137451cb2d7df43e664ab56' }
+          : { mid: 593148, asid: 1932615, elementid: 'im-a420dcb83a834a079e2f38bed1fc31a9' };
+        var host = document.getElementById('imAdSlot');
+        if (!host) return;
+        var box = document.createElement('div');
+        box.id = spot.elementid;
+        host.appendChild(box);
+        (window.adsbyimobile = window.adsbyimobile || []).push({
+          pid: 84969, mid: spot.mid, asid: spot.asid,
+          type: 'banner', display: 'inline', elementid: spot.elementid
+        });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104';
+        host.appendChild(s);
+      })();
+    </script>
 
     <!-- フッター -->
     <footer class="footer">
