@@ -1584,11 +1584,11 @@ h1 {
   padding-bottom: 2px;
 }
 
-/* 写真エリア: テキスト量に関わらず固定比率（セル高さの約65%） */
+/* 写真エリア: セル高さの約78%を写真に割り当て */
 .bingo-cell.has-photo .cell-photo-wrap {
   flex: none;
   width: 100%;
-  height: 65%;
+  height: 78%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1606,15 +1606,17 @@ h1 {
   transform: translateZ(0); /* GPU合成でiOSのレンダリング品質を向上 */
 }
 
-/* テキスト: 残りスペースを使用（overflow は bingo-cell の overflow:hidden で隠れる） */
+/* テキスト: アップ前アイコン時と同じフォントサイズ・コンパクトな高さ */
 .bingo-cell.has-photo .cell-text {
-  flex: 1;
+  flex: none;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  line-height: 1.2;
+  line-height: 1.1;
   color: inherit;
+  padding: 0 1px;
 }
 
 /* ==================== 終了・結果画面 ==================== */

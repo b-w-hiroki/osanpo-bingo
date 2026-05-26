@@ -1948,8 +1948,8 @@ class OsanpoBingo {
             this._stopBattleRealtime();
             this.showResultView(); // showEndScreen は存在しないため正しいメソッドを使用
           } else {
-            // 「続ける」→ 1時間後に再確認
-            this._nextLongPlayCheckMs = Date.now() + RECHECK_INTERVAL_MS;
+            // 「続ける」→ 再表示しない（1回きり）
+            this._nextLongPlayCheckMs = Infinity;
           }
         });
       }
