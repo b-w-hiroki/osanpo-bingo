@@ -1522,20 +1522,37 @@ class OsanpoBingo {
       }, i * 70);
     });
 
+    // バトルモード: 新ラインの先頭セルから bingo-line-* クラスで勝者色を取得
+    let bingoPlayerColor = null;
+    if (this.gameType === 'battle' && newLines.length > 0) {
+      const firstIdx = newLines[0][0];
+      const firstCell = this.boardElement?.querySelector(`[data-index="${firstIdx}"]`);
+      if (firstCell) {
+        for (const c of ['blue', 'red', 'yellow', 'green']) {
+          if (firstCell.classList.contains(`bingo-line-${c}`)) { bingoPlayerColor = c; break; }
+        }
+      }
+    }
+
     // セル点灯後にコンフェッティ＋中央テキスト
     const delay = newCellIndices.length * 70 + 100;
     setTimeout(() => {
-      this._launchConfetti();
-      this._showBingoText(allBingoLines.length);
+      this._launchConfetti(bingoPlayerColor);
+      this._showBingoText(allBingoLines.length, bingoPlayerColor);
     }, delay);
   }
 
-  _launchConfetti() {
+  _launchConfetti(playerColor = null) {
     const wrap = document.createElement('div');
     wrap.className = 'confetti-wrap';
     document.body.appendChild(wrap);
 
-    const colors = ['#d32f2f', '#f9a825', '#2e7d32', '#1565c0', '#6a1b9a', '#e65100', '#c2185b'];
+    const PLAYER_COLOR_HEX = { blue: '#1565c0', red: '#c62828', yellow: '#f57f17', green: '#2e7d32' };
+    const baseColors = ['#d32f2f', '#f9a825', '#2e7d32', '#1565c0', '#6a1b9a', '#e65100', '#c2185b'];
+    // バトルモードでは勝者色を半数に配分
+    const colors = playerColor && PLAYER_COLOR_HEX[playerColor]
+      ? Array(4).fill(PLAYER_COLOR_HEX[playerColor]).concat(['#fff', ...baseColors])
+      : baseColors;
     for (let i = 0; i < 70; i++) {
       const p = document.createElement('div');
       const size = 6 + Math.random() * 9;
@@ -1560,9 +1577,19 @@ class OsanpoBingo {
     setTimeout(() => wrap.remove(), 3800);
   }
 
-  _showBingoText(count) {
+  _showBingoText(count, playerColor = null) {
     const el = document.createElement('div');
     el.className = 'bingo-celebration-text';
+    // バトルモードでは勝者色でバナーを彩る
+    const BINGO_COLOR_STYLE = {
+      blue:   'background:#1565c0;border-color:#0d47a1',
+      red:    'background:#c62828;border-color:#b71c1c',
+      yellow: 'background:#e65100;border-color:#bf360c',
+      green:  'background:#2e7d32;border-color:#1b5e20',
+    };
+    if (playerColor && BINGO_COLOR_STYLE[playerColor]) {
+      el.style.cssText = BINGO_COLOR_STYLE[playerColor];
+    }
     el.innerHTML = `<span class="big">🎉 BINGO!</span><span class="sub">${count > 1 ? count + '本BINGO達成！' : 'BINGO達成！'}</span>`;
     document.body.appendChild(el);
     el.addEventListener('animationend', () => el.remove(), { once: true });

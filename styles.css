@@ -313,11 +313,11 @@ h1 {
 .bingo-cell.claimed-red.claimed-self    { background: #e53935; border-color: #c62828; color: #fff; }
 .bingo-cell.claimed-yellow.claimed-self { background: #ffa000; border-color: #ff6f00; color: #fff; }
 .bingo-cell.claimed-green.claimed-self  { background: #43a047; border-color: #2e7d32; color: #fff; }
-/* 相手のマス: リーチ(薄紫)と区別できるシアン系 */
-.bingo-cell.claimed-blue.locked        { background: #b3e5fc; border-color: #4fc3f7; color: #01579b; }
-.bingo-cell.claimed-red.locked         { background: #ffcdd2; border-color: #ef9a9a; color: #7f0000; }
-.bingo-cell.claimed-yellow.locked      { background: #fff9c4; border-color: #fff176; color: #e65100; }
-.bingo-cell.claimed-green.locked       { background: #c8e6c9; border-color: #a5d6a7; color: #1b5e20; }
+/* 相手のマス: 取った人の色（self より1段暗いシェード）で「誰が取ったか」を明示 */
+.bingo-cell.claimed-blue.locked        { background: #1565c0; border-color: #0d47a1; color: #fff; }
+.bingo-cell.claimed-red.locked         { background: #c62828; border-color: #b71c1c; color: #fff; }
+.bingo-cell.claimed-yellow.locked      { background: #f57f17; border-color: #e65100; color: #fff; }
+.bingo-cell.claimed-green.locked       { background: #2e7d32; border-color: #1b5e20; color: #fff; }
 /* ビンゴライン: ライン所有者色で全セル統一（bingo-line-* クラスで上書き）
    ※ styles.css 後半の .bingo-cell.bingo ルールより後に配置し、確実に上書き */
 
