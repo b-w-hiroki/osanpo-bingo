@@ -313,11 +313,11 @@ h1 {
 .bingo-cell.claimed-red.claimed-self    { background: #e53935; border-color: #c62828; color: #fff; }
 .bingo-cell.claimed-yellow.claimed-self { background: #ffa000; border-color: #ff6f00; color: #fff; }
 .bingo-cell.claimed-green.claimed-self  { background: #43a047; border-color: #2e7d32; color: #fff; }
-/* 相手のマス: リーチ(薄紫)と区別できるシアン系 */
-.bingo-cell.claimed-blue.locked        { background: #b3e5fc; border-color: #4fc3f7; color: #01579b; }
-.bingo-cell.claimed-red.locked         { background: #ffcdd2; border-color: #ef9a9a; color: #7f0000; }
-.bingo-cell.claimed-yellow.locked      { background: #fff9c4; border-color: #fff176; color: #e65100; }
-.bingo-cell.claimed-green.locked       { background: #c8e6c9; border-color: #a5d6a7; color: #1b5e20; }
+/* 相手のマス: 取った人の色（self より1段暗いシェード）で「誰が取ったか」を明示 */
+.bingo-cell.claimed-blue.locked        { background: #1565c0; border-color: #0d47a1; color: #fff; }
+.bingo-cell.claimed-red.locked         { background: #c62828; border-color: #b71c1c; color: #fff; }
+.bingo-cell.claimed-yellow.locked      { background: #f57f17; border-color: #e65100; color: #fff; }
+.bingo-cell.claimed-green.locked       { background: #2e7d32; border-color: #1b5e20; color: #fff; }
 /* ビンゴライン: ライン所有者色で全セル統一（bingo-line-* クラスで上書き）
    ※ styles.css 後半の .bingo-cell.bingo ルールより後に配置し、確実に上書き */
 
@@ -1609,11 +1609,11 @@ h1 {
   padding-bottom: 2px;
 }
 
-/* 写真エリア: テキスト量に関わらず固定比率（セル高さの約65%） */
+/* 写真エリア: セル高さの約78%を写真に割り当て */
 .bingo-cell.has-photo .cell-photo-wrap {
   flex: none;
   width: 100%;
-  height: 65%;
+  height: 78%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1631,15 +1631,17 @@ h1 {
   transform: translateZ(0); /* GPU合成でiOSのレンダリング品質を向上 */
 }
 
-/* テキスト: 残りスペースを使用（overflow は bingo-cell の overflow:hidden で隠れる） */
+/* テキスト: アップ前アイコン時と同じフォントサイズ・コンパクトな高さ */
 .bingo-cell.has-photo .cell-text {
-  flex: 1;
+  flex: none;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  line-height: 1.2;
+  line-height: 1.1;
   color: inherit;
+  padding: 0 1px;
 }
 
 /* ==================== 終了・結果画面 ==================== */
