@@ -183,29 +183,31 @@ h1 {
   width: 100%;
 }
 
-/* ボード上部ヘッダー: ？ボタン + 将来の見出し用レイアウト */
+/* ボード上部ヘッダー: バナー（左・flex拡張）＋ ？ボタン（右固定） */
 .board-header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 6px 8px 2px;
+  gap: 8px;
+  padding: 4px 0 4px;
   min-height: 40px;
 }
 
-/* タイトルバナー: board-wrap 直下に配置。board-wrap と同幅になるよう width:100% のみ設定 */
+/* タイトルバナー: board-headerの余白を埋める。高さ固定でアスペクト比を保つ */
 .board-title-banner {
+  flex: 1;
+  min-width: 0;
   display: block;
-  width: 100%;
+  height: 40px;
+  width: auto;
   max-width: 100%;
-  height: auto;
-  margin-bottom: 4px;
+  object-fit: contain;
+  object-position: left center;
 }
 
 /* ボードラッパー */
 .board-wrap {
   display: block;
   width: 100%;
-  overflow: hidden;
 }
 
 /* 遊び方（？）ボタン: ボード上部ヘッダー内に配置 */
