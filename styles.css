@@ -179,6 +179,8 @@ h1 {
 /* ==================== メインエリア ==================== */
 .main {
   flex: 0 0 auto;
+  min-width: 0; /* flexbox min-width:auto バグ対策（大きな子要素がコンテナ幅を突き破るのを防ぐ） */
+  width: 100%;
 }
 
 /* ボード上部ヘッダー: ？ボタン + 将来の見出し用レイアウト */
@@ -194,6 +196,7 @@ h1 {
 .board-title-banner {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
   margin-bottom: 4px;
 }
@@ -201,6 +204,8 @@ h1 {
 /* ボードラッパー */
 .board-wrap {
   display: block;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* 遊び方（？）ボタン: ボード上部ヘッダー内に配置 */
