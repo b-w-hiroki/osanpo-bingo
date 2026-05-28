@@ -190,11 +190,10 @@ h1 {
   min-height: 40px;
 }
 
-/* タイトルバナー: board-wrap 直下に配置。幅はビンゴ枠に合わせるが最大340px（高さ約42px） */
+/* タイトルバナー: board-wrap 直下に配置。board-wrap と同幅になるよう width:100% のみ設定 */
 .board-title-banner {
   display: block;
   width: 100%;
-  max-width: 340px;
   height: auto;
   margin-bottom: 4px;
 }
