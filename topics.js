@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-27 22:52:20（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-28 17:45:34（walking_bingo_master.xlsx より自動生成）
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -998,9 +998,9 @@ const topicSets = [
     topicIds: []
   },
   {
-    id: '住宅街',
-    name: '住宅街',
-    description: '住宅街や路地で見つけやすいお題です。',
+    id: '商店街',
+    name: '商店街',
+    description: '商店街や繁華街で見つけやすいお題です。',
     monetizationType: 'free',
     topicIds: []
   },
