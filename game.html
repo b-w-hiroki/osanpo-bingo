@@ -391,13 +391,14 @@
     
     <!-- ビンゴボード -->
     <main class="main">
-      <!-- ボード上部ヘッダー: タイトルバナー + ？ボタン -->
+      <!-- ボード上部ヘッダー: ？ボタン -->
       <div class="board-header">
-        <img src="static/title-banner-1l.jpg" alt="おさんぽビンゴバトル" class="board-title-banner">
         <button type="button" id="howToPlayBtn" class="help-btn" aria-label="遊び方を見る">？</button>
       </div>
 
       <div class="board-wrap">
+        <!-- タイトルバナー: board-wrap と同幅になるよう board-wrap 直下に配置 -->
+        <img src="static/title-banner-1l.jpg" alt="おさんぽビンゴバトル" class="board-title-banner">
         <div id="bingoBoard" class="bingo-board">
           <!-- JavaScriptで動的に生成 -->
         </div>
