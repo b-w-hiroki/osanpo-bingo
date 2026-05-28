@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osanpo-bingo-v144';
+const CACHE_NAME = 'osanpo-bingo-v145';
 const urlsToCache = [
   'index.html',
   'game.html',
