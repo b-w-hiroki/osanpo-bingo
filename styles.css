@@ -185,19 +185,17 @@ h1 {
 .board-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px 4px;
+  justify-content: flex-end;
+  padding: 6px 8px 2px;
   min-height: 40px;
-  gap: 6px;
 }
 
-/* タイトルバナー: ボード幅に追従しつつ右の？ボタンを押しのけない */
+/* タイトルバナー: board-wrap 直下に配置し、ビンゴ枠と同幅で表示 */
 .board-title-banner {
-  flex: 1 1 0;
-  min-width: 0;
-  max-height: 38px;
-  object-fit: contain;
-  object-position: left center;
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 4px;
 }
 
 /* ボードラッパー */
