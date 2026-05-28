@@ -1010,13 +1010,6 @@ const topicSets = [
     description: 'オフィス街や都市部で見つけやすいお題です。',
     monetizationType: 'free',
     topicIds: []
-  },
-  {
-    id: '観光地',
-    name: '観光地',
-    description: '観光地や名所で楽しめるお題です。ランドマークも出現します。',
-    monetizationType: 'free',
-    topicIds: []
   }
 ];
 function getTopicSetById(id) {
