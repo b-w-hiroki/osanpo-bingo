@@ -254,6 +254,7 @@ class OsanpoBingo {
     this.totalDistance = 0;      // 累積メートル
     this.lastPosition = null;    // 最後の GeolocationCoordinates
     this.watchId = null;         // watchPosition ID
+    this.wakeLock = null;        // Screen Wake Lock センチネル
     // 'idle' | 'active' | 'denied' | 'unavailable'
     this.locationState = 'idle';
 
@@ -456,6 +457,12 @@ class OsanpoBingo {
     }
 
     document.addEventListener('visibilitychange', () => {
+      // 画面復帰時、計測中なら Wake Lock を取り直す
+      // （Wake Lock はタブが hidden になると OS により自動解放されるため）
+      if (document.visibilityState === 'visible' && this.watchId != null) {
+        this.requestWakeLock();
+      }
+
       if (!BATTLE_MODE_ENABLED) return;
       if (document.visibilityState === 'visible') {
         // skipInitialSync=true にして startBattleSyncLoop 内の自動sync呼び出しを抑制し、
@@ -1766,6 +1773,10 @@ class OsanpoBingo {
       },
       options
     );
+
+    // 画面ロックによる JS 停止（＝計測の取りこぼし）を防ぐため、
+    // 計測中は Screen Wake Lock で画面を点灯させ続ける。
+    this.requestWakeLock();
   }
 
   /** GPS トラッキング停止 */
@@ -1774,6 +1785,39 @@ class OsanpoBingo {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
     }
+    this.releaseWakeLock();
+  }
+
+  /**
+   * Screen Wake Lock を取得して画面の自動消灯を防ぐ。
+   * Web アプリはバックグラウンド（画面OFF/別アプリ）では JS ごと停止され、
+   * その間 watchPosition も止まって移動距離を取りこぼす。
+   * 計測中ずっと画面を点灯させることで取りこぼしを最小化する。
+   */
+  async requestWakeLock() {
+    if (!('wakeLock' in navigator)) return; // 非対応ブラウザは何もしない
+    if (this.wakeLock) return;              // 二重取得防止
+    try {
+      this.wakeLock = await navigator.wakeLock.request('screen');
+      // OS 都合で勝手に解放された場合に備えてフラグをクリア
+      this.wakeLock.addEventListener('release', () => {
+        this.wakeLock = null;
+      });
+    } catch (e) {
+      // ユーザー操作なし・低バッテリー等で失敗することがある。計測自体は継続。
+      this.wakeLock = null;
+    }
+  }
+
+  /** Screen Wake Lock を解放する */
+  async releaseWakeLock() {
+    if (!this.wakeLock) return;
+    try {
+      await this.wakeLock.release();
+    } catch (e) {
+      /* noop */
+    }
+    this.wakeLock = null;
   }
 
   /**
