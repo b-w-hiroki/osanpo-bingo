@@ -250,14 +250,6 @@ class OsanpoBingo {
     this.lastBattleSyncError = '';
     this.debugPanelEl = null;
 
-    // 移動距離トラッキング
-    this.totalDistance = 0;      // 累積メートル
-    this.lastPosition = null;    // 最後の GeolocationCoordinates
-    this.watchId = null;         // watchPosition ID
-    this.wakeLock = null;        // Screen Wake Lock センチネル
-    // 'idle' | 'active' | 'denied' | 'unavailable'
-    this.locationState = 'idle';
-
     // DOM要素（初期化時に取得）
     this.boardElement = null;
     this.messageElement = null;
@@ -268,7 +260,6 @@ class OsanpoBingo {
     this.difficultyDisplay = null;
     this.playerCountDisplay = null;
     this.opponentClaimedCountElement = null;
-    this.distanceElement = null;
   }
   
   // 初期化
@@ -286,8 +277,7 @@ class OsanpoBingo {
     this.difficultyDisplay = document.getElementById('difficultyDisplay');
     this.playerCountDisplay = document.getElementById('playerCountDisplay');
     this.opponentClaimedCountElement = document.getElementById('opponentClaimedCount');
-    this.distanceElement = document.getElementById('distanceDisplay');
-    
+
     if (!this.boardElement) {
       console.error('❌ bingoBoard 要素が見つかりません');
       return;
@@ -347,7 +337,6 @@ class OsanpoBingo {
         } else {
           this.stopBattleSyncLoop();
         }
-        this.startLocationTracking();
         // 復元されたゲームでも3時間・24時間タイマーを有効にする
         this.startPlayTimer();
       };
@@ -427,12 +416,6 @@ class OsanpoBingo {
       roomCodeStat.addEventListener('click', () => this.copyRoomCode());
     }
 
-    // 距離表示タップ → GPS 許諾を再リクエスト
-    const distanceStat = document.getElementById('distanceStat');
-    if (distanceStat) {
-      distanceStat.addEventListener('click', () => this.handleDistanceTap());
-    }
-    
     // 合言葉モーダル
     this.setupRoomCodeModal();
     this.populateTopicSetSelects();
@@ -457,12 +440,6 @@ class OsanpoBingo {
     }
 
     document.addEventListener('visibilitychange', () => {
-      // 画面復帰時、計測中なら Wake Lock を取り直す
-      // （Wake Lock はタブが hidden になると OS により自動解放されるため）
-      if (document.visibilityState === 'visible' && this.watchId != null) {
-        this.requestWakeLock();
-      }
-
       if (!BATTLE_MODE_ENABLED) return;
       if (document.visibilityState === 'visible') {
         // skipInitialSync=true にして startBattleSyncLoop 内の自動sync呼び出しを抑制し、
@@ -1674,196 +1651,6 @@ class OsanpoBingo {
     }, 1800);
   }
 
-  // ==================== 移動距離トラッキング ====================
-
-  /**
-   * Haversine 式で2点間の距離（メートル）を返す
-   * @param {number} lat1 @param {number} lon1 @param {number} lat2 @param {number} lon2
-   * @returns {number}
-   */
-  haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // 地球半径 (m)
-    const toRad = (d) => (d * Math.PI) / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  /**
-   * メートルを表示文字列にフォーマット
-   * GPS が使えない場合は「測定なし」を返す
-   */
-  formatDistance(meters) {
-    if (this.locationState === 'unavailable' || this.locationState === 'denied') {
-      return '測定なし';
-    }
-    if (this.locationState === 'idle') return '測定なし';
-    if (meters < 1000) return `${Math.round(meters)}m`;
-    return `${(meters / 1000).toFixed(1)}km`;
-  }
-
-  /** 距離表示タップ時：GPS 許諾が取れていなければ再リクエスト */
-  async handleDistanceTap() {
-    // すでに計測中なら何もしない
-    if (this.locationState === 'active') return;
-
-    if (!navigator.geolocation) {
-      showAlert('このブラウザでは位置情報が使用できません。');
-      return;
-    }
-
-    // Permissions API で現在の許諾状態を確認
-    let permState = 'prompt';
-    try {
-      const result = await navigator.permissions.query({ name: 'geolocation' });
-      permState = result.state; // 'granted' | 'denied' | 'prompt'
-    } catch (_) {
-      // Permissions API 非対応ブラウザは prompt として扱う
-    }
-
-    if (permState === 'denied') {
-      // ハード拒否済み → ブラウザ設定への案内
-      showAlert(
-        '位置情報の使用が拒否されています。\n\n' +
-        '距離を計測するには、ブラウザの設定から\nこのサイトの位置情報を「許可」に変更してください。\n\n' +
-        '📱 iPhoneの場合：\n設定 → プライバシーとセキュリティ → 位置情報サービス → Safari\n\n' +
-        '📱 Androidの場合：\nブラウザのアドレスバー横の🔒をタップ → 権限 → 位置情報'
-      );
-      return;
-    }
-
-    // 'prompt' または 'granted' → トラッキング再開
-    this.totalDistance = 0;
-    this.lastPosition = null;
-    this.locationState = 'idle';
-    this.stopLocationTracking();
-    this.startLocationTracking();
-  }
-
-  /** GPS トラッキング開始（パーミッション確認あり） */
-  startLocationTracking() {
-    if (!navigator.geolocation) {
-      this.locationState = 'unavailable';
-      this.updateStats();
-      return;
-    }
-    if (this.watchId != null) return; // 二重起動防止
-
-    this.locationState = 'idle';
-
-    const options = {
-      enableHighAccuracy: true,
-      maximumAge: 5000,
-      timeout: 10000
-    };
-
-    this.watchId = navigator.geolocation.watchPosition(
-      (pos) => this.onLocationUpdate(pos),
-      (err) => {
-        // PERMISSION_DENIED(1) or POSITION_UNAVAILABLE(2) or TIMEOUT(3)
-        if (err.code === 1) {
-          this.locationState = 'denied';
-        } else {
-          this.locationState = 'unavailable';
-        }
-        this.updateStats();
-      },
-      options
-    );
-
-    // 画面ロックによる JS 停止（＝計測の取りこぼし）を防ぐため、
-    // 計測中は Screen Wake Lock で画面を点灯させ続ける。
-    this.requestWakeLock();
-  }
-
-  /** GPS トラッキング停止 */
-  stopLocationTracking() {
-    if (this.watchId != null) {
-      navigator.geolocation.clearWatch(this.watchId);
-      this.watchId = null;
-    }
-    this.releaseWakeLock();
-  }
-
-  /**
-   * Screen Wake Lock を取得して画面の自動消灯を防ぐ。
-   * Web アプリはバックグラウンド（画面OFF/別アプリ）では JS ごと停止され、
-   * その間 watchPosition も止まって移動距離を取りこぼす。
-   * 計測中ずっと画面を点灯させることで取りこぼしを最小化する。
-   */
-  async requestWakeLock() {
-    if (!('wakeLock' in navigator)) return; // 非対応ブラウザは何もしない
-    if (this.wakeLock) return;              // 二重取得防止
-    try {
-      this.wakeLock = await navigator.wakeLock.request('screen');
-      // OS 都合で勝手に解放された場合に備えてフラグをクリア
-      this.wakeLock.addEventListener('release', () => {
-        this.wakeLock = null;
-      });
-    } catch (e) {
-      // ユーザー操作なし・低バッテリー等で失敗することがある。計測自体は継続。
-      this.wakeLock = null;
-    }
-  }
-
-  /** Screen Wake Lock を解放する */
-  async releaseWakeLock() {
-    if (!this.wakeLock) return;
-    try {
-      await this.wakeLock.release();
-    } catch (e) {
-      /* noop */
-    }
-    this.wakeLock = null;
-  }
-
-  /**
-   * 位置情報更新ハンドラ
-   * 精度が低い点・GPS ジャンプはフィルタリングして無視する
-   */
-  onLocationUpdate(pos) {
-    const { latitude, longitude, accuracy } = pos.coords;
-
-    // GPS が取れた時点で active に（精度不問）
-    if (this.locationState !== 'active') {
-      this.locationState = 'active';
-      this.updateStats();
-    }
-
-    // 精度 50m 超は距離加算に使わない（ノイズ除去）
-    if (accuracy > 50) return;
-
-    const now = pos.timestamp || Date.now();
-
-    if (this.lastPosition) {
-      const dist = this.haversineDistance(
-        this.lastPosition.latitude,
-        this.lastPosition.longitude,
-        latitude,
-        longitude
-      );
-      const dtSec = (now - (this.lastPosition.t || now)) / 1000;
-      // 経過時間で「正当な移動」と「GPSノイズ／乗り物」を区別する。
-      // ・速度が歩行上限以内なら加算（画面OFF・スリープ・バックグラウンド
-      //   からの復帰で空いた区間も、直線距離としてここで埋まる＝取りこぼし軽減）
-      // ・歩行上限を超える瞬間移動は GPS ジャンプor乗り物として無視
-      // ・極端に時間が空いた場合（アプリ長時間放置→遠方で再開等）は
-      //   別地点での再開とみなしてブリッジしない
-      const MAX_WALK_SPEED = 2.5; // m/s（約9km/h。早歩き〜小走りまで許容）
-      const MAX_GAP_SEC = 1800;   // 30分以上空いたら橋渡ししない
-      if (dtSec > 0 && dtSec <= MAX_GAP_SEC && dist / dtSec <= MAX_WALK_SPEED) {
-        this.totalDistance += dist;
-        this.updateStats();
-        this.saveToStorage();
-      }
-    }
-
-    this.lastPosition = { latitude, longitude, t: now };
-  }
-
   // ==================== 統計を更新 ====================
 
   // 統計を更新
@@ -1930,16 +1717,6 @@ class OsanpoBingo {
     if (regionDisplayEl && isKanko) {
       const region = this.landmarkRegion || 'all';
       regionDisplayEl.textContent = region === 'all' ? 'すべて' : region;
-    }
-    // 移動距離
-    if (this.distanceElement) {
-      this.distanceElement.textContent = this.formatDistance(this.totalDistance);
-    }
-    const distanceStat = document.getElementById('distanceStat');
-    if (distanceStat) {
-      const tappable = this.locationState !== 'active';
-      distanceStat.classList.toggle('stat-item-clickable', tappable);
-      distanceStat.title = tappable ? 'タップして位置情報を再取得' : '';
     }
     // プレイ時間
     const playTimeEl = document.getElementById('playTimeDisplay');
@@ -2176,15 +1953,6 @@ class OsanpoBingo {
         : [...this.markedCells].filter(idx => !this.board[idx]?.isFree).length;
     }
 
-    // 距離を表示
-    const distEl = document.getElementById('screenshotDistance');
-    if (distEl) distEl.textContent = this.formatDistance(this.totalDistance);
-    const distDivider = document.getElementById('screenshotDistanceDivider');
-    if (distDivider) distDivider.classList.remove('hidden');
-
-    // 結果確定時にトラッキング停止
-    this.stopLocationTracking();
-
     // GA: ゲーム終了
     {
       const _gaNonFree = this.board.map((c, i) => ({...c, idx: i})).filter(c => !c.isFree);
@@ -2201,7 +1969,6 @@ class OsanpoBingo {
         bingo_count:  this.bingoLines.length,
         photo_count:  Object.keys(this.photoBlobs).length,
         duration_min: _gaDurMin,
-        distance_m:   Math.round(this.totalDistance),
         tier1_filled: _gaTier.filled[1], tier1_empty: _gaTier.empty[1],
         tier2_filled: _gaTier.filled[2], tier2_empty: _gaTier.empty[2],
         tier3_filled: _gaTier.filled[3], tier3_empty: _gaTier.empty[3],
@@ -2658,12 +2425,6 @@ class OsanpoBingo {
       this.createBoard(this.roomCode, this.difficulty, shuffleSalt, null);
       if (this.board[12]?.isFree) this.markCell(12);
       this.checkBingo();
-      // 距離リセット＆再トラッキング
-      this.totalDistance = 0;
-      this.lastPosition = null;
-      this.locationState = 'idle';
-      this.stopLocationTracking();
-      this.startLocationTracking();
       this.updateStats();
       this.saveToStorage();
       this.syncBattleOwnersFromServer();
@@ -3123,10 +2884,6 @@ class OsanpoBingo {
         this.createBoard('solo', this.difficulty, soloSalt, customTopics);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
-        this.totalDistance = 0;
-        this.lastPosition = null;
-        this.stopLocationTracking();
-        this.startLocationTracking();
         this.startPlayTimer();
         this.updateStats();
         this.saveToStorage(); // 開始直後にリフレッシュしても続きから再開できるよう保存
@@ -3219,10 +2976,6 @@ class OsanpoBingo {
         this.createBoard(roomCode, difficulty, initialSalt, customTopics);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
-        this.totalDistance = 0;
-        this.lastPosition = null;
-        this.stopLocationTracking();
-        this.startLocationTracking();
         this.startPlayTimer();
         this.updateStats();
         // バトルモードの場合、ルーム設定をサーバーに保存（参加者が同じボードを作れるよう）
@@ -3367,10 +3120,6 @@ class OsanpoBingo {
         this.createBoard(roomCode, difficulty, '', joinCustomTopics);
         if (this.board[12]?.isFree) this.markCell(12);
         this.checkBingo();
-        this.totalDistance = 0;
-        this.lastPosition = null;
-        this.stopLocationTracking();
-        this.startLocationTracking();
         this.startPlayTimer();
         this.updateStats();
         this.registerPlayerPresence();
@@ -4277,8 +4026,6 @@ class OsanpoBingo {
         battlePlayerId: this.battlePlayerId,
         battleCellOwners: this.battleCellOwners,
         battleBingoOwners: this.battleBingoOwners,
-        totalDistance: this.totalDistance,
-        lastPosition: this.lastPosition,
         landmarkMode: this.landmarkMode,
         landmarkRegion: this.landmarkRegion,
         battlePaused: this._battlePaused
@@ -4364,18 +4111,6 @@ class OsanpoBingo {
       }
       if (data.battleBingoOwners && typeof data.battleBingoOwners === 'object') {
         this.battleBingoOwners = data.battleBingoOwners;
-      }
-      if (typeof data.totalDistance === 'number') {
-        this.totalDistance = data.totalDistance;
-        // 保存時点での距離があればactiveとして扱う
-        if (data.totalDistance > 0) this.locationState = 'active';
-      }
-      // 再開後の初回フィックスでも距離を橋渡しできるよう最後の位置を復元
-      // （ブラウザ終了でメモリ上の lastPosition が失われるケースの取りこぼし対策）
-      if (data.lastPosition &&
-          typeof data.lastPosition.latitude === 'number' &&
-          typeof data.lastPosition.longitude === 'number') {
-        this.lastPosition = data.lastPosition;
       }
       if (typeof data.landmarkMode === 'boolean') {
         this.landmarkMode = data.landmarkMode;
