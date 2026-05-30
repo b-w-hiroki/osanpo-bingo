@@ -1836,6 +1836,8 @@ class OsanpoBingo {
     // 精度 50m 超は距離加算に使わない（ノイズ除去）
     if (accuracy > 50) return;
 
+    const now = pos.timestamp || Date.now();
+
     if (this.lastPosition) {
       const dist = this.haversineDistance(
         this.lastPosition.latitude,
@@ -1843,15 +1845,23 @@ class OsanpoBingo {
         latitude,
         longitude
       );
-      // GPS ジャンプ（150m 以上の瞬間移動）も無視
-      if (dist < 150) {
+      const dtSec = (now - (this.lastPosition.t || now)) / 1000;
+      // 経過時間で「正当な移動」と「GPSノイズ／乗り物」を区別する。
+      // ・速度が歩行上限以内なら加算（画面OFF・スリープ・バックグラウンド
+      //   からの復帰で空いた区間も、直線距離としてここで埋まる＝取りこぼし軽減）
+      // ・歩行上限を超える瞬間移動は GPS ジャンプor乗り物として無視
+      // ・極端に時間が空いた場合（アプリ長時間放置→遠方で再開等）は
+      //   別地点での再開とみなしてブリッジしない
+      const MAX_WALK_SPEED = 2.5; // m/s（約9km/h。早歩き〜小走りまで許容）
+      const MAX_GAP_SEC = 1800;   // 30分以上空いたら橋渡ししない
+      if (dtSec > 0 && dtSec <= MAX_GAP_SEC && dist / dtSec <= MAX_WALK_SPEED) {
         this.totalDistance += dist;
         this.updateStats();
         this.saveToStorage();
       }
     }
 
-    this.lastPosition = { latitude, longitude };
+    this.lastPosition = { latitude, longitude, t: now };
   }
 
   // ==================== 統計を更新 ====================
@@ -4268,6 +4278,7 @@ class OsanpoBingo {
         battleCellOwners: this.battleCellOwners,
         battleBingoOwners: this.battleBingoOwners,
         totalDistance: this.totalDistance,
+        lastPosition: this.lastPosition,
         landmarkMode: this.landmarkMode,
         landmarkRegion: this.landmarkRegion,
         battlePaused: this._battlePaused
@@ -4358,6 +4369,13 @@ class OsanpoBingo {
         this.totalDistance = data.totalDistance;
         // 保存時点での距離があればactiveとして扱う
         if (data.totalDistance > 0) this.locationState = 'active';
+      }
+      // 再開後の初回フィックスでも距離を橋渡しできるよう最後の位置を復元
+      // （ブラウザ終了でメモリ上の lastPosition が失われるケースの取りこぼし対策）
+      if (data.lastPosition &&
+          typeof data.lastPosition.latitude === 'number' &&
+          typeof data.lastPosition.longitude === 'number') {
+        this.lastPosition = data.lastPosition;
       }
       if (typeof data.landmarkMode === 'boolean') {
         this.landmarkMode = data.landmarkMode;
