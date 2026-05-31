@@ -2080,7 +2080,7 @@ class OsanpoBingo {
     // 一緒に遊んだ人がいれば「〇〇とのおさんぽの記録」をタイトルに
     document.getElementById('resultCaptureTitle').textContent =
       groupText ? `${groupText}とのおさんぽの記録` : 'おさんぽビンゴ';
-    document.getElementById('resultCaptureDate').textContent = dateEl?.textContent || '';
+    document.getElementById('resultCaptureDate').textContent = dateEl?.textContent || '-';
     
     const playTimeEl = document.getElementById('resultPlayTime');
     const capturePlayTimeEl = document.getElementById('resultCapturePlayTime');
