@@ -2005,7 +2005,10 @@ class OsanpoBingo {
     box.querySelector('#resultPhotoClose').addEventListener('click', () => box.remove());
     box.querySelector('.result-photo-save-btn').addEventListener('click', () => {
       const filename = `osanpo-bingo-${topicText || Date.now()}.jpg`;
-      this.savePhotoToDevice(src, filename);
+      // 保持済み Blob があれば直接渡す（タップ直後の共有を保ち iOS 保存成功率を上げる）
+      const idx = Object.keys(this.photos).find(k => this.photos[k] === src);
+      const blob = (idx != null) ? this.photoBlobs[idx] : null;
+      this.savePhotoToDevice(blob || src, filename);
     });
 
     const onKey = (e) => { if (e.key === 'Escape') { box.remove(); document.removeEventListener('keydown', onKey); } };
@@ -2074,28 +2077,32 @@ class OsanpoBingo {
     const dateEl = document.getElementById('resultDate');
     const boardEl = document.getElementById('screenshotBoard');
     
-    document.getElementById('resultCaptureTitle').textContent = 'おさんぽビンゴ';
+    // 一緒に遊んだ人がいれば「〇〇とのおさんぽの記録」をタイトルに
+    document.getElementById('resultCaptureTitle').textContent =
+      groupText ? `${groupText}とのおさんぽの記録` : 'おさんぽビンゴ';
     document.getElementById('resultCaptureDate').textContent = dateEl?.textContent || '-';
     
     const playTimeEl = document.getElementById('resultPlayTime');
     const capturePlayTimeEl = document.getElementById('resultCapturePlayTime');
     const div1 = document.getElementById('resultCaptureDivider1');
     const div2 = document.getElementById('resultCaptureDivider2');
+    // メタ行は「日付 ／ プレイ時間」。プレイ時間がある時だけ div1 を表示。
     if (capturePlayTimeEl && playTimeEl?.textContent) {
       capturePlayTimeEl.textContent = playTimeEl.textContent;
       capturePlayTimeEl.style.display = '';
       if (div1) div1.style.display = '';
-      if (div2) div2.style.display = '';
     } else {
       if (capturePlayTimeEl) { capturePlayTimeEl.textContent = ''; capturePlayTimeEl.style.display = 'none'; }
-      if (div1) div1.style.display = '';
-      if (div2) div2.style.display = 'none';
+      if (div1) div1.style.display = 'none';
     }
-    
+
+    // グループ名はタイトル（〇〇とのおさんぽの記録）に表示するため、メタ行側は隠す
     const groupEl = document.getElementById('resultCaptureGroup');
     if (groupEl) {
-      groupEl.textContent = groupText || '-';
+      groupEl.textContent = '';
+      groupEl.style.display = 'none';
     }
+    if (div2) div2.style.display = 'none';
     document.getElementById('resultCaptureBingo').textContent = this.bingoLines.length;
     document.getElementById('resultCaptureMarked').textContent =
       (BATTLE_MODE_ENABLED && this.gameType === 'battle')
@@ -3454,7 +3461,8 @@ class OsanpoBingo {
       savePhotoToDeviceBtn.addEventListener('click', () => {
         const idx = this.currentPhotoIndex;
         if (idx !== null && this.photos[idx]) {
-          this.savePhotoToDevice(this.photos[idx], `osanpo-bingo-${Date.now()}.jpg`);
+          // 保持済み Blob を優先（タップ直後の共有を保つ）
+          this.savePhotoToDevice(this.photoBlobs[idx] || this.photos[idx], `osanpo-bingo-${Date.now()}.jpg`);
         }
       });
     }
@@ -3755,28 +3763,34 @@ class OsanpoBingo {
   // 写真をデバイスライブラリに保存
   //  - iOS: <a download> はカメラロール保存不可のため共有シート経由
   //  - Android / PC: <a download> で直接ダウンロード
+  // 写真を端末に保存する
+  //  - photoData: Blob（推奨。タップ直後の共有を保てる）または URL/dataURL
+  //  - iOS: 写真ライブラリ保存は共有シート経由のみ可能（OS制約）。
+  //    余計な確認を挟むとタップのジェスチャーが切れて共有が拒否されるため、
+  //    案内は出さずタップ直後に共有シートを開く。
   async savePhotoToDevice(photoData, filename) {
     try {
-      const response = await fetch(photoData);
-      const blob = await response.blob();
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      let blob;
+      if (photoData instanceof Blob) {
+        blob = photoData;
+      } else {
+        const response = await fetch(photoData);
+        blob = await response.blob();
+      }
+      const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
 
-      if (isIOS) {
-        const file = new File([blob], filename, { type: blob.type });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          // iOSはライブラリに直接保存できないため共有シート経由、操作方法を先に案内
-          await showAlert('共有シートが開きます。\n「写真に保存」をタップするとカメラロールに保存されます 📸');
-          try {
-            await navigator.share({ files: [file], title: 'おさんぽビンゴ写真' });
-            return;
-          } catch (e) {
-            if (e.name === 'AbortError') return;
-            // Share失敗時はダウンロードにフォールバック
-          }
+      // 共有可能なら共有シート経由（iOS でカメラロールに保存できる唯一の経路）
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file] });
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return; // ユーザーがキャンセル
+          // それ以外はダウンロードにフォールバック
         }
       }
 
-      // Android / PC: 直接ダウンロード（iOS フォールバックも）
+      // フォールバック: 直接ダウンロード（Android / PC / 共有非対応）
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -3790,119 +3804,51 @@ class OsanpoBingo {
     }
   }
 
-  // 全写真をグリッド画像にまとめて保存
+  // 撮影した写真を1枚ずつ個別に保存する
+  //  - まとめ画像ではなく、アップロードした写真をそのまま個別ファイルで保存
+  //  - iOS は複数ファイルを共有シートに渡すと、各写真がカメラロールに個別保存される
   async saveAllPhotosAsGrid() {
-    const entries = [];
+    // ファイル名に使えない文字を除去（お題名をファイル名に利用）
+    const sanitize = (s) => (s || '').replace(/[\\/:*?"<>|]/g, '').slice(0, 30).trim();
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+    const files = [];
     for (let i = 0; i < 25; i++) {
-      if (this.photos[i] && this.board[i] && !this.board[i].isFree) {
-        entries.push({ src: this.photos[i], topic: this.board[i].text || '' });
+      const blob = this.photoBlobs[i];
+      if (blob && this.board[i] && !this.board[i].isFree) {
+        const topic = sanitize(this.board[i].text);
+        const ext = (blob.type && blob.type.includes('png')) ? 'png' : 'jpg';
+        const name = `osanpo-${date}-${topic || ('photo' + (i + 1))}.${ext}`;
+        files.push(new File([blob], name, { type: blob.type || 'image/jpeg' }));
       }
     }
-    if (entries.length === 0) {
+    if (files.length === 0) {
       showAlert('保存できる写真がありません。');
       return;
     }
 
-    const COLS = 3;
-    const CELL_W = 260;
-    const PHOTO_H = 195;
-    const LABEL_H = 34;
-    const CELL_H = PHOTO_H + LABEL_H;
-    const GAP = 8;
-    const HEADER_H = 52;
-    const PAD = GAP;
-    const rows = Math.ceil(entries.length / COLS);
-    const canvasW = PAD + COLS * CELL_W + (COLS - 1) * GAP + PAD;
-    const canvasH = HEADER_H + PAD + rows * CELL_H + (rows - 1) * GAP + PAD;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasW;
-    canvas.height = canvasH;
-    const ctx = canvas.getContext('2d');
-
-    // 背景
-    ctx.fillStyle = '#f0f7f0';
-    ctx.fillRect(0, 0, canvasW, canvasH);
-
-    // ヘッダー帯
-    ctx.fillStyle = '#157F1F';
-    ctx.fillRect(0, 0, canvasW, HEADER_H);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('おさんぽビンゴ 写真まとめ', canvasW / 2, HEADER_H / 2);
-
-    // 画像を並行ロード
-    const loadImg = (src) => new Promise((res) => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = () => res(null);
-      img.src = src;
-    });
-    const imgs = await Promise.all(entries.map(e => loadImg(e.src)));
-
-    const drawRoundRect = (x, y, w, h, r) => {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath();
-    };
-
-    entries.forEach(({ topic }, idx) => {
-      const col = idx % COLS;
-      const row = Math.floor(idx / COLS);
-      const x = PAD + col * (CELL_W + GAP);
-      const y = HEADER_H + PAD + row * (CELL_H + GAP);
-
-      // カード背景
-      ctx.fillStyle = '#ffffff';
-      drawRoundRect(x, y, CELL_W, CELL_H, 8);
-      ctx.fill();
-
-      // 写真を cover クリップ
-      const img = imgs[idx];
-      if (img) {
-        ctx.save();
-        drawRoundRect(x, y, CELL_W, PHOTO_H, 8);
-        ctx.clip();
-        const scale = Math.max(CELL_W / img.width, PHOTO_H / img.height);
-        const sw = img.width * scale;
-        const sh = img.height * scale;
-        ctx.drawImage(img, x + (CELL_W - sw) / 2, y + (PHOTO_H - sh) / 2, sw, sh);
-        ctx.restore();
-      } else {
-        ctx.fillStyle = '#eee';
-        drawRoundRect(x, y, CELL_W, PHOTO_H, 8);
-        ctx.fill();
+    // iOS / 対応ブラウザ: 複数ファイルをまとめて共有 → 各写真が個別に保存される
+    if (navigator.canShare && navigator.canShare({ files })) {
+      try {
+        await navigator.share({ files });
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') return; // ユーザーがキャンセル
+        // それ以外は個別ダウンロードにフォールバック
       }
+    }
 
-      // ラベル（省略付き）
-      ctx.fillStyle = '#333333';
-      ctx.font = '13px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      let label = topic;
-      const maxW = CELL_W - 16;
-      if (ctx.measureText(label).width > maxW) {
-        while (ctx.measureText(label + '…').width > maxW && label.length > 0) {
-          label = label.slice(0, -1);
-        }
-        label += '…';
-      }
-      ctx.fillText(label, x + CELL_W / 2, y + PHOTO_H + LABEL_H / 2);
-    });
-
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    await this.savePhotoToDevice(dataUrl, `osanpo-bingo-photos-${date}.jpg`);
+    // フォールバック（Android / PC / 複数共有非対応）: 1枚ずつダウンロード
+    for (const file of files) {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   }
 
   // セル写真を保存（IndexedDB に Blob で保存）
