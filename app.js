@@ -173,6 +173,16 @@ function makeBattlePlayerId(name, color, randomId) {
   return `${safeName}::${safeColor}::${randomId}`;
 }
 
+// HTML特殊文字をエスケープ（innerHTML へユーザー入力を埋め込む際のXSS対策）
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function parseOwnerName(ownerUserId) {
   if (!ownerUserId) return '名無しさん';
   const parts = ownerUserId.split('::');
@@ -1152,11 +1162,11 @@ class OsanpoBingo {
 
       if (hasPhoto) {
         cell.innerHTML = displayText
-          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div><div class="cell-text ${sizeClass}">${displayText}</div>`
+          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div><div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
           : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div>`;
       } else {
         cell.innerHTML = displayText
-          ? `${getTopicIcon(topic)}<div class="cell-text ${sizeClass}">${displayText}</div>`
+          ? `${getTopicIcon(topic)}<div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
           : getTopicIcon(topic);
       }
       
@@ -1741,7 +1751,7 @@ class OsanpoBingo {
           const isMe = p.id === this.battlePlayerId;
           return `<div class="battle-score-row${isMe ? ' battle-score-row--me' : ''}">` +
             `<span class="battle-score-dot battle-color-${p.color}"></span>` +
-            `<span class="battle-score-name">${p.name}${isMe ? '<span class="battle-score-you">あなた</span>' : ''}</span>` +
+            `<span class="battle-score-name">${escapeHtml(p.name)}${isMe ? '<span class="battle-score-you">あなた</span>' : ''}</span>` +
             `<span class="battle-score-marks">${p.marks}マス</span>` +
             `<span class="battle-score-bingo">BINGO×${p.bingos}</span>` +
             `<span class="battle-score-total">${p.total}pt</span></div>`;
@@ -2768,8 +2778,8 @@ class OsanpoBingo {
                 const rawOwner = sRows[0].owner_user_id || '';
                 const s = JSON.parse(rawOwner.startsWith('__settings__:') ? rawOwner.slice('__settings__:'.length) : rawOwner);
                 const dLabel = diffLabel[s.difficulty] || s.difficulty || 'ふつう';
-                const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${s.topicSetId}` : '';
-                settingsChips = `<span class="join-room-info-chip">${dLabel}${tsLabel}</span>`;
+                const tsLabel = s.topicSetId && s.topicSetId !== 'default' ? ` / ${escapeHtml(s.topicSetId)}` : '';
+                settingsChips = `<span class="join-room-info-chip">${escapeHtml(dLabel)}${tsLabel}</span>`;
               } catch (_) {}
               joinInfoContent.innerHTML =
                 `<span class="join-room-info-chip">バトルモード</span>` +
