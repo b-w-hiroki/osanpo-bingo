@@ -232,6 +232,9 @@ class OsanpoBingo {
     
     // フリー入力マス
     this.customTopics = [];       // ユーザーが入力したカスタムお題 [{text, icon}]
+
+    // 意気込み（中央マスの画像）: 'random'=おまかせ（シード連動） / 'center_0X.png'=指定
+    this.centerChoice = (() => { try { return localStorage.getItem('osanpo_ikigomi') || 'random'; } catch (e) { return 'random'; } })();
     
     // 遊び方（写真で記録 / マークだけ）
     this.playMode = 'photo';      // 'photo' | 'markOnly'
@@ -428,6 +431,7 @@ class OsanpoBingo {
 
     // 合言葉モーダル
     this.setupRoomCodeModal();
+    this.setupIkigomiGrids();
     this.populateTopicSetSelects();
     ['topicSetSelectSolo', 'topicSetSelectCreate', 'topicSetSelectJoin'].forEach((id) => {
       const el = document.getElementById(id);
@@ -500,8 +504,10 @@ class OsanpoBingo {
     const seedStr = [this.roomCode, seedUserId, seedSalt, 'mix', this.topicSetId || 'default'].filter(Boolean).join('-');
     const seed = stringToSeed(seedStr);
     console.log(`[board seed] isShared=${isShared} seedStr="${seedStr}" seed=${seed}`);
-    // 中央フリーマスの画像（center_01〜09）をシードで決定（同じ部屋なら全員同じ画像）
-    const centerImage = `center_${String((seed % 9) + 1).padStart(2, '0')}.png`;
+    // 中央フリーマスの画像。意気込みで指定があればそれを、'random'(おまかせ)ならシードで決定
+    const centerImage = (this.centerChoice && this.centerChoice !== 'random')
+      ? this.centerChoice
+      : `center_${String((seed % 9) + 1).padStart(2, '0')}.png`;
     // シャッフル後に四隅制約を適用（ガチおに以外はおにが四隅に来ないよう保証）
     const shuffledTopics = enforceCornerConstraint(
       shuffleWithSeed(allTopics, seed),
@@ -2469,7 +2475,43 @@ class OsanpoBingo {
   markCell(index) {
     this.markedCells.add(index);
   }
-  
+
+  // 意気込み（中央マス画像）グリッドを生成・選択処理（ソロ/作成/参加の各画面）
+  setupIkigomiGrids() {
+    const ids = ['ikigomiGridSolo', 'ikigomiGridCreate', 'ikigomiGridJoin'];
+    const options = [{ value: 'random', omakase: true }].concat(
+      Array.from({ length: 9 }, (_, i) => {
+        const n = String(i + 1).padStart(2, '0');
+        return { value: `center_${n}.png`, img: `static/center_${n}.png` };
+      })
+    );
+    const renderAll = () => {
+      ids.forEach((gid) => {
+        const grid = document.getElementById(gid);
+        if (!grid) return;
+        grid.innerHTML = options.map((o) => {
+          const isSel = o.value === this.centerChoice;
+          const inner = o.omakase
+            ? '<span class="ikigomi-omakase">🎲<br>おまかせ</span>'
+            : `<img src="${o.img}" alt="" loading="lazy">`;
+          return `<button type="button" class="ikigomi-option${isSel ? ' selected' : ''}" data-value="${o.value}" aria-pressed="${isSel}">${inner}</button>`;
+        }).join('');
+      });
+    };
+    renderAll();
+    ids.forEach((gid) => {
+      const grid = document.getElementById(gid);
+      if (!grid) return;
+      grid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.ikigomi-option');
+        if (!btn) return;
+        this.centerChoice = btn.dataset.value;
+        try { localStorage.setItem('osanpo_ikigomi', this.centerChoice); } catch (err) {}
+        renderAll(); // 3画面の選択状態を同期
+      });
+    });
+  }
+
   populateTopicSetSelects() {
     if (typeof topicSets === 'undefined') return;
     const available = topicSets.filter(

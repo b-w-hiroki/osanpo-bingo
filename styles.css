@@ -2507,3 +2507,43 @@ h1 {
   color: #3d5a4a;
   margin-top: 6px;
 }
+
+/* 意気込み（中央マス画像）選択グリッド */
+.ikigomi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.ikigomi-option {
+  appearance: none;
+  padding: 3px;
+  border: 2px solid var(--border, #d4e2d6);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color .12s, transform .08s, box-shadow .12s;
+}
+.ikigomi-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.ikigomi-omakase {
+  font-size: 0.7rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #3d5a4a;
+  text-align: center;
+}
+.ikigomi-option.selected {
+  border-color: var(--primary, #2faa3f);
+  box-shadow: 0 0 0 2px rgba(47, 170, 63, 0.35);
+  background: #f0fbf1;
+}
+.ikigomi-option:hover { transform: translateY(-1px); }
