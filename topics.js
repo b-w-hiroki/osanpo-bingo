@@ -1,7 +1,7 @@
 // お散歩ビンゴ - お題データベース
 // このファイルは tools/csv-to-topics.js で自動生成されています
 // 編集する場合は topics_list.csv を更新して npm run build-topics を実行してください
-// 生成日時: 2026-05-28 17:45:34（walking_bingo_master.xlsx より自動生成）
+// 生成日時: 2026-05-31 13:46:59（walking_bingo_master.xlsx より自動生成）
 
 // お題ID → アイコン画像ファイル名（なければ絵文字フォールバック）
 const topicIconMap = {
@@ -207,10 +207,10 @@ const topicIconMap = {
   466: 'icon466_シーサー.png',
   467: 'icon467_ふくろう置き物.png',
   468: 'icon468_黄色い量販店.png',
-  469: 'icon469_商店街フラッグキャラ.png',
-  470: 'icon470_商店街バナーキャラ.png',
-  471: 'icon471_店先ポップスタンドキャラ.png',
-  472: 'icon472_アーケード装飾キャラ.png',
+  469: 'icon469_商店街のキャラ旗.png',
+  470: 'icon470_商店街のバナー.png',
+  471: 'icon471_店先ポップスタンド.png',
+  472: 'icon472_アーケード装飾.png',
   473: 'icon473_シャッターキャラ絵.png',
   474: 'icon474_壁キャライラスト.png',
   475: 'icon475_公共掲示板キャラ.png',
@@ -244,7 +244,7 @@ const topicIconMap = {
   525: 'icon525_証明写真機.png',
   526: 'icon526_冷凍餃子自販機.png',
   527: 'icon527_卵自販機.png',
-  528: 'icon528_おでん缶自販機.png',
+  528: 'icon528_おでん缶.png',
   533: 'icon533_ブロック塀の通気穴.png',
   547: 'icon547_住宅煙突.png',
   548: 'icon548_銭湯煙突.png',
@@ -628,8 +628,8 @@ const topicDatabase = {
     {id: 430, text: '古いステッカー跡', icon: '🔍', category: '案内・注意表示', diff: 1, season: 'all'},
     {id: 432, text: '半分はがれた表示', icon: '🔍', category: '案内・注意表示', diff: 1, season: 'all'},
     {id: 442, text: 'グレーチング', icon: '🔍', category: '舗装・縁石・路面状態', diff: 1, season: 'all'},
-    {id: 469, text: '商店街フラッグキャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 1, season: 'all', fields: ['residential']},
-    {id: 470, text: '商店街バナーキャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 1, season: 'all', fields: ['residential']},
+    {id: 469, text: '商店街のキャラ旗', icon: '🔍', category: 'キャラクター掲示物', diff: 1, season: 'all', fields: ['residential']},
+    {id: 470, text: '商店街のバナー', icon: '🔍', category: 'キャラクター掲示物', diff: 1, season: 'all', fields: ['residential']},
     {id: 485, text: '分別表示', icon: '🔍', category: '生活・地域設備', diff: 1, season: 'all'},
     {id: 486, text: 'ゴミ収集曜日掲示', icon: '🔍', category: '生活・地域設備', diff: 1, season: 'all', fields: ['residential']},
     {id: 495, text: 'カラスよけネット', icon: '🔍', category: 'その他観察', diff: 1, season: 'all'},
@@ -753,8 +753,8 @@ const topicDatabase = {
     {id: 463, text: '曲がったフェンス', icon: '🔍', category: '劣化・補修・ズレ', diff: 2, season: 'all'},
     {id: 466, text: 'シーサー', icon: '🔍', category: 'キャラクター掲示物', diff: 2, season: 'all', region_limit: '沖縄'},
     {id: 468, text: '黄色い量販店', icon: '🔍', category: 'キャラクター掲示物', diff: 2, season: 'all'},
-    {id: 471, text: '店先ポップスタンドキャラ', icon: '🔍', category: '店舗周辺', diff: 2, season: 'all'},
-    {id: 472, text: 'アーケード装飾キャラ', icon: '🔍', category: 'キャラクター掲示物', diff: 2, season: 'all', fields: ['residential']},
+    {id: 471, text: '店先ポップスタンド', icon: '🔍', category: '店舗周辺', diff: 2, season: 'all'},
+    {id: 472, text: 'アーケード装飾', icon: '🔍', category: 'キャラクター掲示物', diff: 2, season: 'all', fields: ['residential']},
     {id: 473, text: 'シャッターキャラ絵', icon: '🔍', category: 'キャラクター掲示物', diff: 2, season: 'all', fields: ['residential']},
     {id: 474, text: '壁キャライラスト', icon: '🔍', category: 'キャラクター掲示物', diff: 2, season: 'all'},
     {id: 475, text: '公共掲示板キャラ', icon: '🔍', category: '公共施設', diff: 2, season: 'all'},
@@ -959,7 +959,7 @@ const topicDatabase = {
     {id: 213, text: '枝の風船', icon: '🔍', category: '痕跡・発見', diff: 4, season: 'all', fields: ['residential']},
     {id: 477, text: '元ハローマック跡っぽい店', icon: '🔍', category: '観光・地域情報', diff: 4, season: 'all', fields: ['residential']},
     {id: 527, text: '卵自販機', icon: '🔍', category: '商業・店舗', diff: 4, season: 'all', fields: ['residential']},
-    {id: 528, text: 'おでん缶自販機', icon: '🔍', category: '商業・店舗', diff: 4, season: 'all'},
+    {id: 528, text: 'おでん缶', icon: '🔍', category: '商業・店舗', diff: 4, season: 'all'},
     {id: 630, text: '海', icon: '🔍', category: '自然・生き物', diff: 4, season: 'all', fields: ['residential']},
     {id: 655, text: 'ショベルカー', icon: '🔍', category: '街構造・乗り物', diff: 4, season: 'all'},
     {id: 656, text: 'ブルドーザー', icon: '🔍', category: '街構造・乗り物', diff: 4, season: 'all'},
