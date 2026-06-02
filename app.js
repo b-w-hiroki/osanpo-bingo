@@ -500,6 +500,8 @@ class OsanpoBingo {
     const seedStr = [this.roomCode, seedUserId, seedSalt, 'mix', this.topicSetId || 'default'].filter(Boolean).join('-');
     const seed = stringToSeed(seedStr);
     console.log(`[board seed] isShared=${isShared} seedStr="${seedStr}" seed=${seed}`);
+    // 中央フリーマスの画像（center_01〜09）をシードで決定（同じ部屋なら全員同じ画像）
+    const centerImage = `center_${String((seed % 9) + 1).padStart(2, '0')}.png`;
     // シャッフル後に四隅制約を適用（ガチおに以外はおにが四隅に来ないよう保証）
     const shuffledTopics = enforceCornerConstraint(
       shuffleWithSeed(allTopics, seed),
@@ -524,8 +526,7 @@ class OsanpoBingo {
       let topicIdx = 0;
       for (let i = 0; i < 25; i++) {
         if (i === 12) {
-          // 中央は常に☆フリーマス（写真・操作不可）
-          this.board.push({text: '', icon: '⭐', isFree: true});
+          this.board.push({text: '', icon: '⭐', isFree: true, centerImage});
         } else if (landmarkPositions.has(i)) {
           const lm = lmDB[Math.floor(lmRng() * lmDB.length)];
           this.board.push({...lm, isLandmark: true});
@@ -537,7 +538,7 @@ class OsanpoBingo {
       // 通常モード: 中央はFREEスター
       for (let i = 0; i < 25; i++) {
         if (i === 12) {
-          this.board.push({text: '', icon: '⭐', isFree: true});
+          this.board.push({text: '', icon: '⭐', isFree: true, centerImage});
         } else {
           const topicIndex = i < 12 ? i : i - 1;
           this.board.push(shuffledTopics[topicIndex]);
@@ -1160,14 +1161,19 @@ class OsanpoBingo {
       if (textLen >= 9)       cell.classList.add('cell-len-xxl');
       else if (textLen >= 5)  cell.classList.add('cell-len-l');
 
+      // 中央フリーマスは center 画像（あれば）、それ以外は通常アイコン
+      const iconHtml = (topic.isFree && topic.centerImage)
+        ? `<img src="static/${topic.centerImage}" alt="" class="cell-center-img">`
+        : getTopicIcon(topic);
+
       if (hasPhoto) {
         cell.innerHTML = displayText
           ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div><div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
           : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div>`;
       } else {
         cell.innerHTML = displayText
-          ? `${getTopicIcon(topic)}<div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
-          : getTopicIcon(topic);
+          ? `${iconHtml}<div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
+          : iconHtml;
       }
       
       // アクセシビリティ
