@@ -2492,7 +2492,7 @@ class OsanpoBingo {
         grid.innerHTML = options.map((o) => {
           const isSel = o.value === this.centerChoice;
           const inner = o.omakase
-            ? '<span class="ikigomi-omakase">🎲<br>おまかせ</span>'
+            ? '<span class="ikigomi-omakase"><span class="ikigomi-dice">🎲</span>おまかせ</span>'
             : `<img src="${o.img}" alt="" loading="lazy">`;
           return `<button type="button" class="ikigomi-option${isSel ? ' selected' : ''}" data-value="${o.value}" aria-pressed="${isSel}">${inner}</button>`;
         }).join('');
