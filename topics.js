@@ -993,7 +993,7 @@ const topicSets = [
   {
     id: 'default',
     name: 'すべて',
-    description: 'すべてのフィールドのお題から出題します。',
+    description: '全フィールドのお題から出題！',
     monetizationType: 'free',
     topicIds: []
   },
