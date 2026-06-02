@@ -65,6 +65,8 @@
     /* 横並び時はステッパーをコンパクト化して文字を収める */
     .form-row .stepper-btn { flex-basis: 38px; }
     .form-row .stepper-value { font-size: 13.5px; padding: 12px 2px; letter-spacing: -0.3px; }
+    /* ガイド文が1行/2行で高さが変わりUIがズレるのを防ぐため、2行分で固定 */
+    .form-row .topic-set-help { min-height: 3em; }
     /* 極小幅のみ縦積み（その際は通常サイズに戻す） */
     @media (max-width: 339px) {
       .form-row { display: block; }
