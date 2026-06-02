@@ -2507,7 +2507,16 @@ class OsanpoBingo {
         if (!btn) return;
         this.centerChoice = btn.dataset.value;
         try { localStorage.setItem('osanpo_ikigomi', this.centerChoice); } catch (err) {}
-        renderAll(); // 3画面の選択状態を同期
+        // 再描画せずクラス切替で全グリッドの選択状態を同期（画像の再読込によるチラつきを防止）
+        ids.forEach((gid2) => {
+          const g2 = document.getElementById(gid2);
+          if (!g2) return;
+          g2.querySelectorAll('.ikigomi-option').forEach((opt) => {
+            const sel = opt.dataset.value === this.centerChoice;
+            opt.classList.toggle('selected', sel);
+            opt.setAttribute('aria-pressed', sel);
+          });
+        });
       });
     });
   }
