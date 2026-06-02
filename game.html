@@ -59,6 +59,10 @@
       padding: 12px 4px;
       pointer-events: none;
     }
+    /* 難易度・フィールドを横並び（狭い画面では縦積み） */
+    .form-row { display: flex; gap: 12px; align-items: flex-start; }
+    .form-row > .form-group { flex: 1 1 0; min-width: 0; }
+    @media (max-width: 480px) { .form-row { display: block; } }
 
   </style>
   
@@ -106,6 +110,7 @@
           <p class="modal-description">
             設定してすぐスタート
           </p>
+          <div class="form-row">
           <div class="form-group">
             <label>難易度</label>
             <select id="difficultySelectSolo" style="display:none">
@@ -130,6 +135,7 @@
               <button type="button" class="stepper-btn stepper-next">►</button>
             </div>
             <p class="form-help topic-set-help" id="topicSetHelpSolo"></p>
+          </div>
           </div>
           <div class="form-group" id="landmarkRegionGroupSolo" style="display:none">
             <label for="landmarkRegionSelectSolo">観光地エリア</label>
@@ -220,6 +226,7 @@
             <p class="form-help">友達に合言葉を教えてあげよう</p>
           </div>
 
+          <div class="form-row">
           <div class="form-group">
             <label>難易度</label>
             <select id="difficultySelect" style="display:none">
@@ -245,6 +252,7 @@
               <button type="button" class="stepper-btn stepper-next">►</button>
             </div>
             <p class="form-help topic-set-help" id="topicSetHelpCreate"></p>
+          </div>
           </div>
           <div class="form-group" id="landmarkRegionGroupCreate" style="display:none">
             <label for="landmarkRegionSelectCreate">観光地エリア</label>
