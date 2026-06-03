@@ -389,6 +389,16 @@ class OsanpoBingo {
     const howToPlayBtn = document.getElementById('howToPlayBtn');
     if (howToPlayBtn) {
       howToPlayBtn.addEventListener('click', () => this.showHowToPlay());
+      // 設定モーダル表示中は「？」を隠す（プレイ中＝モーダル非表示のときだけ表示）
+      const setupModal = document.getElementById('roomCodeModal');
+      const syncHelpBtn = () => {
+        const open = setupModal && getComputedStyle(setupModal).display !== 'none';
+        howToPlayBtn.classList.toggle('is-hidden', !!open);
+      };
+      if (setupModal) {
+        new MutationObserver(syncHelpBtn).observe(setupModal, { attributes: true, attributeFilter: ['style', 'class'] });
+      }
+      syncHelpBtn();
     }
 
     // 終わるボタン

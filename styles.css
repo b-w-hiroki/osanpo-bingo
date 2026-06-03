@@ -230,6 +230,7 @@ h1 {
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s, box-shadow 0.15s;
 }
+.help-btn.is-hidden { display: none; }
 .help-btn:hover,
 .help-btn:active {
   background: rgba(240, 248, 255, 0.98);
