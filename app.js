@@ -2337,7 +2337,7 @@ class OsanpoBingo {
   
   getShareText() {
     const url = this.getShareUrl();
-    return `おさんぽビンゴで遊んだよ～！\n#お散歩ビンゴ #散歩 #ビンゴ\n${url}`;
+    return `おさんぽビンゴで遊んだよ～！\n#おさんぽビンゴ #散歩 #ビンゴ\n${url}`;
   }
 
   getShareUrl() {
