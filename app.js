@@ -3,6 +3,29 @@ const BATTLE_MODE_ENABLED = true;
 
 // お散歩ビンゴ - Phase 2: グループ機能 + 写真機能
 
+// 招待リンクのベースURL（合言葉つきURLの組み立てに使用）
+const GAME_URL = 'https://osanpobingo-battle.com/game.html';
+
+// 合言葉の最大文字数（joinRoomCodeInput の maxlength と揃える）
+const ROOM_CODE_MAX_LENGTH = 8;
+
+/**
+ * 招待リンク（?room=XXXXX）から合言葉を取り出す。
+ * 不正・空・長すぎる値は null を返し、通常のモード選択にフォールバックする。
+ */
+function getInviteRoomFromUrl() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('room');
+    if (!raw) return null;
+    const code = raw.trim();
+    if (!code || code.length > ROOM_CODE_MAX_LENGTH) return null;
+    if (code === 'solo') return null;
+    return code;
+  } catch {
+    return null;
+  }
+}
+
 // カスタム確認・通知モーダル（confirm/alert の代わり）
 function showConfirm(message) {
   return new Promise((resolve) => {
@@ -299,7 +322,11 @@ class OsanpoBingo {
     
     // イベントリスナーを設定
     this.setupEventListeners();
-    
+
+    // 招待リンク（?room=XXXXX）で開かれたか判定
+    // 招待経由は保存データより優先し、必ず「ゲームに参加」ステップを開く
+    const inviteRoom = getInviteRoomFromUrl();
+
     // LocalStorageから読み込み
     const loaded = this.loadFromStorage();
 
@@ -309,7 +336,12 @@ class OsanpoBingo {
       .then(() => { delete this._legacyPhotos; })
       .catch(e => console.warn('PhotoStorage init error:', e));
 
-    if (!loaded || this.board.length !== 25) {
+    if (inviteRoom) {
+      // 招待リンク経由: 合言葉を入れた状態で参加ステップを開く（手入力ゼロ）
+      sendGA('invite_landed', { room_code_length: inviteRoom.length });
+      this.showRoomCodeModal();
+      this.openJoinStepWithCode(inviteRoom);
+    } else if (!loaded || this.board.length !== 25) {
       this.showRoomCodeModal();
     } else {
       // 一時保存済み（_battlePaused=true）以外はリフレッシュとみなして確認なしに自動再開。
@@ -436,7 +468,7 @@ class OsanpoBingo {
     // 合言葉をクリックでコピー
     const roomCodeStat = document.getElementById('roomCodeStat');
     if (roomCodeStat) {
-      roomCodeStat.addEventListener('click', () => this.copyRoomCode());
+      roomCodeStat.addEventListener('click', () => this.shareInvite());
     }
 
     // 合言葉モーダル
@@ -2622,6 +2654,22 @@ class OsanpoBingo {
     sel.value = this.landmarkRegion || 'all';
   }
   
+  // 招待リンク経由: 「ゲームに参加」ステップを合言葉入りで開く
+  openJoinStepWithCode(roomCode) {
+    const steps = ['modeSelectStep', 'soloGameStep', 'groupModeSelectStep', 'createGameStep', 'joinGameStep'];
+    steps.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = id === 'joinGameStep' ? 'block' : 'none';
+    });
+
+    const input = document.getElementById('joinRoomCodeInput');
+    if (input) {
+      input.value = roomCode;
+      // 既存のデバウンス済みルーム存在チェックをそのまま走らせる
+      input.dispatchEvent(new Event('input'));
+    }
+  }
+
   showRoomCodeModal(openToSettings) {
     const modal = document.getElementById('roomCodeModal');
     if (!modal) return;
@@ -3086,6 +3134,9 @@ class OsanpoBingo {
 
         // 初回バトルプレイ時はチュートリアルを表示（非同期・ゲーム開始後）
         this._showBattleTutorial().catch(() => {});
+
+        // 作成直後に招待導線を案内（合言葉を口頭で伝える手間をなくす）
+        this.showCopyNotification('🔗「合言葉」をタップで招待リンクを送れます');
       });
     }
 
@@ -3287,42 +3338,69 @@ class OsanpoBingo {
     return topics;
   }
   
-  copyRoomCode() {
+  // 招待リンク（合言葉をプリセットしたURL）
+  getInviteUrl(roomCode = this.roomCode) {
+    if (!roomCode || roomCode === 'solo') return GAME_URL;
+    return `${GAME_URL}?room=${encodeURIComponent(roomCode)}&ref=invite`;
+  }
+
+  // 招待メッセージ（LINE等にそのまま貼れる形）
+  getInviteText(roomCode = this.roomCode) {
+    return `おさんぽビンゴで一緒に遊ぼう！\n合言葉「${roomCode}」は入力ずみ。リンクを開くだけで参加できます。\n${this.getInviteUrl(roomCode)}`;
+  }
+
+  // 合言葉ではなく招待リンクを共有する（相手の手入力をなくすため）
+  shareInvite() {
     if (!this.roomCode || this.roomCode === 'solo') return;
-    
-    // クリップボードにコピー
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(this.roomCode)
-        .then(() => {
-          // コピー成功のフィードバック
-          const roomCodeStat = document.getElementById('roomCodeStat');
-          if (roomCodeStat) {
-            const originalBg = roomCodeStat.style.background;
-            roomCodeStat.style.background = '#a8d5ba';
-            roomCodeStat.style.transition = 'background 0.3s';
-            
-            setTimeout(() => {
-              roomCodeStat.style.background = originalBg;
-            }, 300);
-          }
-          
-          // 小さな通知を表示
-          this.showCopyNotification();
-        })
-        .catch(err => {
-          console.error('コピー失敗:', err);
-          showAlert(`合言葉は「${this.roomCode}」です\n\n長押しでコピーしてください`);
+
+    const text = this.getInviteText();
+    const url = this.getInviteUrl();
+    sendGA('invite_shared', { game_type: this.gameType || 'normal' });
+
+    // 成功時の視覚フィードバック
+    const flashStat = () => {
+      const roomCodeStat = document.getElementById('roomCodeStat');
+      if (!roomCodeStat) return;
+      const originalBg = roomCodeStat.style.background;
+      roomCodeStat.style.background = '#a8d5ba';
+      roomCodeStat.style.transition = 'background 0.3s';
+      setTimeout(() => { roomCodeStat.style.background = originalBg; }, 300);
+    };
+
+    const copyToClipboard = () => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            flashStat();
+            this.showCopyNotification('🔗 招待リンクをコピーしました！');
+          })
+          .catch(err => {
+            console.error('コピー失敗:', err);
+            showAlert(`招待リンク\n\n${url}\n\n長押しでコピーしてください`);
+          });
+      } else {
+        showAlert(`招待リンク\n\n${url}\n\n長押しでコピーしてください`);
+      }
+    };
+
+    // スマホは共有シート（LINE等に直接送れる）、非対応環境はクリップボード
+    if (navigator.share) {
+      navigator.share({ title: 'おさんぽビンゴ', text, url })
+        .then(flashStat)
+        .catch((err) => {
+          // ユーザーがキャンセルした場合は何もしない
+          if (err && err.name === 'AbortError') return;
+          copyToClipboard();
         });
     } else {
-      // クリップボードAPIが使えない場合
-      showAlert(`合言葉は「${this.roomCode}」です\n\n長押しでコピーしてください`);
+      copyToClipboard();
     }
   }
   
   // コピー通知を表示
-  showCopyNotification() {
+  showCopyNotification(message = '📋 合言葉をコピーしました！') {
     const notification = document.createElement('div');
-    notification.textContent = '📋 合言葉をコピーしました！';
+    notification.textContent = message;
     notification.style.cssText = `
       position: fixed;
       bottom: 20px;
