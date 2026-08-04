@@ -131,14 +131,29 @@ npx --yes serve -l 3000
 ### ファイル構成
 
 ```
+index.html          … ランディングページ
 game.html           … ゲーム画面
+topics.html         … お題図鑑（topics.js から自動生成・直接編集しない）
 app.js              … ゲームロジック（OsanpoBingo クラス）
 styles.css          … スタイル
-topics.js           … お題一覧・難易度別選択ロジック
-battle-config.js    … Supabase接続設定（gitignore対象）
+topics.js           … お題一覧・難易度別選択ロジック（topics_list.csv から自動生成）
+battle-config.js    … Supabase接続設定（anon key のみのためコミット対象）
 battle-config.example.js … 設定ファイルのテンプレート
 app-battle.js       … バトルモード関連メソッド抜粋（レビュー参照用）
+assets/icons/       … お題アイコン（配信用に最適化済み・最大512px）
 ```
+
+### npm スクリプト
+
+```bash
+npm run build-topics        # topics_list.csv → topics.js を再生成
+npm run build-topics-page   # topics.js → topics.html を再生成
+npm run optimize-icons      # assets/icons のPNGを配信用に最適化
+npm run optimize-icons:dry  # 最適化せず削減量だけ確認
+```
+
+アイコンを追加したら `npm run optimize-icons` を通してからコミットする。
+ボードは1枚につき25個のアイコンを読み込むため、1枚のサイズがそのまま初回表示の通信量になる。
 
 ### 技術スタック
 
