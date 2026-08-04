@@ -465,10 +465,16 @@ class OsanpoBingo {
     // 結果画面：決定・ダウンロード・共有・戻る
     this.setupResultView();
     
-    // 合言葉をクリックでコピー
+    // 合言葉をクリックでコピー（口頭・チャットで合言葉だけ伝えたい場合用）
     const roomCodeStat = document.getElementById('roomCodeStat');
     if (roomCodeStat) {
-      roomCodeStat.addEventListener('click', () => this.shareInvite());
+      roomCodeStat.addEventListener('click', () => this.copyRoomCode());
+    }
+
+    // 招待をクリックで招待リンクを共有（相手の手入力をなくす）
+    const inviteStat = document.getElementById('inviteStat');
+    if (inviteStat) {
+      inviteStat.addEventListener('click', () => this.shareInvite());
     }
 
     // 合言葉モーダル
@@ -1770,6 +1776,9 @@ class OsanpoBingo {
     // 合言葉：バトルのみ表示
     const roomCodeStatEl = document.getElementById('roomCodeStat');
     if (roomCodeStatEl) roomCodeStatEl.style.display = isBattle ? '' : 'none';
+    // 招待リンク：合言葉と同じくバトルのみ表示
+    const inviteStatEl = document.getElementById('inviteStat');
+    if (inviteStatEl) inviteStatEl.style.display = isBattle ? '' : 'none';
     // バトルモード遊び方：バトルのみ表示
     const battleHowtoEl = document.getElementById('battleHowtoDetails');
     if (battleHowtoEl) battleHowtoEl.style.display = isBattle ? '' : 'none';
@@ -3134,9 +3143,6 @@ class OsanpoBingo {
 
         // 初回バトルプレイ時はチュートリアルを表示（非同期・ゲーム開始後）
         this._showBattleTutorial().catch(() => {});
-
-        // 作成直後に招待導線を案内（合言葉を口頭で伝える手間をなくす）
-        this.showCopyNotification('🔗「合言葉」をタップで招待リンクを送れます');
       });
     }
 
@@ -3338,6 +3344,36 @@ class OsanpoBingo {
     return topics;
   }
   
+  // 合言葉だけをコピーする（口頭・チャットで合言葉を伝えたい場合用）
+  copyRoomCode() {
+    if (!this.roomCode || this.roomCode === 'solo') return;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(this.roomCode)
+        .then(() => {
+          this.flashStat('roomCodeStat');
+          this.showCopyNotification();
+        })
+        .catch(err => {
+          console.error('コピー失敗:', err);
+          showAlert(`合言葉は「${this.roomCode}」です\n\n長押しでコピーしてください`);
+        });
+    } else {
+      // クリップボードAPIが使えない場合
+      showAlert(`合言葉は「${this.roomCode}」です\n\n長押しでコピーしてください`);
+    }
+  }
+
+  // タップした統計チップを一瞬ハイライトする（コピー・共有成功のフィードバック）
+  flashStat(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const originalBg = el.style.background;
+    el.style.background = '#a8d5ba';
+    el.style.transition = 'background 0.3s';
+    setTimeout(() => { el.style.background = originalBg; }, 300);
+  }
+
   // 招待リンク（合言葉をプリセットしたURL）
   getInviteUrl(roomCode = this.roomCode) {
     if (!roomCode || roomCode === 'solo') return GAME_URL;
@@ -3357,15 +3393,7 @@ class OsanpoBingo {
     const url = this.getInviteUrl();
     sendGA('invite_shared', { game_type: this.gameType || 'normal' });
 
-    // 成功時の視覚フィードバック
-    const flashStat = () => {
-      const roomCodeStat = document.getElementById('roomCodeStat');
-      if (!roomCodeStat) return;
-      const originalBg = roomCodeStat.style.background;
-      roomCodeStat.style.background = '#a8d5ba';
-      roomCodeStat.style.transition = 'background 0.3s';
-      setTimeout(() => { roomCodeStat.style.background = originalBg; }, 300);
-    };
+    const flashStat = () => this.flashStat('inviteStat');
 
     const copyToClipboard = () => {
       if (navigator.clipboard && navigator.clipboard.writeText) {
