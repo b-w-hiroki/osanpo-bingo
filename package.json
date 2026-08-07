@@ -7,8 +7,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "resize-icons": "node tools/resize-icons.js",
-    "resize-icons:dry": "node tools/resize-icons.js --dry-run",
+    "optimize-icons": "node tools/optimize-icons.js",
+    "optimize-icons:dry": "node tools/optimize-icons.js --dry-run",
     "build-topics": "node tools/csv-to-topics.js",
     "build-topics-page": "node tools/build-topics-page.js"
   }
