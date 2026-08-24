@@ -110,11 +110,19 @@
 
 ```
 テーブル: battle_cell_owners
-カラム: room_code, topic_key, cell_index, owner_user_id
+カラム: room_code, topic_key, cell_index, owner_user_id, photo_data
 UNIQUE制約: (room_code, topic_key)
 ```
 
-`battle-config.js` は `.gitignore` に登録されているため、誤って公開される心配はありません。
+4. **`supabase/battle_rls_policies.sql` を Supabase の SQL Editor で実行する**（初回のみ・必須）
+   RLS（行レベルセキュリティ）を有効化し、`photo_data`（プレイヤーが撮影した写真）が
+   `select=*` で全ルーム分まとめて抜き取られないようにする設定です。
+   実行しない場合、anon key を知っている第三者が全プレイヤーの写真を閲覧できてしまいます。
+
+`battle-config.js` の anon key は、Supabase の設計上「クライアントに公開されることを前提としたキー」であり、
+`.gitignore` の対象外として意図的にコミットされています（誤って公開されているわけではありません）。
+ただし、anon key はデータの正当性をそれ自体では保証しないため、実際のアクセス制御は上記の RLS 設定に依存します。
+`battle-config.js` を差し替える場合は、新しい Supabase プロジェクトでも必ず手順4を実行してください。
 
 ---
 
