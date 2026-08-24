@@ -2068,7 +2068,7 @@ class OsanpoBingo {
     box.innerHTML = `
       <div class="modal-content">
         <button class="modal-close" id="resultPhotoClose">✕</button>
-        ${topicText ? `<p class="result-photo-modal-title">${topicText}</p>` : ''}
+        ${topicText ? `<p class="result-photo-modal-title">${escapeHtml(topicText)}</p>` : ''}
         <img src="${src}" alt="写真" class="result-photo-modal-img">
         <button class="btn btn-primary btn-large result-photo-save-btn">端末に保存</button>
       </div>
@@ -4442,20 +4442,33 @@ class OsanpoBingo {
     modal.style.display = 'flex';
   }
 
-  /** Supabase から特定セルの photo_data を取得（オンデマンド） */
+  /**
+   * Supabase から特定セルの photo_data を取得（オンデマンド）。
+   * 通常の REST SELECT ではなく RPC (get_cell_photo) 経由で取得する。
+   * photo_data 列は anon ロールの直接 SELECT から外しているため
+   * （supabase/battle_rls_policies.sql 参照）、room_code + cell_index を
+   * 個別指定するこの経路でのみ取得できる。select=* による全ルーム一括抜き取りを防ぐため。
+   */
   async fetchOpponentCellPhoto(cellIndex, ownerId) {
     if (!this.battleBackend.enabled || !this.roomCode || this.roomCode === 'solo') return null;
     const { url, key } = this.battleBackend;
     try {
-      // オーナーIDを絞り込むことで、別プレイヤーのレコードと混在しないよう確実に特定する
-      const ownerFilter = ownerId ? `&owner_user_id=eq.${encodeURIComponent(ownerId)}` : '';
-      const fetchUrl = `${url}/rest/v1/${this.battleTable}?select=photo_data&room_code=eq.${encodeURIComponent(this.roomCode)}&cell_index=eq.${cellIndex}${ownerFilter}`;
-      const res = await fetch(fetchUrl, {
-        headers: { apikey: key, Authorization: `Bearer ${key}` }
+      const res = await fetch(`${url}/rest/v1/rpc/get_cell_photo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: key,
+          Authorization: `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          p_room_code: this.roomCode,
+          p_cell_index: cellIndex,
+          p_owner_user_id: ownerId || null
+        })
       });
       if (!res.ok) return null;
-      const rows = await res.json();
-      return rows?.[0]?.photo_data || null;
+      const photo = await res.json();
+      return photo || null;
     } catch (e) {
       console.warn('fetchOpponentCellPhoto failed', e);
       return null;
