@@ -2068,7 +2068,7 @@ class OsanpoBingo {
     box.innerHTML = `
       <div class="modal-content">
         <button class="modal-close" id="resultPhotoClose">✕</button>
-        ${topicText ? `<p class="result-photo-modal-title">${topicText}</p>` : ''}
+        ${topicText ? `<p class="result-photo-modal-title">${escapeHtml(topicText)}</p>` : ''}
         <img src="${src}" alt="写真" class="result-photo-modal-img">
         <button class="btn btn-primary btn-large result-photo-save-btn">端末に保存</button>
       </div>
