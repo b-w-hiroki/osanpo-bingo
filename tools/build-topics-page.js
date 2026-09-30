@@ -259,7 +259,7 @@ ${sections.map(renderSection).join('\n\n')}
 
   <footer>
     <p><a href="./">トップページ</a> ｜ <a href="game.html">遊ぶ</a> ｜ <a href="privacy.html">プライバシーポリシー</a> ｜ <a href="terms.html">利用規約</a></p>
-    <p>© おさんぽビンゴ</p>
+    <p>© 2026 birdman studio</p>
   </footer>
 </body>
 </html>
