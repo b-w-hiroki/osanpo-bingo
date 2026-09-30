@@ -178,3 +178,7 @@ Chrome / Firefox / Safari / Edge
 ## ライセンス
 
 MIT License
+
+## 姉妹アプリの導線（birdman studio 共通）
+
+LP のヘッダーの切り替えメニューとフッターのアイコンは、`sister-apps.js` の `APPS` から描画します。アプリを追加・変更するときは `APPS` に1行足し、同じファイルを4リポジトリ（otsukai / osanpo-bingo / gohan-tabeta / osaifu）にコピーして、各 Service Worker のキャッシュ番号を上げてください。表示中のアプリ自身は自動で一覧から外れ、件数が増えるとメニューは縦・フッターは横にスクロールします。
