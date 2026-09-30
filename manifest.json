@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "おさんぽビンゴバトル",
   "short_name": "おさんぽビンゴバトル",
   "description": "おさんぽ中に見つけたものをマークしてBINGOを目指そう！",
@@ -20,6 +21,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "static/screenshots/board.jpg",
+      "sizes": "1170x1992",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "ビンゴボード：散歩で見つけたお題をマーク"
+    },
+    {
+      "src": "static/screenshots/setup.jpg",
+      "sizes": "1170x1992",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "設定してすぐスタート"
     }
   ]
 }
