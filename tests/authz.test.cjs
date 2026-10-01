@@ -95,3 +95,11 @@ test('RLS design rejects impersonated ownership and limits reads to room members
   const joinFlow = app.slice(app.indexOf("joinGameBtn.addEventListener('click'"));
   assert.ok(joinFlow.indexOf('battleAuth.joinRoom(roomCode)') < joinFlow.indexOf('fetchRoomSettings(roomCode)'));
 });
+
+test('privacy policy explains anonymous battle identity, session storage, and leave cleanup', () => {
+  const privacy = readFileSync(resolve(__dirname, '..', 'privacy.html'), 'utf8');
+  assert.match(privacy, /Supabaseの匿名認証/);
+  assert.match(privacy, /セッションストレージ/);
+  assert.match(privacy, /ルームから退出したときに当該参加者分を削除/);
+  assert.match(privacy, /メールアドレス・氏名・パスワードは取得しません/);
+});
