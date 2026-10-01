@@ -62,12 +62,7 @@ async syncBattleOwnersFromServer() {
     const endpointUrl = new URL(`${this.battleBackend.url}/rest/v1/${this.battleTable}`);
     endpointUrl.searchParams.set('select', 'topic_key,cell_index,owner_user_id');
     endpointUrl.searchParams.set('room_code', `eq.${this.roomCode}`);
-    const res = await fetch(endpointUrl.toString(), {
-      headers: {
-        apikey: this.battleBackend.key,
-        Authorization: `Bearer ${this.battleBackend.key}`
-      }
-    });
+    const res = await fetch(endpointUrl.toString(), { headers: await this.battleAuth.headers() });
     if (!res.ok) {
       this.lastBattleSyncStatus = `http_${res.status}`;
       this.lastBattleSyncError = 'sync_get_failed';
@@ -138,12 +133,10 @@ async claimBattleCellOnServer(index) {
   // POST（先着取得試行）
   const postRes = await fetch(`${url}/rest/v1/${this.battleTable}`, {
     method: 'POST',
-    headers: {
+    headers: await this.battleAuth.headers({
       'Content-Type': 'application/json',
-      apikey: key,
-      Authorization: `Bearer ${key}`,
       Prefer: 'resolution=ignore-duplicates,return=representation'
-    },
+    }),
     body: JSON.stringify({
       room_code: this.roomCode,
       topic_key: topicKey,
@@ -174,7 +167,7 @@ async claimBattleCellOnServer(index) {
   try {
     const getRes = await fetch(
       `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&topic_key=eq.${encodeURIComponent(topicKey)}&select=owner_user_id`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+      { headers: await this.battleAuth.headers() }
     );
     getRows = await getRes.json();
   } catch (e) {
