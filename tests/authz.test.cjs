@@ -60,6 +60,21 @@ test('authorization failures are surfaced instead of falling back to anon-key wr
   await assert.rejects(() => auth.deleteRoom('owned-by-someone-else'), /delete_battle_room failed \(403\)/);
 });
 
+test('participant leave uses an authenticated RPC that removes membership', async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    if (url.endsWith('/auth/v1/signup')) {
+      return response(200, { access_token: 'participant-token', expires_in: 3600, user: { id: 'participant-user' } });
+    }
+    return response(204, null);
+  };
+  const auth = new OsanpoBattleAuth({ url: 'https://local.test', key: 'public-anon-key' }, { fetchImpl, storage: memoryStorage() });
+  await auth.leaveRoom('invite01');
+  assert.equal(calls[1].url, 'https://local.test/rest/v1/rpc/leave_battle_room');
+  assert.equal(calls[1].init.headers.Authorization, 'Bearer participant-token');
+});
+
 test('RLS design rejects impersonated ownership and limits reads to room members', () => {
   const root = resolve(__dirname, '..');
   const sql = readFileSync(resolve(root, 'supabase/battle_rls_policies.sql'), 'utf8');
@@ -68,6 +83,7 @@ test('RLS design rejects impersonated ownership and limits reads to room members
   assert.match(sql, /member_insert_own[\s\S]*owner_uid = auth\.uid\(\)/);
   assert.match(sql, /owner_update_own[\s\S]*owner_uid = auth\.uid\(\)/);
   assert.match(sql, /owner_delete_own[\s\S]*owner_uid = auth\.uid\(\)/);
+  assert.match(sql, /leave_battle_room[\s\S]*delete from public\.battle_room_members/);
   assert.match(sql, /member_select[\s\S]*is_battle_room_member\(room_code\)/);
   assert.doesNotMatch(sql, /create policy[\s\S]{0,120}\bto anon\b/i);
   assert.match(sql, /revoke all on public\.battle_rooms, public\.battle_room_members, public\.battle_cell_owners from anon/);
