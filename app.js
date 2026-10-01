@@ -956,14 +956,7 @@ class OsanpoBingo {
   async deleteMyBattleRows(roomCode, playerId) {
     if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo' || !playerId) return;
     try {
-      const { url, key } = this.battleBackend;
-      await fetch(
-        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&owner_user_id=eq.${encodeURIComponent(playerId)}`,
-        {
-          method: 'DELETE',
-          headers: await this.battleAuth.headers()
-        }
-      );
+      await this.battleAuth.leaveRoom(roomCode);
     } catch {
       // 削除失敗は無視
     }

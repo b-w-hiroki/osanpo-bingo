@@ -71,6 +71,7 @@
 
     createRoom(roomCode) { return this.rpc('create_battle_room', { p_room_code: roomCode }); }
     joinRoom(roomCode) { return this.rpc('join_battle_room', { p_room_code: roomCode }); }
+    leaveRoom(roomCode) { return this.rpc('leave_battle_room', { p_room_code: roomCode }); }
     deleteRoom(roomCode) { return this.rpc('delete_battle_room', { p_room_code: roomCode }); }
   }
 
