@@ -1,8 +1,12 @@
-const CACHE_NAME = 'osanpo-bingo-v154';
+const CACHE_NAME = 'osanpo-bingo-v156';
 const urlsToCache = [
   'index.html',
   'sister-apps.js',
   'game.html',
+  'news.html',
+  'news.css',
+  'news-data.js',
+  'news-page.js',
   'terms.html',
   'topics.html',
   'photo-storage.js',
@@ -52,8 +56,16 @@ self.addEventListener('message', (event) => {
 
 // フェッチ時にキャッシュから取得（キャッシュにない場合はネットワーク取得 → 自動キャッシュ保存）
 self.addEventListener('fetch', (event) => {
-  // ナビゲーション（ページ遷移）はSWを通さずブラウザに任せる（リンクエラー回避）
-  if (event.request.mode === 'navigate') return;
+  // ゲーム本体のページ遷移は従来どおりブラウザに任せる。
+  // お知らせだけは、圏外でも最後に取得したページを読めるようネットワーク優先＋キャッシュ復帰。
+  if (event.request.mode === 'navigate') {
+    const path = new URL(event.request.url).pathname;
+    if (!path.endsWith('/news.html')) return;
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('news.html', { ignoreSearch: true }))
+    );
+    return;
+  }
   // 外部ドメイン（Supabase API等）はキャッシュせずネットワークに直接パス
   // APIレスポンスをキャッシュすると古いデータが返り続けるため
   const reqUrl = new URL(event.request.url);
