@@ -1,102 +1,135 @@
--- ============================================================================
--- おさんぽビンゴバトル: battle_cell_owners のセキュリティ設定
---
--- 【背景】
--- このアプリは Supabase の anon key をクライアントに公開する設計です（意図的・
--- Supabase の標準的なパターン）。ただし、これまで RLS（行レベルセキュリティ）
--- が未設定だったため、anon key さえあれば誰でも以下が可能でした。
---
---   1. room_code でフィルタせず SELECT * すると、全ルーム・全プレイヤーの
---      写真（photo_data）を丸ごと取得できてしまう
---   2. 任意の room_code を指定して DELETE すれば、他人の対戦データを消せる
---
--- 【このスクリプトでの対応】
---   1. photo_data 列を anon の通常 SELECT から除外し、get_cell_photo() という
---      個別RPC経由でのみ取得できるようにする（app.js 側も対応済み）。
---      → select=* による全ルーム一括の写真抜き取りを防止する。
---   2. RLS を明示的に有効化し、現状の挙動（INSERT/SELECT/DELETE を anon に許可）
---      をポリシーとして明文化する。
---
--- 【残る限界（正直に書きます）】
--- このアプリには Supabase Auth によるログインがなく、owner_user_id は
--- クライアントが自己申告する文字列に過ぎません。そのため RLS だけでは
--- 「本人だけが自分の行を削除できる」ことは技術的に保証できません
--- （誰でも owner_user_id を騙って DELETE を送れます）。
--- これを本当に防ぐには、Supabase Anonymous Auth を導入して auth.uid() を
--- 使った所有者チェックに切り替える必要があります（将来の改善課題）。
--- 当面は「合言葉（room_code）を知っている人だけが対戦に参加できる」という
--- 現状の設計を維持しつつ、上記1.の写真一括流出だけは確実に塞ぎます。
---
--- 【使い方】
--- Supabase ダッシュボード → SQL Editor に貼り付けて実行してください。
--- 実行は1回だけでOKです（既存ポリシーがあれば一旦 DROP してから再作成します）。
--- ============================================================================
+-- Authenticated battle-room authorization design.
+-- Do not apply without a backup and explicit production approval. Enable
+-- Supabase Anonymous Sign-Ins first. Existing rows have no trusted owner_uid;
+-- retire or migrate them explicitly instead of trusting owner_user_id.
 
--- 1. RLS を有効化
+create table if not exists public.battle_rooms (
+  room_code text primary key check (char_length(room_code) between 1 and 8),
+  owner_uid uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+create table if not exists public.battle_room_members (
+  room_code text not null references public.battle_rooms(room_code) on delete cascade,
+  user_uid uuid not null references auth.users(id) on delete cascade,
+  role text not null check (role in ('owner', 'participant')),
+  joined_at timestamptz not null default now(),
+  primary key (room_code, user_uid)
+);
+
+alter table public.battle_cell_owners add column if not exists owner_uid uuid references auth.users(id) on delete cascade;
+alter table public.battle_cell_owners alter column owner_uid set default auth.uid();
+alter table public.battle_rooms enable row level security;
+alter table public.battle_room_members enable row level security;
 alter table public.battle_cell_owners enable row level security;
 
--- 2. 既存ポリシーがあれば削除してから作り直す（再実行しても安全にするため）
+create or replace function public.battle_base_room(p_room_code text)
+returns text language sql immutable as $$ select regexp_replace(p_room_code, '::prs$', ''); $$;
+
+create or replace function public.is_battle_room_member(p_room_code text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.battle_room_members m
+    where m.room_code = public.battle_base_room(p_room_code) and m.user_uid = auth.uid()
+  );
+$$;
+revoke all on function public.is_battle_room_member(text) from public, anon;
+grant execute on function public.is_battle_room_member(text) to authenticated;
+
+drop policy if exists "room_member_select" on public.battle_rooms;
+drop policy if exists "room_owner_delete" on public.battle_rooms;
+create policy "room_member_select" on public.battle_rooms for select to authenticated
+  using (public.is_battle_room_member(room_code));
+create policy "room_owner_delete" on public.battle_rooms for delete to authenticated
+  using (owner_uid = auth.uid());
+
+drop policy if exists "member_select" on public.battle_room_members;
+create policy "member_select" on public.battle_room_members for select to authenticated
+  using (public.is_battle_room_member(room_code));
+
 drop policy if exists "anon_insert" on public.battle_cell_owners;
 drop policy if exists "anon_select" on public.battle_cell_owners;
 drop policy if exists "anon_delete" on public.battle_cell_owners;
+drop policy if exists "member_select" on public.battle_cell_owners;
+drop policy if exists "member_insert_own" on public.battle_cell_owners;
+drop policy if exists "owner_update_own" on public.battle_cell_owners;
+drop policy if exists "owner_delete_own" on public.battle_cell_owners;
+create policy "member_select" on public.battle_cell_owners for select to authenticated
+  using (public.is_battle_room_member(room_code));
+create policy "member_insert_own" on public.battle_cell_owners for insert to authenticated
+  with check (public.is_battle_room_member(room_code) and owner_uid = auth.uid());
+create policy "owner_update_own" on public.battle_cell_owners for update to authenticated
+  using (public.is_battle_room_member(room_code) and owner_uid = auth.uid())
+  with check (public.is_battle_room_member(room_code) and owner_uid = auth.uid());
+create policy "owner_delete_own" on public.battle_cell_owners for delete to authenticated
+  using (public.is_battle_room_member(room_code) and owner_uid = auth.uid());
 
--- 3. INSERT: 誰でも許可（新規参加・マス取得に必要）
-create policy "anon_insert" on public.battle_cell_owners
-  for insert to anon
-  with check (true);
+revoke all on public.battle_rooms, public.battle_room_members, public.battle_cell_owners from anon;
+grant select on public.battle_rooms, public.battle_room_members to authenticated;
+grant insert, update, delete on public.battle_cell_owners to authenticated;
+grant select (room_code, topic_key, cell_index, owner_user_id, owner_uid)
+  on public.battle_cell_owners to authenticated;
 
--- 4. SELECT: 誰でも許可（同じ合言葉のプレイヤー間で同期するために必要。
---    room_code は実質的な「合言葉＝秘密トークン」として扱う設計のため、
---    SNS等に room_code 付きの招待URLをそのまま公開投稿しないよう運用で注意する）
-create policy "anon_select" on public.battle_cell_owners
-  for select to anon
-  using (true);
+create or replace function public.create_battle_room(p_room_code text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'authentication required'; end if;
+  if p_room_code is null or char_length(p_room_code) not between 1 and 8 or p_room_code = 'solo' then
+    raise exception 'invalid room code';
+  end if;
+  insert into public.battle_rooms(room_code, owner_uid) values (p_room_code, auth.uid())
+    on conflict (room_code) do nothing;
+  if not exists (select 1 from public.battle_rooms where room_code = p_room_code and owner_uid = auth.uid()) then
+    raise exception 'room already belongs to another user';
+  end if;
+  insert into public.battle_room_members(room_code, user_uid, role) values (p_room_code, auth.uid(), 'owner')
+    on conflict (room_code, user_uid) do update set role = 'owner';
+end;
+$$;
 
--- 5. DELETE: 誰でも許可（退出時・一時保存の仕組みで必要。
---    上記の通り、本人確認は技術的にできていない点に注意）
-create policy "anon_delete" on public.battle_cell_owners
-  for delete to anon
-  using (true);
+create or replace function public.join_battle_room(p_room_code text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'authentication required'; end if;
+  if not exists (select 1 from public.battle_rooms where room_code = p_room_code) then
+    raise exception 'room not found';
+  end if;
+  insert into public.battle_room_members(room_code, user_uid, role)
+    values (p_room_code, auth.uid(), 'participant') on conflict (room_code, user_uid) do nothing;
+end;
+$$;
 
--- 6. photo_data 列だけは通常の SELECT から除外する
---    （select=* / select=photo_data による一括取得を防ぐ）
-revoke select (photo_data) on public.battle_cell_owners from anon;
+create or replace function public.delete_battle_room(p_room_code text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from public.battle_rooms where room_code = p_room_code and owner_uid = auth.uid()) then
+    raise exception 'room owner required';
+  end if;
+  delete from public.battle_cell_owners where room_code in (p_room_code, p_room_code || '::prs');
+  delete from public.battle_rooms where room_code = p_room_code;
+end;
+$$;
 
--- 7. photo_data を個別に取得するための RPC。
---    room_code + cell_index（+ 任意で owner_user_id）を指定した
---    ピンポイントな問い合わせのみ許可する。
-create or replace function public.get_cell_photo(
-  p_room_code text,
-  p_cell_index int,
-  p_owner_user_id text default null
-)
-returns text
-language sql
-security definer
-set search_path = public
-as $$
-  select photo_data
-  from battle_cell_owners
-  where room_code = p_room_code
-    and cell_index = p_cell_index
-    and (p_owner_user_id is null or owner_user_id = p_owner_user_id)
+create or replace function public.battle_room_exists(p_room_code text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.battle_rooms where room_code = p_room_code);
+$$;
+
+create or replace function public.get_cell_photo(p_room_code text, p_cell_index int, p_owner_user_id text default null)
+returns text language sql stable security definer set search_path = public as $$
+  select c.photo_data from public.battle_cell_owners c
+  where public.is_battle_room_member(p_room_code)
+    and c.room_code = p_room_code and c.cell_index = p_cell_index
+    and (p_owner_user_id is null or c.owner_user_id = p_owner_user_id)
   limit 1;
 $$;
 
-grant execute on function public.get_cell_photo(text, int, text) to anon;
-
--- ============================================================================
--- 確認方法（任意）:
--- 実行後、以下のように photo_data 列だけを直接 SELECT しようとするとエラーになれば成功です。
---
---   curl "https://<project>.supabase.co/rest/v1/battle_cell_owners?select=photo_data&limit=1" \
---     -H "apikey: <anon key>" -H "Authorization: Bearer <anon key>"
---   → 403 / column does not exist 等のエラーになるはず
---
--- 一方、RPC 経由なら room_code と cell_index を指定した場合のみ取得できます:
---
---   curl -X POST "https://<project>.supabase.co/rest/v1/rpc/get_cell_photo" \
---     -H "apikey: <anon key>" -H "Authorization: Bearer <anon key>" \
---     -H "Content-Type: application/json" \
---     -d '{"p_room_code":"実在する合言葉","p_cell_index":0}'
--- ============================================================================
+revoke all on function public.create_battle_room(text) from public, anon;
+revoke all on function public.join_battle_room(text) from public, anon;
+revoke all on function public.delete_battle_room(text) from public, anon;
+revoke all on function public.battle_room_exists(text) from public, anon;
+revoke all on function public.get_cell_photo(text, int, text) from public, anon;
+grant execute on function public.create_battle_room(text) to authenticated;
+grant execute on function public.join_battle_room(text) to authenticated;
+grant execute on function public.delete_battle_room(text) to authenticated;
+grant execute on function public.battle_room_exists(text) to authenticated;
+grant execute on function public.get_cell_photo(text, int, text) to authenticated;

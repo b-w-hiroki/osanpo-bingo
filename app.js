@@ -274,6 +274,7 @@ class OsanpoBingo {
     this.lastClaimedCellIndex = null; // 直近でクレームしたセルインデックス
     this.battlePlayerId = makeBattlePlayerId('', 'blue', getBattleRandomId());
     this.battleBackend = getBattleBackendConfig();
+    this.battleAuth = new window.OsanpoBattleAuth(this.battleBackend);
     this.battleTable = 'battle_cell_owners';
     this.battleSyncTimer = null;
     this._realtimeClient = null;   // SupabaseRealtimeClient（バトル中のみ生存）
@@ -633,10 +634,7 @@ class OsanpoBingo {
       // プレゼンスは別ルーム（::prs サフィックス）に保存されているため別途取得
       const encodedPresenceRoom = encodeURIComponent(this.roomCode + '::prs');
       const presenceUrl = `${this.battleBackend.url}/rest/v1/${this.battleTable}?select=owner_user_id&room_code=eq.${encodedPresenceRoom}`;
-      const authHeaders = {
-        apikey: this.battleBackend.key,
-        Authorization: `Bearer ${this.battleBackend.key}`
-      };
+      const authHeaders = await this.battleAuth.headers();
       // ゲームセル行とプレゼンス行を並行取得
       const [res, presRes] = await Promise.all([
         fetch(syncUrl, { headers: authHeaders }),
@@ -803,12 +801,10 @@ class OsanpoBingo {
     try {
       await fetch(`${url}/rest/v1/${this.battleTable}`, {
         method: 'POST',
-        headers: {
+        headers: await this.battleAuth.headers({
           'Content-Type': 'application/json',
-          apikey: key,
-          Authorization: `Bearer ${key}`,
           Prefer: 'resolution=ignore-duplicates,return=minimal'
-        },
+        }),
         body: JSON.stringify({
           room_code: presenceRoom,
           cell_index: presenceIdx,
@@ -946,14 +942,7 @@ class OsanpoBingo {
   async deleteRoomData(roomCode) {
     if (!this.battleBackend.enabled || !roomCode || roomCode === 'solo') return;
     try {
-      const { url, key } = this.battleBackend;
-      await fetch(
-        `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}`,
-        {
-          method: 'DELETE',
-          headers: { apikey: key, Authorization: `Bearer ${key}` }
-        }
-      );
+      await this.battleAuth.deleteRoom(roomCode);
     } catch {
       // 削除失敗は無視（次回合言葉生成で別コードを使うため問題なし）
     }
@@ -972,7 +961,7 @@ class OsanpoBingo {
         `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&owner_user_id=eq.${encodeURIComponent(playerId)}`,
         {
           method: 'DELETE',
-          headers: { apikey: key, Authorization: `Bearer ${key}` }
+          headers: await this.battleAuth.headers()
         }
       );
     } catch {
@@ -988,12 +977,10 @@ class OsanpoBingo {
       // UPSERT: 設定レコードを上書きできるよう resolution=merge-duplicates を使用
       await fetch(`${url}/rest/v1/${this.battleTable}`, {
         method: 'POST',
-        headers: {
+        headers: await this.battleAuth.headers({
           'Content-Type': 'application/json',
-          apikey: key,
-          Authorization: `Bearer ${key}`,
           Prefer: 'resolution=merge-duplicates,return=minimal'
-        },
+        }),
         body: JSON.stringify({
           room_code: roomCode,
           cell_index: 12,
@@ -1037,7 +1024,7 @@ class OsanpoBingo {
     try {
       const res = await fetch(
         `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(roomCode)}&cell_index=eq.12&select=owner_user_id`,
-        { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+        { headers: await this.battleAuth.headers() }
       );
       if (!res.ok) return null;
       const rows = await res.json();
@@ -1071,15 +1058,13 @@ class OsanpoBingo {
     };
     const postRes = await fetch(`${url}/rest/v1/${this.battleTable}`, {
       method: 'POST',
-      headers: {
+      headers: await this.battleAuth.headers({
         'Content-Type': 'application/json',
-        apikey: key,
-        Authorization: `Bearer ${key}`,
         // return=minimal: レスポンスボディなし。photo_data を送り返さず帯域節約。
         // 201 Created = 新規INSERT成功（クレーム取得）
         // 200 OK      = UNIQUE重複でスキップ（既に誰かが所持）
         Prefer: 'resolution=ignore-duplicates,return=minimal'
-      },
+      }),
       body: JSON.stringify(postBody)
     });
     if (!postRes.ok) {
@@ -1104,7 +1089,7 @@ class OsanpoBingo {
     try {
       const getRes = await fetch(
         `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&cell_index=eq.${index}&select=owner_user_id`,
-        { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+        { headers: await this.battleAuth.headers() }
       );
       getRows = await getRes.json();
     } catch (e) {
@@ -2866,12 +2851,8 @@ class OsanpoBingo {
 
       try {
         // __room_settings__ の有無でルーム存在を確認（最も確実な方法）
-        const sRes = await fetch(
-          `${this.battleBackend.url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(code)}&cell_index=eq.12&select=owner_user_id`,
-          { headers: { apikey: this.battleBackend.key, Authorization: `Bearer ${this.battleBackend.key}` } }
-        );
-        if (!sRes.ok) throw new Error('fetch failed');
-        const sRows = await sRes.json();
+        const exists = await this.battleAuth.rpc('battle_room_exists', { p_room_code: code });
+        const sRows = exists ? [{ owner_user_id: '' }] : [];
         if (sRows.length > 0) {
           // 参加人数チェック（最大3人）
           let memberCount = 0;
@@ -3095,6 +3076,14 @@ class OsanpoBingo {
         this.landmarkRegion = this.landmarkMode
           ? (document.getElementById('landmarkRegionSelectCreate')?.value || 'all')
           : 'all';
+        if (this.gameType === 'battle' && this.battleBackend.enabled) {
+          try {
+            await this.battleAuth.createRoom(roomCode);
+          } catch (e) {
+            showAlert('この合言葉は別の作成者に使用されているか、認証に失敗しました。');
+            return;
+          }
+        }
         if (this.gameType === 'battle' && !this.battleBackend.enabled) {
           showAlert('バトル連携設定が未入力のため、この端末内のみでバトル挙動を行います。');
         }
@@ -3170,6 +3159,15 @@ class OsanpoBingo {
 
         // ① ポーズ状態チェックを pickAvailableColor より先に行う
         //    （ポーズ中→削除した場合に3人制限カウントが正しく反映されるよう）
+        if (this.battleBackend.enabled) {
+          try {
+            await this.battleAuth.joinRoom(roomCode);
+          } catch (e) {
+            showAlert('招待された部屋が見つからないか、認証に失敗しました。');
+            this.roomCode = '';
+            return;
+          }
+        }
         const roomSettings = await this.fetchRoomSettings(roomCode);
         if (roomSettings?.paused && roomSettings?.pauseTime) {
           // このプレイヤーが作成者かどうかをcreatorIdのrandomId部分で判定
@@ -4275,7 +4273,7 @@ class OsanpoBingo {
     const { url, key } = this.battleBackend;
     const res = await fetch(
       `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodeURIComponent(this.roomCode)}&select=cell_index,owner_user_id&limit=200`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+      { headers: await this.battleAuth.headers() }
     );
     if (!res.ok) throw new Error('fetch failed');
     const rows = await res.json();
@@ -4367,12 +4365,10 @@ class OsanpoBingo {
         `${url}/rest/v1/${this.battleTable}?room_code=eq.${encodedRoom}&cell_index=eq.${index}&owner_user_id=eq.${encodeURIComponent(this.battlePlayerId)}`,
         {
           method: 'PATCH',
-          headers: {
+          headers: await this.battleAuth.headers({
             'Content-Type': 'application/json',
-            apikey: key,
-            Authorization: `Bearer ${key}`,
             Prefer: 'return=minimal',
-          },
+          }),
           body: JSON.stringify({ photo_data: photoBase64 }),
         }
       );
@@ -4455,11 +4451,9 @@ class OsanpoBingo {
     try {
       const res = await fetch(`${url}/rest/v1/rpc/get_cell_photo`, {
         method: 'POST',
-        headers: {
+        headers: await this.battleAuth.headers({
           'Content-Type': 'application/json',
-          apikey: key,
-          Authorization: `Bearer ${key}`
-        },
+        }),
         body: JSON.stringify({
           p_room_code: this.roomCode,
           p_cell_index: cellIndex,
