@@ -109,6 +109,21 @@ begin
 end;
 $$;
 
+create or replace function public.leave_battle_room(p_room_code text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if exists (select 1 from public.battle_rooms where room_code = p_room_code and owner_uid = auth.uid()) then
+    raise exception 'room owner must delete the room';
+  end if;
+  if not exists (
+    select 1 from public.battle_room_members where room_code = p_room_code and user_uid = auth.uid()
+  ) then raise exception 'room membership required'; end if;
+  delete from public.battle_cell_owners
+    where owner_uid = auth.uid() and room_code in (p_room_code, p_room_code || '::prs');
+  delete from public.battle_room_members where room_code = p_room_code and user_uid = auth.uid();
+end;
+$$;
+
 create or replace function public.battle_room_exists(p_room_code text)
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.battle_rooms where room_code = p_room_code);
@@ -126,10 +141,12 @@ $$;
 revoke all on function public.create_battle_room(text) from public, anon;
 revoke all on function public.join_battle_room(text) from public, anon;
 revoke all on function public.delete_battle_room(text) from public, anon;
+revoke all on function public.leave_battle_room(text) from public, anon;
 revoke all on function public.battle_room_exists(text) from public, anon;
 revoke all on function public.get_cell_photo(text, int, text) from public, anon;
 grant execute on function public.create_battle_room(text) to authenticated;
 grant execute on function public.join_battle_room(text) to authenticated;
 grant execute on function public.delete_battle_room(text) to authenticated;
+grant execute on function public.leave_battle_room(text) to authenticated;
 grant execute on function public.battle_room_exists(text) to authenticated;
 grant execute on function public.get_cell_photo(text, int, text) to authenticated;
