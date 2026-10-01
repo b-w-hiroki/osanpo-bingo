@@ -115,7 +115,7 @@ function renderPage(sections, totalCount) {
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-VDM84JMFJ0');
+    gtag('config', 'G-VDM84JMFJ0', { display_mode: ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true) ? 'standalone' : 'browser' });
   </script>
 
   <script type="application/ld+json">
