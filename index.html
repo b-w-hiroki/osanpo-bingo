@@ -69,7 +69,7 @@
     /* ===== ロゴモードヒーロー ===== */
     .hero-logo-mode {
       background: #ffffff;
-      padding: 16px 24px 20px;
+      padding: 16px clamp(16px, 6vw, 24px) 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -90,7 +90,7 @@
       display: flex;
       justify-content: center;
       margin: 0;
-      padding: 0 24px 8px;
+      padding: 0 clamp(0px, 4vw, 24px) 8px;
       background: none;
       border: none;
       box-shadow: none;
@@ -145,7 +145,7 @@
   <!-- birdman studio の姉妹アプリ導線（4アプリ共通）。アプリ一覧は sister-apps.js の APPS だけを編集する -->
   <style>
     .bs-sw { position: relative; display: inline-flex; }
-    .bs-sw-btn { width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: inherit; opacity: .7; display: grid; place-items: center; cursor: pointer; padding: 0; }
+    .bs-sw-btn { width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: inherit; opacity: .7; display: grid; place-items: center; cursor: pointer; padding: 0; }
     .bs-sw-btn:hover, .bs-sw-btn[aria-expanded="true"] { opacity: 1; background: rgba(128, 128, 128, .12); }
     .bs-sw-pop { position: fixed; right: 12px; top: 60px; z-index: 1001; width: min(290px, calc(100vw - 24px)); padding: 10px; border-radius: 14px; text-align: left;
       background: var(--surface, #fff); color: var(--text, var(--ink, #1c1917)); border: 1px solid var(--border, var(--line, rgba(128, 128, 128, .25))); box-shadow: 0 12px 32px rgb(0 0 0 / .16);
@@ -159,11 +159,9 @@
     .bs-sw-pop small { display: block; font-size: 11px; line-height: 1.4; opacity: .7; }
     /* ボタンを足してもヘッダーの文字が折り返さないように */
     .site-header .brand, .site-header .btn, header.top .brand, header.top .btn { white-space: nowrap; }
-    @media (max-width: 400px) { .bs-sw-btn { width: 34px; height: 34px; } }
     @media (max-width: 360px) {
       .site-header .brand, header.top .brand { font-size: 15px; gap: 6px; }
       .site-header .btn, header.top .btn { padding: 0 10px; font-size: 13px; }
-      .bs-sw-btn { width: 30px; height: 30px; }
     }
     .bs-foot { box-sizing: border-box; width: 100%; max-width: 640px; align-self: center; margin: 0 auto 20px; padding: 4px 0 18px; border-bottom: 1px solid rgba(128, 128, 128, .2); text-align: center; }
     .bs-foot p { margin: 0 0 10px; font-size: 12px; font-weight: 700; }
