@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check": "node tools/check-syntax.js",
-    "test": "npm run check && node --test tests/authz.test.cjs",
+    "test": "npm run check && node --test tests/*.test.cjs",
     "optimize-icons": "node tools/optimize-icons.js",
     "optimize-icons:dry": "node tools/optimize-icons.js --dry-run",
     "build-topics": "node tools/csv-to-topics.js",
