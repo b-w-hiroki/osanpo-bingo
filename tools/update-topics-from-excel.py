@@ -5,11 +5,18 @@ Keeps: all functions, constants, landmark data unchanged
 
 Tier format: numeric 1-4 (1=かんたん, 2=ふつう, 3=むずかしい, 4=おに)
 """
-import sys, re, unicodedata, os, pandas as pd
+import sys, re, unicodedata, os, json, pandas as pd
 sys.stdout.reconfigure(encoding='utf-8')
 
 EXCEL   = 'C:/Users/kojac/OneDrive/sub_work/osanpo-bingo/walking_bingo_master.xlsx'
 TOPICS  = 'topics.js'
+if len(sys.argv) > 1:
+    EXCEL = sys.argv[1]
+if len(sys.argv) > 2:
+    TOPICS = sys.argv[2]
+
+def js_value(value):
+    return json.dumps(value, ensure_ascii=False)
 
 df_all = pd.read_excel(EXCEL, sheet_name=0)
 df = df_all[df_all['asset_type'] == 'osanpo'].reset_index(drop=True)
@@ -29,7 +36,7 @@ for _, row in df.iterrows():
     fname = unicodedata.normalize('NFC', str(row['icon_file_name']))
     if not fname.endswith('.png'):
         fname += '.png'
-    icon_lines.append(f"  {num}: '{fname}',")
+    icon_lines.append(f"  {num}: {js_value(fname)},")
 icon_lines.append('};')
 icon_block = '\n'.join(icon_lines)
 
@@ -54,13 +61,11 @@ for tier in [1, 2, 3, 4]:
     db_lines.append(f"  // ティア{tier}（{tier_label_jp[tier]}・{len(items)}個）")
     db_lines.append(f"  {tier}: [")
     for (num, text, cat, diff, season, fields, region) in items:
-        t = text.replace("'", "\\'")
-        c = cat.replace("'", "\\'")
-        entry = f"    {{id: {num}, text: '{t}', icon: '\U0001f50d', category: '{c}', diff: {diff}, season: '{season}'"
+        entry = f"    {{id: {num}, text: {js_value(text)}, icon: {js_value('🔍')}, category: {js_value(cat)}, diff: {diff}, season: {js_value(season)}"
         if fields:
-            entry += f", fields: {fields}"
+            entry += f", fields: {js_value(fields)}"
         if region:
-            entry += f", region_limit: '{region}'"
+            entry += f", region_limit: {js_value(region)}"
         entry += "},"
         db_lines.append(entry)
     db_lines.append("  ],")
@@ -96,8 +101,7 @@ quota_lines = [
     'const CATEGORY_QUOTAS = {',
 ]
 for cat, q in QUOTAS.items():
-    c = cat.replace("'", "\\'")
-    quota_lines.append(f"  '{c}': {q},")
+    quota_lines.append(f"  {js_value(cat)}: {q},")
 quota_lines.append('}; // 合計 = 24（その他観察・住宅外構等はフィラー枠で補完）')
 quota_block = '\n'.join(quota_lines)
 
@@ -108,7 +112,7 @@ with open(TOPICS, 'r', encoding='utf-8') as f:
 # ── Replace topicIconMap section ──────────────────────────────────────
 src = re.sub(
     r'const topicIconMap = \{.*?\};',
-    icon_block,
+    lambda _: icon_block,
     src,
     count=1,
     flags=re.DOTALL
@@ -117,7 +121,7 @@ src = re.sub(
 # ── Replace topicDatabase section ─────────────────────────────────────
 src = re.sub(
     r'const topicDatabase = \{.*?\};',
-    db_block,
+    lambda _: db_block,
     src,
     count=1,
     flags=re.DOTALL
@@ -126,7 +130,7 @@ src = re.sub(
 # ── Replace CATEGORY_QUOTAS section ──────────────────────────────────
 src = re.sub(
     r'/\*\*\s*\n\s*\* カテゴリ別.*?合計 = 24[^\n]*',
-    quota_block,
+    lambda _: quota_block,
     src,
     count=1,
     flags=re.DOTALL
