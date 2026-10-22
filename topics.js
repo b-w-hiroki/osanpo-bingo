@@ -441,14 +441,25 @@ const topicIconMap = {
 };
 
 function getTopicIcon(topic) {
+  const unsafeIconChars = ['/', String.fromCharCode(92), '<', '>', '"', "'", String.fromCharCode(96)];
+  const safeIconFile = (file) => typeof file === 'string' &&
+    !unsafeIconChars.some(ch => file.includes(ch)) &&
+    !Array.from(file).some(ch => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127) &&
+    file.toLowerCase().endsWith('.png');
+  const escapeIconText = (value) => String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  const image = (file, landmark) =>
+    `<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/${landmark ? 'landmark/' : ''}${encodeURIComponent(file)}" alt="" class="cell-icon-img"></span>`;
   if (topic.type === 'landmark') {
-    return `<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/landmark/${topic.iconFile}" alt="" class="cell-icon-img"></span>`;
+    if (safeIconFile(topic.iconFile)) return image(topic.iconFile, true);
   }
-  const iconFile = topic.id && topicIconMap[topic.id];
-  if (iconFile) {
-    return `<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/${iconFile}" alt="" class="cell-icon-img"></span>`;
+  const iconFile = topic.type !== 'landmark' &&
+    Object.prototype.hasOwnProperty.call(topicIconMap, topic.id) && topicIconMap[topic.id];
+  if (safeIconFile(iconFile)) {
+    return image(iconFile, false);
   }
-  return `<span class="cell-icon">${topic.icon}</span>`;
+  return `<span class="cell-icon">${escapeIconText(topic.icon)}</span>`;
 }
 
 // ランドマークDB（地域の特別スポット・準備中）

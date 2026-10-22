@@ -1,9 +1,16 @@
-import sys, zipfile, unicodedata, pandas as pd
+import sys, zipfile, unicodedata, json, pandas as pd
 sys.stdout.reconfigure(encoding='utf-8')
 
 EXCEL = 'C:/Users/kojac/Downloads/walking_bingo_master.xlsx'
 ZIP   = 'C:/Users/kojac/Downloads/osanpo-icon.zip'
 OUT   = 'C:/Users/kojac/Desktop/AITEST/osanpo bingo/_gen_topics_data.txt'
+if len(sys.argv) > 1:
+    EXCEL = sys.argv[1]
+if len(sys.argv) > 2:
+    OUT = sys.argv[2]
+
+def js_value(value):
+    return json.dumps(str(value), ensure_ascii=False)
 
 df = pd.read_excel(EXCEL, sheet_name=0)
 
@@ -16,7 +23,7 @@ lines.append('const topicIconMap = {')
 for _, row in df.iterrows():
     num = int(str(row['icon_id']).replace('icon', ''))
     fname = row['icon_file_name']
-    lines.append(f'  {num}: \'{fname}\',')
+    lines.append(f'  {num}: {js_value(fname)},')
 lines.append('};')
 lines.append('')
 
@@ -43,9 +50,7 @@ for tier in ['easy', 'normal', 'hard', 'oni']:
     lines.append(f'  // {diff_labels[tier]}')
     lines.append(f'  {tier}: [')
     for (num, text, cat, diff, season) in tiers[tier]:
-        t = text.replace("'", "\\'")
-        c = cat.replace("'", "\\'")
-        lines.append(f"    {{id: {num}, text: '{t}', icon: '\U0001f50d', category: '{c}', diff: '{diff}', season: '{season}'}},")
+        lines.append(f"    {{id: {num}, text: {js_value(text)}, icon: {js_value('🔍')}, category: {js_value(cat)}, diff: {js_value(diff)}, season: {js_value(season)}}},")
     lines.append('  ],')
 lines.append('};')
 

@@ -13,6 +13,14 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const SITE_URL = 'https://osanpobingo-battle.com';
+const INPUT_PATH = process.argv[2] ? path.resolve(process.argv[2]) : path.join(ROOT, 'topics.js');
+const OUTPUT_PATH = process.argv[3] ? path.resolve(process.argv[3]) : path.join(ROOT, 'topics.html');
+
+// JSON values inside a script element must not contain a literal closing tag.
+function jsonForHtml(value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+}
 
 const DIFFICULTY_LABELS = {
   1: { name: 'かんたん', desc: '散歩に出れば必ず目に入るもの。小さな子でも見つけられます。' },
@@ -22,7 +30,7 @@ const DIFFICULTY_LABELS = {
 };
 
 function loadTopicDatabase() {
-  const src = fs.readFileSync(path.join(ROOT, 'topics.js'), 'utf8');
+  const src = fs.readFileSync(INPUT_PATH, 'utf8');
   // topics.js はブラウザ用のプレーンなスクリプト。トップレベルの const をそのまま取り出す。
   return new Function(`${src}; return { topicDatabase, topicIconMap };`)();
 }
@@ -36,8 +44,9 @@ function escapeHtml(s) {
 }
 
 function buildSections(topicDatabase) {
+  const tierNames = { 1: 'easy', 2: 'normal', 3: 'hard', 4: 'oni' };
   return [1, 2, 3, 4].map((tier) => {
-    const topics = topicDatabase[tier] || [];
+    const topics = topicDatabase[tier] || topicDatabase[tierNames[tier]] || [];
     // カテゴリごとにまとめる（出現順を維持）
     const byCategory = new Map();
     topics.forEach((t) => {
@@ -84,7 +93,7 @@ function renderPage(sections, totalCount) {
 
   const itemListElements = sections
     .flatMap((s) => [...s.byCategory.values()].flat())
-    .map((t, i) => `      { "@type": "ListItem", "position": ${i + 1}, "name": ${JSON.stringify(t.text)} }`)
+    .map((t, i) => `      { "@type": "ListItem", "position": ${i + 1}, "name": ${jsonForHtml(t.text)} }`)
     .join(',\n');
 
   return `<!DOCTYPE html>
@@ -122,8 +131,8 @@ function renderPage(sections, totalCount) {
   {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": ${JSON.stringify(title)},
-    "description": ${JSON.stringify(description)},
+    "name": ${jsonForHtml(title)},
+    "description": ${jsonForHtml(description)},
     "numberOfItems": ${totalCount},
     "itemListElement": [
 ${itemListElements}
@@ -271,7 +280,7 @@ function main() {
   const sections = buildSections(topicDatabase);
   const totalCount = sections.reduce((sum, s) => sum + s.total, 0);
   const html = renderPage(sections, totalCount);
-  const outPath = path.join(ROOT, 'topics.html');
+  const outPath = OUTPUT_PATH;
   fs.writeFileSync(outPath, html, 'utf8');
   console.log(`✅ topics.html を生成しました（${totalCount}お題 / ${sections.length}難易度）`);
 }
