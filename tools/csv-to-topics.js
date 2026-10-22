@@ -17,8 +17,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const CSV_PATH = path.join(__dirname, '..', 'topics_list.csv');
-const OUTPUT_PATH = path.join(__dirname, '..', 'topics.js');
+const CSV_PATH = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, '..', 'topics_list.csv');
+const OUTPUT_PATH = process.argv[3] ? path.resolve(process.argv[3]) : path.join(__dirname, '..', 'topics.js');
 
 function trimCell(s) {
   if (!s) return '';
@@ -26,10 +26,28 @@ function trimCell(s) {
 }
 
 function parseCSV(csvText) {
-  const lines = csvText.split('\n').filter(l => l.trim());
-  const headers = trimCell(lines[0]).split(',').map(trimCell);
-  return lines.slice(1).map(line => {
-    const values = line.split(',').map(trimCell);
+  const records = [];
+  let record = [], cell = '', quoted = false;
+  for (let i = 0; i < csvText.length; i++) {
+    const ch = csvText[i];
+    if (quoted) {
+      if (ch === '"' && csvText[i + 1] === '"') { cell += '"'; i++; }
+      else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ',') { record.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && csvText[i + 1] === '\n') i++;
+      record.push(cell); cell = '';
+      if (record.some(value => value !== '')) records.push(record);
+      record = [];
+    } else cell += ch;
+  }
+  if (quoted) throw new Error('Unterminated quoted CSV cell');
+  record.push(cell);
+  if (record.some(value => value !== '')) records.push(record);
+  const headers = records.shift().map(trimCell);
+  return records.map(values => {
     const row = {};
     headers.forEach((h, i) => { row[h] = values[i] || ''; });
     return row;
@@ -41,7 +59,7 @@ const VALID_DIFFS = new Set(['easy', 'normal', 'hard', 'oni']);
 function buildIconMap(rows) {
   const map = {};
   rows.forEach(row => {
-    if (row['icon_file_name']) map[row['ID']] = row['icon_file_name'];
+    if (row['icon_file_name']) map[Number(row['ID'])] = row['icon_file_name'];
   });
   return map;
 }
@@ -51,9 +69,12 @@ function generateTopicsJS(rows) {
 
   const groups = { easy: [], normal: [], hard: [], oni: [] };
   rows.forEach(row => {
+    if (!Number.isSafeInteger(Number(row['ID'])) || Number(row['ID']) < 1) {
+      throw new Error(`Invalid topic ID: ${JSON.stringify(row['ID'])}`);
+    }
     const diff = VALID_DIFFS.has(row['difficulty']) ? row['difficulty'] : 'normal';
     groups[diff].push({
-      id: parseInt(row['ID']),
+      id: Number(row['ID']),
       text: row['display_name'],
       icon: '🔍',
       category: row['category'],
@@ -63,12 +84,12 @@ function generateTopicsJS(rows) {
   });
 
   const iconMapStr = Object.entries(iconMap)
-    .map(([id, file]) => `  ${id}: '${file}'`)
+    .map(([id, file]) => `  ${JSON.stringify(id)}: ${JSON.stringify(file)}`)
     .join(',\n');
 
   function topicArrayStr(arr) {
     return arr.map(t =>
-      `    {id: ${t.id}, text: '${t.text}', icon: '${t.icon}', category: '${t.category}', diff: '${t.diff}', season: '${t.season}'}`
+      `    ${JSON.stringify(t)}`
     ).join(',\n');
   }
 
@@ -88,14 +109,25 @@ ${iconMapStr}
 };
 
 function getTopicIcon(topic) {
+  const unsafeIconChars = ['/', String.fromCharCode(92), '<', '>', '"', "'", String.fromCharCode(96)];
+  const safeIconFile = (file) => typeof file === 'string' &&
+    !unsafeIconChars.some(ch => file.includes(ch)) &&
+    !Array.from(file).some(ch => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127) &&
+    file.toLowerCase().endsWith('.png');
+  const escapeIconText = (value) => String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  const image = (file, landmark) =>
+    \`<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/\${landmark ? 'landmark/' : ''}\${encodeURIComponent(file)}" alt="" class="cell-icon-img"></span>\`;
   if (topic.type === 'landmark') {
-    return \`<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/landmark/\${topic.iconFile}" alt="" class="cell-icon-img"></span>\`;
+    if (safeIconFile(topic.iconFile)) return image(topic.iconFile, true);
   }
-  const iconFile = topic.id && topicIconMap[topic.id];
-  if (iconFile) {
-    return \`<span class="cell-icon cell-icon-img-wrap"><img src="assets/icons/\${iconFile}" alt="" class="cell-icon-img"></span>\`;
+  const iconFile = topic.type !== 'landmark' &&
+    Object.prototype.hasOwnProperty.call(topicIconMap, topic.id) && topicIconMap[topic.id];
+  if (safeIconFile(iconFile)) {
+    return image(iconFile, false);
   }
-  return \`<span class="cell-icon">\${topic.icon}</span>\`;
+  return \`<span class="cell-icon">\${escapeIconText(topic.icon)}<\/span>\`;
 }
 
 // ランドマークDB（地域の特別スポット・準備中）

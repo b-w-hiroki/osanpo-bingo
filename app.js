@@ -1194,14 +1194,15 @@ class OsanpoBingo {
       else if (textLen >= 5)  cell.classList.add('cell-len-l');
 
       // 中央フリーマスは center 画像（あれば）、それ以外は通常アイコン
-      const iconHtml = (topic.isFree && topic.centerImage)
+      const iconHtml = (topic.isFree && typeof topic.centerImage === 'string' &&
+        /^[a-z0-9_-]+\.(?:png|jpe?g|webp)$/i.test(topic.centerImage))
         ? `<img src="static/${topic.centerImage}" alt="" class="cell-center-img">`
         : getTopicIcon(topic);
 
       if (hasPhoto) {
         cell.innerHTML = displayText
-          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div><div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
-          : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${displayPhotoUrl}" alt=""></div>`;
+          ? `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${escapeHtml(displayPhotoUrl)}" alt=""></div><div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
+          : `<div class="cell-photo-wrap"><img class="cell-photo-img" src="${escapeHtml(displayPhotoUrl)}" alt=""></div>`;
       } else {
         cell.innerHTML = displayText
           ? `${iconHtml}<div class="cell-text ${sizeClass}">${escapeHtml(displayText)}</div>`
