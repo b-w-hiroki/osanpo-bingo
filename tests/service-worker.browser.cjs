@@ -4,8 +4,7 @@ const { createServer } = require('node:http');
 const { readFileSync, mkdtempSync, rmSync } = require('node:fs');
 const { resolve, join, extname, sep } = require('node:path');
 const { tmpdir } = require('node:os');
-const { execFile } = require('node:child_process');
-const { promisify } = require('node:util');
+const { spawn } = require('node:child_process');
 
 const root = resolve(__dirname, '..');
 const source = readFileSync(join(root, 'service-worker.js'), 'utf8');
@@ -126,12 +125,64 @@ test('SW rejects failed updates, preserves other caches and navigation policy', 
   try {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const chrome = process.env.CHROME_BIN || 'google-chrome';
-    const args = ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
-      '--disable-background-networking', '--virtual-time-budget=30000', '--dump-dom',
-      '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
-      '--user-data-dir=' + profile, 'http://127.0.0.1:' + server.address().port + '/__probe'];
-    const { stdout } = await promisify(execFile)(chrome, args, { timeout: 50000, maxBuffer: 2 * 1024 * 1024 });
-    assert.match(stdout, /<pre id="result">PASS<\/pre>/, stdout.slice(0, 4000));
+    const browser = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-first-run',
+      '--no-default-browser-check', '--disable-background-networking', '--remote-debugging-pipe',
+      '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1', '--user-data-dir=' + profile],
+      { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
+    let stderr = '';
+    browser.stderr.on('data', chunk => { stderr += chunk; });
+    const pending = new Map();
+    let nextId = 0;
+    let buffer = '';
+    browser.stdio[4].on('data', chunk => {
+      buffer += chunk.toString();
+      let end;
+      while ((end = buffer.indexOf('\0')) >= 0) {
+        const message = JSON.parse(buffer.slice(0, end));
+        buffer = buffer.slice(end + 1);
+        if (pending.has(message.id)) {
+          const { resolve, reject, timer } = pending.get(message.id);
+          clearTimeout(timer);
+          pending.delete(message.id);
+          if (message.error) reject(new Error(JSON.stringify(message.error)));
+          else resolve(message.result);
+        }
+      }
+    });
+    const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
+      const id = ++nextId;
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timeout: ' + stderr)); }, 10000);
+      pending.set(id, { resolve, reject, timer });
+      browser.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
+    });
+    browser.on('error', error => {
+      for (const { reject, timer } of pending.values()) { clearTimeout(timer); reject(error); }
+      pending.clear();
+    });
+    try {
+      const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
+      const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
+      await send('Page.navigate', { url: 'http://127.0.0.1:' + server.address().port + '/__probe' }, sessionId);
+      let result;
+      const deadline = Date.now() + 40000;
+      while (Date.now() < deadline) {
+        try {
+          const evaluation = await send('Runtime.evaluate', {
+            expression: "document.getElementById('result')?.textContent", returnByValue: true
+          }, sessionId);
+          result = evaluation.result?.value;
+          if (result && result !== 'RUNNING') break;
+        } catch (error) {
+          if (!/context|navigation/i.test(error.message)) throw error;
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      assert.equal(result, 'PASS', String(result) + '\n' + stderr.slice(-2000));
+    } finally {
+      browser.kill();
+      for (const { timer } of pending.values()) clearTimeout(timer);
+      await new Promise(resolve => browser.once('exit', resolve));
+    }
   } finally {
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
