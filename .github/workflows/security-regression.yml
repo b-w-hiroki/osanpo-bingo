@@ -25,4 +25,3 @@ jobs:
         run: |
           command -v google-chrome
           npm run test:browser
-
