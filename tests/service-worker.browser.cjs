@@ -45,7 +45,7 @@ async function run() {
     const frame = document.createElement('iframe');
     frame.src = '/' + path + '?failed-update';
     document.body.appendChild(frame);
-    await waitFor(() => frame.contentDocument && frame.contentDocument.documentElement.outerHTML.length > 500,
+    await waitFor(() => frame.contentDocument && frame.contentDocument.documentElement?.outerHTML.length > 500,
   'old offline navigation ' + path);
     frame.remove();
   }
@@ -72,11 +72,11 @@ async function run() {
     frame.src = '/' + path + '?updated';
     document.body.appendChild(frame);
     if (path !== 'game.html') {
-      await waitFor(() => frame.contentDocument && frame.contentDocument.documentElement.outerHTML.length > 500,
+      await waitFor(() => frame.contentDocument && frame.contentDocument.documentElement?.outerHTML.length > 500,
         'updated offline navigation ' + path);
     } else {
       await new Promise(resolve => { frame.onload = resolve; setTimeout(resolve, 500); });
-      check(!frame.contentDocument || !frame.contentDocument.documentElement.outerHTML.includes('bingoBoard'),
+      check(!frame.contentDocument || !frame.contentDocument.documentElement?.outerHTML.includes('bingoBoard'),
         'game navigation must not use precache');
     }
     frame.remove();
