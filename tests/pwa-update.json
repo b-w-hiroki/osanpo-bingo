@@ -1,0 +1,21 @@
+{
+  "app": "osanpo-bingo",
+  "worker": "service-worker.js",
+  "oldWorker": "tests/fixtures/service-worker-v161.js",
+  "oldCache": "osanpo-bingo-v161",
+  "newCache": "osanpo-bingo-v162",
+  "failureAsset": "battle-auth.js",
+  "activation": "manual",
+  "approvalMessage": "skipWaiting",
+  "offlinePages": [
+    "index.html",
+    "news.html"
+  ],
+  "htmlMarker": "<title>",
+  "requiredAssets": [
+    "app-helpers.js",
+    "battle-config.js",
+    "battle-auth.js",
+    "app.js"
+  ]
+}
