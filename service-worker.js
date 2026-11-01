@@ -1,4 +1,4 @@
-const CACHE_NAME = 'osanpo-bingo-v160';
+const CACHE_NAME = 'osanpo-bingo-v161';
 const urlsToCache = [
   'index.html',
   'sister-apps.js',
@@ -13,6 +13,7 @@ const urlsToCache = [
   'landing.css',
   'styles.css',
   'topics.js',
+  'app-helpers.js',
   'app.js',
   'manifest.json',
   'sitemap.xml',
