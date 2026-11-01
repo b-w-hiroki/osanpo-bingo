@@ -1,4 +1,5 @@
-const CACHE_NAME = 'osanpo-bingo-v161';
+const CACHE_PREFIX = 'osanpo-bingo-v';
+const CACHE_NAME = `${CACHE_PREFIX}162`;
 const urlsToCache = [
   'index.html',
   'sister-apps.js',
@@ -14,6 +15,8 @@ const urlsToCache = [
   'styles.css',
   'topics.js',
   'app-helpers.js',
+  'battle-config.js',
+  'battle-auth.js',
   'app.js',
   'manifest.json',
   'sitemap.xml',
@@ -46,7 +49,7 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache).catch(() => {}))
+      .then((cache) => cache.addAll(urlsToCache))
   );
 });
 
@@ -95,7 +98,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -103,3 +106,4 @@ self.addEventListener('activate', (event) => {
     }).then(() => self.clients.claim())
   );
 });
+
