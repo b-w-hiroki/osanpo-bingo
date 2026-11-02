@@ -11,7 +11,7 @@
     "index.html",
     "news.html"
   ],
-  "htmlMarker": "<title>",
+  "htmlMarker": "おさんぽビンゴ",
   "requiredAssets": [
     "app-helpers.js",
     "battle-config.js",
