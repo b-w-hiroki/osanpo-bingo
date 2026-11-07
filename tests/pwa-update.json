@@ -3,7 +3,7 @@
   "worker": "service-worker.js",
   "oldWorker": "tests/fixtures/service-worker-v161.js",
   "oldCache": "osanpo-bingo-v161",
-  "newCache": "osanpo-bingo-v162",
+  "newCache": "osanpo-bingo-v163",
   "failureAsset": "battle-auth.js",
   "activation": "manual",
   "approvalMessage": "skipWaiting",

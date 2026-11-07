@@ -57,7 +57,7 @@ async function run() {
   registration.waiting.postMessage('skipWaiting');
   await waitFor(async () => !(await caches.keys()).includes('osanpo-bingo-v161'), 'old cache retired');
   check(await caches.match('/foreign-marker', { cacheName: 'other-app-v1' }), 'foreign cache preserved');
-  const current = await caches.open('osanpo-bingo-v162');
+  const current = await caches.open('osanpo-bingo-v163');
   const html = await (await current.match('/game.html')).text();
   const scripts = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)]
     .map(match => match[1]).filter(path => !/^https?:/.test(path));

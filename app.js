@@ -2732,6 +2732,17 @@ class OsanpoBingo {
       });
     }
     
+    // Short walk uses the same start/save path as the full setup flow.
+    document.getElementById('quickWalkBtn')?.addEventListener('click', () => {
+      document.getElementById('difficultySelectSolo').value = 'easy';
+      document.getElementById('topicSetSelectSolo').value = 'default';
+      customTopicCountSolo.value = '0';
+      this.renderCustomTopicInputs(0, customTopicInputsSolo);
+      this._quickWalkStart = true;
+      try { startSoloGameBtn.click(); }
+      finally { this._quickWalkStart = false; }
+    });
+
     // ふつうに遊ぶ：ゲーム開始
     if (startSoloGameBtn) {
       startSoloGameBtn.addEventListener('click', () => {
@@ -2739,7 +2750,7 @@ class OsanpoBingo {
         const difficultySelectSolo = document.getElementById('difficultySelectSolo');
         const modal = document.getElementById('roomCodeModal');
         const playModeRadio = document.querySelector('input[name="playModeSolo"]:checked');
-        this.playMode = playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
+        this.playMode = this._quickWalkStart || playModeRadio?.value === 'markOnly' ? 'markOnly' : 'photo';
         this.difficulty = difficultySelectSolo?.value || 'normal';
         this.topicSetId = document.getElementById('topicSetSelectSolo')?.value || 'default';
         this.gameType = 'normal';
