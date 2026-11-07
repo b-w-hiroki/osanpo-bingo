@@ -26,7 +26,7 @@ test('precache network failure rejects install rather than activating incomplete
 test('activate only deletes this app obsolete version caches', async () => {
   const deleted = [];
   const handlers = worker({
-    keys: async () => ['osanpo-bingo-v161', 'osanpo-bingo-v162', 'other-app-v1'],
+    keys: async () => ['osanpo-bingo-v161', 'osanpo-bingo-v163', 'other-app-v1'],
     delete: async name => { deleted.push(name); }
   });
   let pending;

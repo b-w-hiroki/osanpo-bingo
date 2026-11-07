@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'osanpo-bingo-v';
-const CACHE_NAME = `${CACHE_PREFIX}162`;
+const CACHE_NAME = `${CACHE_PREFIX}163`;
 const urlsToCache = [
   'index.html',
   'sister-apps.js',
