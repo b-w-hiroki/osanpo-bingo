@@ -4,8 +4,7 @@ const { createServer } = require('node:http');
 const { readFileSync, mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join, resolve, extname } = require('node:path');
-const { execFile } = require('node:child_process');
-const { promisify } = require('node:util');
+const { spawn } = require('node:child_process');
 
 const root = resolve(__dirname, '..');
 const chrome = process.env.CHROME_BIN || (process.platform === 'win32'
@@ -70,13 +69,79 @@ test('restored board and photo modal render hostile icon data as inert text', as
   try {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const url = `http://127.0.0.1:${server.address().port}/game.html`;
-    const { stdout } = await promisify(execFile)(chrome, [
-      '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
-      `--user-data-dir=${profile}`, '--virtual-time-budget=3000', '--dump-dom', url
-    ], { timeout: 25000, maxBuffer: 3 * 1024 * 1024 });
-    const match = stdout.match(/<pre id="securityResult">([^<]+)<\/pre>/);
-    assert.ok(match, 'browser did not complete restored-board probe');
-    const result = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+    // Wait for the actual assertion payload; headless-shell does not support --dump-dom.
+    const browser = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-first-run',
+      '--no-default-browser-check', '--disable-background-networking', '--remote-debugging-pipe',
+      '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1', '--user-data-dir=' + profile],
+      { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
+    let stderr = '';
+    browser.stderr.on('data', chunk => { stderr += chunk; });
+    const pending = new Map();
+    let nextId = 0;
+    let buffer = '';
+    browser.stdio[4].on('data', chunk => {
+      buffer += chunk.toString();
+      let end;
+      while ((end = buffer.indexOf('\0')) >= 0) {
+        const message = JSON.parse(buffer.slice(0, end));
+        buffer = buffer.slice(end + 1);
+        if (pending.has(message.id)) {
+          const { resolve, reject, timer } = pending.get(message.id);
+          clearTimeout(timer);
+          pending.delete(message.id);
+          if (message.error) reject(new Error(JSON.stringify(message.error)));
+          else resolve(message.result);
+        }
+      }
+    });
+    const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
+      const id = ++nextId;
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timeout: ' + stderr)); }, 10000);
+      pending.set(id, { resolve, reject, timer });
+      browser.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
+    });
+    browser.on('error', error => {
+      for (const { reject, timer } of pending.values()) { clearTimeout(timer); reject(error); }
+      pending.clear();
+    });
+    let result;
+    try {
+      const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
+      const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
+      await send('Page.navigate', { url }, sessionId);
+      let encoded;
+      const deadline = Date.now() + 15000;
+      while (Date.now() < deadline) {
+        try {
+          const evaluation = await send('Runtime.evaluate', {
+            expression: "document.getElementById('securityResult')?.textContent", returnByValue: true
+          }, sessionId);
+          encoded = evaluation.result?.value;
+          if (encoded) break;
+        } catch (error) {
+          if (!/context|navigation/i.test(error.message)) throw error;
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      assert.ok(encoded, 'browser did not complete restored-board probe\n' + stderr.slice(-2000));
+      result = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
+    } finally {
+      // Let Chrome shut down its child processes before deleting its profile.
+      // SIGTERM on only the parent can leave a child writing into Default/ on CI.
+      const closed = new Promise(resolve => {
+        if (browser.exitCode !== null || browser.signalCode !== null) resolve();
+        else browser.once('close', resolve);
+      });
+      const forceStop = setTimeout(() => browser.kill('SIGKILL'), 5000);
+      try {
+        send('Browser.close').catch(() => {});
+        await closed;
+      } finally {
+        clearTimeout(forceStop);
+        for (const { timer } of pending.values()) clearTimeout(timer);
+        pending.clear();
+      }
+    }
     assert.equal(result.count, 25);
     assert.equal(result.text, `桜${payload}`);
     assert.equal(result.activeMarkup, false);
@@ -86,7 +151,8 @@ test('restored board and photo modal render hostile icon data as inert text', as
     assert.equal(result.freeImage, false);
     assert.equal(result.marker, 0);
   } finally {
-    server.close();
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve));
     rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });
