@@ -126,9 +126,21 @@ test('restored board and photo modal render hostile icon data as inert text', as
       assert.ok(encoded, 'browser did not complete restored-board probe\n' + stderr.slice(-2000));
       result = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
     } finally {
-      browser.kill();
-      for (const { timer } of pending.values()) clearTimeout(timer);
-      await new Promise(resolve => browser.once('exit', resolve));
+      // Let Chrome shut down its child processes before deleting its profile.
+      // SIGTERM on only the parent can leave a child writing into Default/ on CI.
+      const closed = new Promise(resolve => {
+        if (browser.exitCode !== null || browser.signalCode !== null) resolve();
+        else browser.once('close', resolve);
+      });
+      const forceStop = setTimeout(() => browser.kill('SIGKILL'), 5000);
+      try {
+        send('Browser.close').catch(() => {});
+        await closed;
+      } finally {
+        clearTimeout(forceStop);
+        for (const { timer } of pending.values()) clearTimeout(timer);
+        pending.clear();
+      }
     }
     assert.equal(result.count, 25);
     assert.equal(result.text, `桜${payload}`);
