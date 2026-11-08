@@ -19,6 +19,21 @@ const assert = require('node:assert/strict');
     const base = `http://127.0.0.1:${server.address().port}`;
     await page.route('**/*', r => r.request().url().startsWith(base) ? r.continue() : r.abort());
     await page.goto(`${base}/game.html`);
+    // Both text spans must stack instead of competing for half the button width.
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.locator('#quickWalkBtn').waitFor({ state: 'visible' });
+      await page.waitForTimeout(400);
+      const choices = await page.locator('#modeSelectStep .mode-btn').evaluateAll(buttons => buttons.map(button => {
+        const title = button.querySelector('.mode-btn-label').getBoundingClientRect();
+        const detail = button.querySelector('.mode-btn-desc').getBoundingClientRect();
+        return { stacked: detail.top >= title.bottom, singleLine: title.height < 30, width: button.getBoundingClientRect().width };
+      }));
+      assert.equal(choices.length, 3);
+      assert.ok(choices.every(c => c.stacked && c.singleLine && c.width >= 44));
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      await page.screenshot({ path: `/tmp/osanpo-mode-choices-${width}.png` });
+    }
     await page.locator('#quickWalkBtn').click();
     const state = await page.evaluate(() => ({ difficulty: game.difficulty, playMode: game.playMode, count: game.board.length, custom: game.board.filter(c => c.isCustom).length, pending: game._quickWalkStart, overflow: document.documentElement.scrollWidth > innerWidth }));
     assert.deepEqual(state, { difficulty: 'easy', playMode: 'markOnly', count: 25, custom: 0, pending: false, overflow: false });
