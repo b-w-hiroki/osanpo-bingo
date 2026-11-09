@@ -181,3 +181,7 @@ MIT License
 ## 姉妹アプリの導線（birdman studio 共通）
 
 LP のヘッダーの切り替えメニューとフッターのアイコンは、`sister-apps.js` の `APPS` から描画します。アプリを追加・変更するときは `APPS` に1行足し、同じファイルを4リポジトリ（otsukai / osanpo-bingo / gohan-tabeta / osaifu）にコピーして、各 Service Worker のキャッシュ番号を上げてください。表示中のアプリ自身は自動で一覧から外れ、件数が増えるとメニューは縦・フッターは横にスクロールします。
+
+## 継続的な回帰確認
+
+`npm test`、`npm run test:browser`、PWA 更新契約を PR と `main` への push で実行します。回帰 workflow は手動でも実行できます。Pages の配信成功とは別に、対象コミットの回帰結果を確認してください。実端末・実利用者の評価や外部サービスの本番状態は、この自動テストの保証範囲に含みません。
