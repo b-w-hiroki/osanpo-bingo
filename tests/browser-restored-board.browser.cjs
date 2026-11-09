@@ -5,6 +5,7 @@ const { readFileSync, mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join, resolve, extname } = require('node:path');
 const { spawn } = require('node:child_process');
+const { createBrowserCloser } = require('./helpers/chrome-lifecycle.cjs');
 
 const root = resolve(__dirname, '..');
 const chrome = process.env.CHROME_BIN || (process.platform === 'win32'
@@ -46,7 +47,7 @@ window.addEventListener('load', () => setTimeout(() => {
 }, 300));
 </script>`;
 
-test('restored board and photo modal render hostile icon data as inert text', async () => {
+test('restored board and photo modal render hostile icon data as inert text', { timeout: 90000 }, async () => {
   const server = createServer((request, response) => {
     const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
     if (pathname === '/game.html') {
@@ -96,10 +97,13 @@ test('restored board and photo modal render hostile icon data as inert text', as
     });
     const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
       const id = ++nextId;
-      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timeout: ' + stderr)); }, 10000);
+      // Allow cold Chrome startup extra time without relaxing page assertions.
+      const timeoutMs = method === 'Target.createTarget' ? 30000 : 10000;
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timeout: ' + stderr)); }, timeoutMs);
       pending.set(id, { resolve, reject, timer });
       browser.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
     });
+    const closeBrowser = createBrowserCloser(browser, send);
     browser.on('error', error => {
       for (const { reject, timer } of pending.values()) { clearTimeout(timer); reject(error); }
       pending.clear();
@@ -126,18 +130,9 @@ test('restored board and photo modal render hostile icon data as inert text', as
       assert.ok(encoded, 'browser did not complete restored-board probe\n' + stderr.slice(-2000));
       result = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
     } finally {
-      // Let Chrome shut down its child processes before deleting its profile.
-      // SIGTERM on only the parent can leave a child writing into Default/ on CI.
-      const closed = new Promise(resolve => {
-        if (browser.exitCode !== null || browser.signalCode !== null) resolve();
-        else browser.once('close', resolve);
-      });
-      const forceStop = setTimeout(() => browser.kill('SIGKILL'), 5000);
       try {
-        send('Browser.close').catch(() => {});
-        await closed;
+        await closeBrowser();
       } finally {
-        clearTimeout(forceStop);
         for (const { timer } of pending.values()) clearTimeout(timer);
         pending.clear();
       }

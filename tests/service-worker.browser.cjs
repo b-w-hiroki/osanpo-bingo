@@ -5,6 +5,7 @@ const { readFileSync, mkdtempSync, rmSync } = require('node:fs');
 const { resolve, join, extname, sep } = require('node:path');
 const { tmpdir } = require('node:os');
 const { spawn } = require('node:child_process');
+const { createBrowserCloser } = require('./helpers/chrome-lifecycle.cjs');
 
 const root = resolve(__dirname, '..');
 const source = readFileSync(join(root, 'service-worker.js'), 'utf8');
@@ -89,7 +90,7 @@ run().then(result => { document.getElementById('result').textContent = result; }
   .catch(error => { document.getElementById('result').textContent = 'FAIL: ' + error.stack; });
 `;
 
-test('SW rejects failed updates, preserves other caches and navigation policy', { timeout: 60000 }, async () => {
+test('SW rejects failed updates, preserves other caches and navigation policy', { timeout: 90000 }, async () => {
   let state = { version: 'old', fail: null, offline: false };
   const server = createServer((request, response) => {
     const path = new URL(request.url, 'http://localhost').pathname;
@@ -151,10 +152,13 @@ test('SW rejects failed updates, preserves other caches and navigation policy', 
     });
     const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
       const id = ++nextId;
-      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timeout: ' + stderr)); }, 10000);
+      // Allow cold Chrome startup extra time without relaxing page assertions.
+      const timeoutMs = method === 'Target.createTarget' ? 30000 : 10000;
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error(method + ' timeout: ' + stderr)); }, timeoutMs);
       pending.set(id, { resolve, reject, timer });
       browser.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
     });
+    const closeBrowser = createBrowserCloser(browser, send);
     browser.on('error', error => {
       for (const { reject, timer } of pending.values()) { clearTimeout(timer); reject(error); }
       pending.clear();
@@ -179,9 +183,12 @@ test('SW rejects failed updates, preserves other caches and navigation policy', 
       }
       assert.equal(result, 'PASS', String(result) + '\n' + stderr.slice(-2000));
     } finally {
-      browser.kill();
-      for (const { timer } of pending.values()) clearTimeout(timer);
-      await new Promise(resolve => browser.once('exit', resolve));
+      try {
+        await closeBrowser();
+      } finally {
+        for (const { timer } of pending.values()) clearTimeout(timer);
+        pending.clear();
+      }
     }
   } finally {
     server.closeAllConnections();
